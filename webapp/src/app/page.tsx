@@ -116,9 +116,9 @@ export default function LandingPage() {
       {/* Hero — The Symptom */}
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-iron-700 bg-surface-secondary text-xs text-iron-400 mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-risk-green/30 bg-risk-green/10 text-xs text-risk-green font-medium mb-8">
             <span className="w-2 h-2 rounded-full bg-risk-green animate-pulse" />
-            Risk Management Ecosystem
+            Official Closed Beta
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-iron-50 leading-tight mb-6">
             It&apos;s not lack of discipline.
@@ -248,7 +248,7 @@ export default function LandingPage() {
           <p className="text-iron-500 mb-8 leading-relaxed">
             Your system already has an edge. You just need a visual firewall to protect it from yourself.
             <br /><br />
-            <span className="text-iron-200 font-medium">Join the official waitlist and be among the first to test IronRisk Shield when Beta spots open.</span>
+            <span className="text-iron-200 font-medium">Join the official waitlist and be among the first to test IronRisk Shield when Closed Beta spots open.</span>
             <br /><br />
             <span className="text-iron-500 text-sm italic">
               IronRisk is an &apos;indie&apos; tool, built by an algo-trader in his spare time. Pure craftsmanship, no rush, no corporate pressure.
