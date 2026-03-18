@@ -1,0 +1,77 @@
+"""Strategies API routes — CRUD + CSV Upload."""
+
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
+from sqlalchemy.orm import Session
+from typing import List
+
+from models.database import get_db
+from models.user import User
+from schemas.strategy import StrategyResponse, StrategyListResponse
+from services.auth_service import get_current_user
+from services.strategy_service import (
+    create_strategy_from_csv, get_user_strategies,
+    get_strategy_by_id, delete_strategy,
+)
+
+router = APIRouter(prefix="/api/strategies", tags=["Strategies"])
+
+
+@router.post("/upload", response_model=StrategyResponse)
+async def upload_strategy(
+    name: str = Form(...),
+    description: str = Form(""),
+    magic_number: int = Form(0),
+    start_date: str = Form(None),
+    max_drawdown_limit: float = Form(0.0),
+    daily_loss_limit: float = Form(0.0),
+    file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Upload a CSV file to create a new strategy with full metrics analysis."""
+    if not file.filename or not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="File must be a CSV")
+
+    content = await file.read()
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="CSV file is empty")
+
+    strategy = create_strategy_from_csv(
+        db=db,
+        user_id=user.id,
+        name=name,
+        description=description,
+        magic_number=magic_number,
+        start_date=start_date,
+        max_drawdown_limit=max_drawdown_limit,
+        daily_loss_limit=daily_loss_limit,
+        csv_content=content,
+    )
+    return strategy
+
+
+@router.get("/", response_model=List[StrategyResponse])
+def list_strategies(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return get_user_strategies(db, user.id)
+
+
+@router.get("/{strategy_id}", response_model=StrategyResponse)
+def get_strategy(
+    strategy_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return get_strategy_by_id(db, strategy_id, user.id)
+
+
+@router.delete("/{strategy_id}")
+def remove_strategy(
+    strategy_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    delete_strategy(db, strategy_id, user.id)
+    return {"detail": "Strategy deleted"}
