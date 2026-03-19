@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           message: isEnglish
-            ? "You're already on the list! We'll notify you when we launch. 🚀"
-            : "¡Ya estás en la lista! Te avisaremos al lanzar. 🚀",
+            ? "This email is already registered! You're on the list — we'll notify you when we launch. 🚀"
+            : "¡Este correo ya estaba registrado! Estás en la lista — te avisaremos al lanzar. 🚀",
         },
         { status: 200 }
       );
