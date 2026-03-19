@@ -80,7 +80,7 @@ export default function LandingPageES() {
             ${large ? "px-8 py-4 text-base" : "px-6 py-3 text-sm"}
           `}
         >
-          {isLoading ? "Enviando..." : large ? "🛡️ Quiero Acceso Anticipado" : "Activar Escudo →"}
+          {isLoading ? "Enviando..." : large ? "🚀 Quiero Acceso Anticipado" : "Unirme a la Lista →"}
         </button>
         {error && <p className="text-risk-red text-sm mt-1">{error}</p>}
       </form>
@@ -142,7 +142,7 @@ export default function LandingPageES() {
           <div className="absolute inset-0 bg-gradient-to-t from-surface-primary via-transparent to-transparent z-10" />
           <Image
             src="/ironrisk-shield-mockup.png"
-            alt="IronRisk MT4/MT5 Shield Dashboard Mockup"
+            alt="IronRisk MT4/MT5 Dashboard Mockup"
             width={1600}
             height={900}
             className="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity duration-700"
@@ -246,7 +246,7 @@ export default function LandingPageES() {
           <p className="text-iron-500 mb-8 leading-relaxed">
             Tu sistema ya tiene edge. Solo necesitas un cortafuegos visual que lo proteja de ti mismo.
             <br /><br />
-            <span className="text-iron-200 font-medium">Únete a la lista oficial y sé de los primeros en probar IronRisk Shield cuando abramos plazas para la Beta Cerrada.</span>
+            <span className="text-iron-200 font-medium">Únete a la lista oficial y sé de los primeros en probar IronRisk cuando abramos plazas para la Beta Cerrada.</span>
             <br /><br />
             <span className="text-iron-500 text-sm italic">
               IronRisk es una herramienta &apos;indie&apos;, construida por un algo-trader en su tiempo libre. Pura artesanía, sin prisas ni presiones corporativas.

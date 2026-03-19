@@ -1,5 +1,6 @@
 """Strategies API routes — CRUD + CSV Upload."""
 
+import logging
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -12,6 +13,8 @@ from services.strategy_service import (
     create_strategy_from_csv, get_user_strategies,
     get_strategy_by_id, delete_strategy,
 )
+
+logger = logging.getLogger("ironrisk")
 
 router = APIRouter(prefix="/api/strategies", tags=["Strategies"])
 
@@ -36,18 +39,25 @@ async def upload_strategy(
     if len(content) == 0:
         raise HTTPException(status_code=400, detail="CSV file is empty")
 
-    strategy = create_strategy_from_csv(
-        db=db,
-        user_id=user.id,
-        name=name,
-        description=description,
-        magic_number=magic_number,
-        start_date=start_date,
-        max_drawdown_limit=max_drawdown_limit,
-        daily_loss_limit=daily_loss_limit,
-        csv_content=content,
-    )
-    return strategy
+    try:
+        strategy = create_strategy_from_csv(
+            db=db,
+            user_id=user.id,
+            name=name,
+            description=description,
+            magic_number=magic_number,
+            start_date=start_date,
+            max_drawdown_limit=max_drawdown_limit,
+            daily_loss_limit=daily_loss_limit,
+            csv_content=content,
+        )
+        return strategy
+    except ValueError as e:
+        logger.warning(f"CSV parsing error for user {user.id}: {e}")
+        raise HTTPException(status_code=400, detail=f"CSV error: {str(e)}")
+    except Exception as e:
+        logger.error(f"Upload failed for user {user.id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Strategy creation failed: {str(e)}")
 
 
 @router.get("/", response_model=List[StrategyResponse])

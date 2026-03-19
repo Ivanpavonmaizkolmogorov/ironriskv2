@@ -30,11 +30,10 @@ export default function LandingPage() {
       const data = await res.json();
       if (res.ok) {
         setSubmitted(true);
-        setSuccessMessage("You're on the list! We'll notify you when we launch.");
+        setSuccessMessage(data.message || "You're on the list! We'll notify you when we launch.");
         setEmail("");
       } else {
-        // Fallback to error state
-        setError("Error submitting. Please try again.");
+        setError(data.error || "Error submitting. Please try again.");
       }
     } catch {
       setError("Network error. Please try again.");
@@ -82,7 +81,7 @@ export default function LandingPage() {
             ${large ? "px-8 py-4 text-base" : "px-6 py-3 text-sm"}
           `}
         >
-          {isLoading ? "Sending..." : large ? "🛡️ Get Early Access" : "Activate Shield →"}
+          {isLoading ? "Sending..." : large ? "🚀 Get Early Access" : "Join Waitlist →"}
         </button>
         {error && <p className="text-risk-red text-sm mt-1">{error}</p>}
       </form>
@@ -144,7 +143,7 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-surface-primary via-transparent to-transparent z-10" />
           <Image
             src="/ironrisk-shield-mockup.png"
-            alt="IronRisk MT4/MT5 Shield Dashboard Mockup"
+            alt="IronRisk MT4/MT5 Dashboard Mockup"
             width={1600}
             height={900}
             className="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity duration-700"
@@ -248,7 +247,7 @@ export default function LandingPage() {
           <p className="text-iron-500 mb-8 leading-relaxed">
             Your system already has an edge. You just need a visual firewall to protect it from yourself.
             <br /><br />
-            <span className="text-iron-200 font-medium">Join the official waitlist and be among the first to test IronRisk Shield when Closed Beta spots open.</span>
+            <span className="text-iron-200 font-medium">Join the official waitlist and be among the first to test IronRisk when Closed Beta spots open.</span>
             <br /><br />
             <span className="text-iron-500 text-sm italic">
               IronRisk is an &apos;indie&apos; tool, built by an algo-trader in his spare time. Pure craftsmanship, no rush, no corporate pressure.

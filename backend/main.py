@@ -1,12 +1,20 @@
 """IronRisk V2 — FastAPI Backend Entrypoint."""
 
-from fastapi import FastAPI
+import logging
+import traceback
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from models.database import Base, engine, get_settings
 from api.auth import router as auth_router
 from api.strategies import router as strategies_router
 from api.live import router as live_router
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("ironrisk")
 
 # Create tables (dev only — use Alembic migrations in production)
 Base.metadata.create_all(bind=engine)
@@ -30,6 +38,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Global exception handler — ensures CORS headers are sent even on 500 errors
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception on {request.method} {request.url}:")
+    logger.error(traceback.format_exc())
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal server error: {str(exc)}"},
+    )
+
 
 # Register routers
 app.include_router(auth_router)

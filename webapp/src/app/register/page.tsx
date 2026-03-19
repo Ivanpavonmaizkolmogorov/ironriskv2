@@ -73,8 +73,26 @@ export default function RegisterPage() {
           />
 
           {(error || localError) && (
-            <div className="bg-risk-red/10 border border-risk-red/30 rounded-lg p-3">
-              <p className="text-risk-red text-sm">{error || localError}</p>
+            <div className={`border rounded-lg p-3 ${
+              error?.toLowerCase().includes("already registered") || error?.toLowerCase().includes("ya registrad")
+                ? "bg-amber-500/10 border-amber-500/30"
+                : "bg-risk-red/10 border-risk-red/30"
+            }`}>
+              <p className={`text-sm ${
+                error?.toLowerCase().includes("already registered") || error?.toLowerCase().includes("ya registrad")
+                  ? "text-amber-400"
+                  : "text-risk-red"
+              }`}>
+                {error || localError}
+              </p>
+              {error?.toLowerCase().includes("already registered") && (
+                <p className="text-sm text-iron-400 mt-2">
+                  You already have an account.{" "}
+                  <Link href="/login" className="text-risk-green hover:underline font-medium">
+                    Sign in here →
+                  </Link>
+                </p>
+              )}
             </div>
           )}
 

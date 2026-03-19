@@ -22,15 +22,17 @@ def parse_csv(file_content: bytes) -> Tuple[List[dict], dict]:
     text = file_content.decode("utf-8-sig")  # Handle BOM
     reader = csv.DictReader(io.StringIO(text), delimiter="\t")
 
-    # Try tab-delimited first, then comma
+    # Try tab-delimited first, then semicolon, then comma
+    if reader.fieldnames is None or len(reader.fieldnames) <= 1:
+        reader = csv.DictReader(io.StringIO(text), delimiter=";")
     if reader.fieldnames is None or len(reader.fieldnames) <= 1:
         reader = csv.DictReader(io.StringIO(text), delimiter=",")
 
     if reader.fieldnames is None:
         raise ValueError("Could not parse CSV: no headers found")
 
-    # Normalize headers to lowercase
-    reader.fieldnames = [h.strip().lower().replace(" ", "_") for h in reader.fieldnames]
+    # Normalize headers to lowercase and strip quotes
+    reader.fieldnames = [h.strip(' "\'').replace(" ", "_").lower() for h in reader.fieldnames]
 
     # Check for 'profit' column
     if "profit" not in reader.fieldnames:

@@ -2,11 +2,23 @@
 "use client";
 
 import React, { useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { useWizardStore } from "@/store/useWizardStore";
+import { useStrategyStore } from "@/store/useStrategyStore";
 
 export default function StepTwo() {
-  const { stepTwoData, updateStepTwo, setStep } = useWizardStore();
+  const router = useRouter();
+  const { fetchStrategies } = useStrategyStore();
+  const { stepTwoData, updateStepTwo, setStep, submitStrategy, isSubmitting, error } = useWizardStore();
+
+  const handleSubmit = async () => {
+    const strategyId = await submitStrategy();
+    if (strategyId) {
+      await fetchStrategies();
+      router.push("/dashboard");
+    }
+  };
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,11 +89,11 @@ export default function StepTwo() {
       )}
 
       <div className="flex justify-between pt-4">
-        <Button variant="ghost" onClick={() => setStep(1)}>
+        <Button variant="ghost" onClick={() => setStep(1)} disabled={isSubmitting}>
           ← Back
         </Button>
-        <Button onClick={() => setStep(3)} disabled={!stepTwoData.isValid}>
-          Next → Set Limits
+        <Button onClick={handleSubmit} disabled={!stepTwoData.isValid} isLoading={isSubmitting}>
+          🚀 Upload & Create Strategy
         </Button>
       </div>
     </div>
