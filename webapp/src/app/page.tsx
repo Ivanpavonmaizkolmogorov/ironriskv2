@@ -10,6 +10,7 @@ import Image from "next/image";
 export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isDuplicate, setIsDuplicate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -30,6 +31,7 @@ export default function LandingPage() {
       const data = await res.json();
       if (res.ok) {
         setSubmitted(true);
+        setIsDuplicate(res.status === 200);
         setSuccessMessage(data.message || "You're on the list! We'll notify you when we launch.");
         setEmail("");
       } else {
@@ -46,8 +48,10 @@ export default function LandingPage() {
     if (submitted) {
       return (
         <div className={`flex items-center gap-3 justify-center ${large ? "py-4" : "py-2"}`}>
-          <span className="text-risk-green text-2xl">✓</span>
-          <span className="text-risk-green font-medium">
+          <span className={`text-2xl ${isDuplicate ? "text-amber-400" : "text-risk-green"}`}>
+            {isDuplicate ? "⚠" : "✓"}
+          </span>
+          <span className={`font-medium ${isDuplicate ? "text-amber-400" : "text-risk-green"}`}>
             {successMessage}
           </span>
         </div>
