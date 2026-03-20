@@ -6,14 +6,13 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function LandingPageES() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [isDuplicate, setIsDuplicate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,10 +28,8 @@ export default function LandingPageES() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSubmitted(true);
-        setIsDuplicate(res.status === 200);
-        setSuccessMessage(data.message || "¡Estás en la lista!");
-        setEmail("");
+        // Redirect to Gracias page for Analytics tracking
+        router.push("/gracias");
       } else {
         setError(data.error || "Error al enviar.");
       }
@@ -44,19 +41,6 @@ export default function LandingPageES() {
   };
 
   const EmailForm = ({ id, large = false }: { id: string; large?: boolean }) => {
-    if (submitted) {
-      return (
-        <div className={`flex items-center gap-3 justify-center ${large ? "py-4" : "py-2"}`}>
-          <span className={`text-2xl ${isDuplicate ? "text-amber-400" : "text-risk-green"}`}>
-            {isDuplicate ? "⚠" : "✓"}
-          </span>
-          <span className={`font-medium ${isDuplicate ? "text-amber-400" : "text-risk-green"}`}>
-            {successMessage || "¡Estás en la lista! Te avisaremos al lanzar."}
-          </span>
-        </div>
-      );
-    }
-
     return (
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 justify-center" id={id}>
         <input
