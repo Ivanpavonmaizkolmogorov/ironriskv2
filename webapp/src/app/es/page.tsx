@@ -121,7 +121,7 @@ export default function LandingPageES() {
           <EmailForm id="hero-form" />
 
           <p className="text-sm font-medium text-iron-400 mt-6 tracking-wide">
-            Tecnología de control de riesgo basada en matemática pura. Cero fe, 100% probabilidad.
+            Tecnología de control de riesgo basada en tus propios datos. Cero suposiciones, puro contexto estadístico.
           </p>
         </div>
 
@@ -155,7 +155,7 @@ export default function LandingPageES() {
               {
                 icon: "📊",
                 title: "1. Sube tu Backtest",
-                desc: "Carga el CSV de tu Strategy Tester. Python calcula la distribución estadística completa de tu varianza.",
+                desc: "Carga el CSV de tu Strategy Tester. Verificamos automáticamente qué distribución de probabilidad se ajusta a tus datos — sin suposiciones, solo matemáticas contrastadas.",
               },
               {
                 icon: "🛡️",
@@ -205,9 +205,9 @@ export default function LandingPageES() {
             <div className="bg-surface-primary border border-risk-green/20 rounded-xl p-6">
               <h4 className="text-risk-green font-semibold mb-3">✓ Con IronRisk</h4>
               <ul className="space-y-2 text-sm text-iron-400">
-                <li>• Ves -$800 y el termómetro marca <span className="text-risk-green">NORMAL (1σ)</span></li>
-                <li>• Sabes que tu backtest tuvo drawdowns de -$2,400</li>
-                <li>• Tu cerebro recibe la señal: &quot;esto es varianza normal&quot;</li>
+                <li>• Ves -$800 e IronRisk muestra <span className="text-risk-green">percentil 33 — dentro del rango esperado</span></li>
+                <li>• Ves que tu backtest tuvo drawdowns de -$2,400</li>
+                <li>• Tu cerebro recibe la señal: &quot;mis datos dicen que esto es esperable&quot;</li>
                 <li>• Dejas que el sistema trabaje sin intervención</li>
               </ul>
             </div>

@@ -122,7 +122,7 @@ export default function LandingPage() {
           <EmailForm id="hero-form" />
 
           <p className="text-sm font-medium text-iron-400 mt-6 tracking-wide">
-            Risk control technology based on pure mathematics. Zero faith, 100% probability.
+            Risk control technology based on your own data. Zero assumptions, pure statistical context.
           </p>
         </div>
 
@@ -156,7 +156,7 @@ export default function LandingPage() {
               {
                 icon: "📊",
                 title: "1. Upload Your Backtest",
-                desc: "Upload your Strategy Tester CSV. Python computes the complete statistical distribution of your variance.",
+                desc: "Upload your Strategy Tester CSV. We automatically test which probability distribution fits your data — no assumptions, only verified math.",
               },
               {
                 icon: "🛡️",
@@ -206,9 +206,9 @@ export default function LandingPage() {
             <div className="bg-surface-primary border border-risk-green/20 rounded-xl p-6">
               <h4 className="text-risk-green font-semibold mb-3">✓ With IronRisk</h4>
               <ul className="space-y-2 text-sm text-iron-400">
-                <li>• You see -$800 and the thermometer shows <span className="text-risk-green">NORMAL (1σ)</span></li>
-                <li>• You know your backtest had drawdowns of -$2,400</li>
-                <li>• Your brain receives the signal: &quot;this is normal variance&quot;</li>
+                <li>• You see -$800 and IronRisk shows <span className="text-risk-green">percentile 33 — within expected range</span></li>
+                <li>• You see your backtest had drawdowns of -$2,400</li>
+                <li>• Your brain receives the signal: &quot;my data says this is expected&quot;</li>
                 <li>• You let the system work without intervention</li>
               </ul>
             </div>
