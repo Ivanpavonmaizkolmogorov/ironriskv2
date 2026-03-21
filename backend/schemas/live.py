@@ -31,3 +31,6 @@ class HeartbeatResponse(BaseModel):
     metrics: List[MetricStatus]
     floor_level: float
     ceiling_level: float
+    max_drawdown_limit: float = 0.0
+    daily_loss_limit: float = 0.0
+    risk_config: Optional[dict] = None

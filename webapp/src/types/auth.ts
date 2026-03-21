@@ -5,12 +5,7 @@ export interface User {
   email: string;
 }
 
-export interface APIToken {
-  id: string;
-  token: string;
-  label: string;
-  is_active: boolean;
-}
+// APIToken removed (now TradingAccount)
 
 export interface TokenResponse {
   access_token: string;

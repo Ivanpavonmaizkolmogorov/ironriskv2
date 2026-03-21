@@ -26,7 +26,11 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401 && typeof window !== "undefined") {
       localStorage.removeItem("ironrisk_jwt");
-      window.location.href = "/login";
+      // Only redirect if not already on login or register page
+      const path = window.location.pathname;
+      if (path !== "/login" && path !== "/register") {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
@@ -41,11 +45,15 @@ export const authAPI = {
   login: (email: string, password: string) =>
     api.post("/api/auth/login", { email, password }),
   getMe: () => api.get("/api/auth/me"),
-  createToken: (label: string) =>
-    api.post("/api/auth/tokens", { label }),
-  listTokens: () => api.get("/api/auth/tokens"),
-  revokeToken: (tokenId: string) =>
-    api.delete(`/api/auth/tokens/${tokenId}`),
+};
+
+// --- Trading Account endpoints ---
+export const tradingAccountAPI = {
+  create: (data: { name: string; broker?: string; account_number?: string }) =>
+    api.post("/api/trading-accounts/", data),
+  list: () => api.get("/api/trading-accounts/"),
+  revoke: (accountId: string) =>
+    api.delete(`/api/trading-accounts/${accountId}`),
 };
 
 // --- Strategy endpoints ---
@@ -53,6 +61,9 @@ export const strategyAPI = {
   list: () => api.get("/api/strategies/"),
   get: (id: string) => api.get(`/api/strategies/${id}`),
   delete: (id: string) => api.delete(`/api/strategies/${id}`),
+  deleteAll: () => api.delete("/api/strategies/bulk/all"),
+  update: (id: string, data: Partial<import("@/types/strategy").Strategy>) =>
+    api.patch(`/api/strategies/${id}`, data),
   upload: (formData: FormData) =>
     api.post("/api/strategies/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" },

@@ -27,20 +27,4 @@ class UserResponse(BaseModel):
 
 
 # --- API Token Management ---
-
-class CreateAPITokenRequest(BaseModel):
-    label: str = "Default"
-
-
-class APITokenResponse(BaseModel):
-    id: str
-    token: str
-    label: str
-    is_active: bool
-
-    class Config:
-        from_attributes = True
-
-
-class RevokeTokenRequest(BaseModel):
-    token_id: str
+# Deprecated in favor of TradingAccounts

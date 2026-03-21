@@ -8,11 +8,10 @@ from models.database import get_db
 from models.user import User
 from schemas.auth import (
     RegisterRequest, LoginRequest, TokenResponse,
-    UserResponse, CreateAPITokenRequest, APITokenResponse,
+    UserResponse
 )
 from services.auth_service import (
-    register_user, authenticate_user, create_jwt,
-    get_current_user, create_api_token, revoke_api_token, get_user_tokens,
+    register_user, authenticate_user, create_jwt, get_current_user
 )
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -37,30 +36,4 @@ def get_me(user: User = Depends(get_current_user)):
     return user
 
 
-# --- API Token Management (for EA) ---
-
-@router.post("/tokens", response_model=APITokenResponse)
-def create_token(
-    req: CreateAPITokenRequest,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    return create_api_token(db, user.id, req.label)
-
-
-@router.get("/tokens", response_model=List[APITokenResponse])
-def list_tokens(
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    return get_user_tokens(db, user.id)
-
-
-@router.delete("/tokens/{token_id}")
-def delete_token(
-    token_id: str,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    revoke_api_token(db, user.id, token_id)
-    return {"detail": "Token revoked"}
+# --- API Token Management removed (now in trading_accounts API) ---

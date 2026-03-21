@@ -11,6 +11,8 @@ from models.database import Base, engine, get_settings
 from api.auth import router as auth_router
 from api.strategies import router as strategies_router
 from api.live import router as live_router
+from api.trading_accounts import router as trading_accounts_router
+from api.portfolios import router as portfolios_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -55,6 +57,8 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(auth_router)
 app.include_router(strategies_router)
 app.include_router(live_router)
+app.include_router(trading_accounts_router)
+app.include_router(portfolios_router)
 
 
 @app.get("/")

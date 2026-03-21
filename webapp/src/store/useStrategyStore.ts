@@ -12,6 +12,7 @@ interface StrategyState {
   fetchStrategies: () => Promise<void>;
   selectStrategy: (id: string) => void;
   deleteStrategy: (id: string) => Promise<void>;
+  updateStrategy: (id: string, data: Partial<Strategy>) => Promise<boolean>;
 }
 
 export const useStrategyStore = create<StrategyState>((set, get) => ({
@@ -51,6 +52,22 @@ export const useStrategyStore = create<StrategyState>((set, get) => ({
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Delete failed";
       set({ error: message });
+    }
+  },
+
+  updateStrategy: async (id, data) => {
+    try {
+      const res = await strategyAPI.update(id, data);
+      const updatedStrategy = res.data;
+      set((s) => ({
+        strategies: s.strategies.map((st) => (st.id === id ? updatedStrategy : st)),
+        selectedStrategy: s.selectedStrategy?.id === id ? updatedStrategy : s.selectedStrategy,
+      }));
+      return true;
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Update failed";
+      set({ error: message });
+      return false;
     }
   },
 }));

@@ -10,7 +10,6 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from models.database import get_db, get_settings
 from models.user import User
-from models.api_token import APIToken
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
@@ -69,35 +68,4 @@ def get_current_user(
     return user
 
 
-# --- API Token Operations ---
-
-def create_api_token(db: Session, user_id: str, label: str = "Default") -> APIToken:
-    token = APIToken(user_id=user_id, label=label)
-    db.add(token)
-    db.commit()
-    db.refresh(token)
-    return token
-
-
-def revoke_api_token(db: Session, user_id: str, token_id: str) -> None:
-    token = db.query(APIToken).filter(
-        APIToken.id == token_id, APIToken.user_id == user_id
-    ).first()
-    if not token:
-        raise HTTPException(status_code=404, detail="Token not found")
-    token.is_active = False
-    db.commit()
-
-
-def get_user_tokens(db: Session, user_id: str):
-    return db.query(APIToken).filter(APIToken.user_id == user_id).all()
-
-
-def validate_api_token(db: Session, token_str: str) -> APIToken:
-    """Validate an API token (used by EA — no JWT)."""
-    token = db.query(APIToken).filter(
-        APIToken.token == token_str, APIToken.is_active == True
-    ).first()
-    if not token:
-        raise HTTPException(status_code=401, detail="Invalid or revoked API token")
-    return token
+# --- API Token Operations removed (now in trading_account_service) ---

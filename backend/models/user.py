@@ -22,5 +22,4 @@ class User(Base):
     )
 
     # Relationships
-    strategies = relationship("Strategy", back_populates="user", cascade="all, delete-orphan")
-    api_tokens = relationship("APIToken", back_populates="user", cascade="all, delete-orphan")
+    trading_accounts = relationship("TradingAccount", back_populates="user", cascade="all, delete-orphan")

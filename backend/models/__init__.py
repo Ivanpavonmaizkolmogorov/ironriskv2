@@ -1,7 +1,8 @@
 from .database import Base, engine, SessionLocal, get_db, get_settings
 from .user import User
 from .strategy import Strategy
-from .api_token import APIToken
+from .trading_account import TradingAccount
+from .portfolio import Portfolio
 
 __all__ = [
     "Base",
@@ -11,5 +12,6 @@ __all__ = [
     "get_settings",
     "User",
     "Strategy",
-    "APIToken",
+    "TradingAccount",
+    "Portfolio",
 ]

@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { strategyAPI } from "@/services/api";
 
 interface StepOneData {
+  tradingAccountId: string;
   name: string;
   description: string;
   magicNumber: number;
@@ -32,13 +33,13 @@ interface WizardState {
   updateStepOne: (data: Partial<StepOneData>) => void;
   updateStepTwo: (data: Partial<StepTwoData>) => void;
   updateStepThree: (data: Partial<StepThreeData>) => void;
-  submitStrategy: () => Promise<string | null>;
+  submitStrategy: (columnMapping?: Record<string, string>) => Promise<string | null>;
   reset: () => void;
 }
 
 const initialState = {
   currentStep: 1 as const,
-  stepOneData: { name: "", description: "", magicNumber: 0, startDate: "" },
+  stepOneData: { tradingAccountId: "", name: "", description: "", magicNumber: 0, startDate: "" },
   stepTwoData: { file: null, previewRows: 0, isValid: false },
   stepThreeData: { maxDrawdown: 0, dailyLoss: 0 },
   isSubmitting: false,
@@ -59,7 +60,7 @@ export const useWizardStore = create<WizardState>((set, get) => ({
   updateStepThree: (data) =>
     set((s) => ({ stepThreeData: { ...s.stepThreeData, ...data } })),
 
-  submitStrategy: async () => {
+  submitStrategy: async (columnMapping?: Record<string, string>) => {
     const { stepOneData, stepTwoData, stepThreeData } = get();
     if (!stepTwoData.file) {
       set({ error: "No CSV file selected" });
@@ -69,12 +70,16 @@ export const useWizardStore = create<WizardState>((set, get) => ({
     set({ isSubmitting: true, error: null });
     try {
       const formData = new FormData();
+      formData.append("trading_account_id", stepOneData.tradingAccountId);
       formData.append("name", stepOneData.name);
       formData.append("description", stepOneData.description);
       formData.append("magic_number", String(stepOneData.magicNumber));
       formData.append("start_date", stepOneData.startDate || "");
       formData.append("max_drawdown_limit", String(stepThreeData.maxDrawdown));
       formData.append("daily_loss_limit", String(stepThreeData.dailyLoss));
+      if (columnMapping && Object.keys(columnMapping).length > 0) {
+        formData.append("column_mapping", JSON.stringify(columnMapping));
+      }
       formData.append("file", stepTwoData.file);
 
       const res = await strategyAPI.upload(formData);

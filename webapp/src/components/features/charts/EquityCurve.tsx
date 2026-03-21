@@ -26,6 +26,9 @@ export default function EquityCurve({ data }: EquityCurveProps) {
     );
   }
 
+  const hasDates = data.some((d) => !!d.date);
+  const xKey = hasDates ? "date" : "trade";
+
   return (
     <div className="w-full h-72">
       <ResponsiveContainer width="100%" height="100%">
@@ -38,7 +41,7 @@ export default function EquityCurve({ data }: EquityCurveProps) {
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#2a2e35" />
           <XAxis
-            dataKey="trade"
+             dataKey={xKey}
             tick={{ fill: "#78828f", fontSize: 11 }}
             axisLine={{ stroke: "#3e444f" }}
             tickLine={false}
@@ -58,7 +61,7 @@ export default function EquityCurve({ data }: EquityCurveProps) {
               fontSize: "12px",
             }}
             formatter={(value: number) => [`$${value.toFixed(2)}`, "Equity"]}
-            labelFormatter={(label: number) => `Trade #${label}`}
+            labelFormatter={(label: any) => hasDates ? `Date: ${label}` : `Trade #${label}`}
           />
           <Area
             type="monotone"

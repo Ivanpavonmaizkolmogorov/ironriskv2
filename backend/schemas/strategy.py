@@ -20,8 +20,20 @@ class StrategyStepThree(BaseModel):
     daily_loss_limit: float
 
 
+class StrategyUpdate(BaseModel):
+    """Payload for updating strategy parameters (from Step 1)."""
+    name: Optional[str] = None
+    description: Optional[str] = None
+    magic_number: Optional[int] = None
+    start_date: Optional[str] = None
+    max_drawdown_limit: Optional[float] = None
+    daily_loss_limit: Optional[float] = None
+    risk_config: Optional[dict] = None
+
+
 class CreateStrategyRequest(BaseModel):
     """Full strategy creation payload (sent after wizard completion)."""
+    trading_account_id: str
     name: str
     description: str = ""
     magic_number: int = 0
@@ -45,6 +57,7 @@ class MetricSnapshotResponse(BaseModel):
 class StrategyResponse(BaseModel):
     """Strategy summary for dashboard list."""
     id: str
+    trading_account_id: str
     name: str
     description: str
     magic_number: int
@@ -56,6 +69,7 @@ class StrategyResponse(BaseModel):
     equity_curve: Optional[list] = None
     gauss_params: Optional[dict] = None
     metrics_snapshot: Optional[dict] = None
+    risk_config: Optional[dict] = None
 
     class Config:
         from_attributes = True

@@ -15,8 +15,8 @@ class Strategy(Base):
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
-    user_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("users.id"), nullable=False, index=True
+    trading_account_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("trading_accounts.id"), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=True, default="")
@@ -36,6 +36,9 @@ class Strategy(Base):
     # Gaussian distribution params for the bell chart
     gauss_params: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
 
+    # Risk configuration — which variables to monitor and their limits
+    risk_config: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
+
     # Trade count for stats
     total_trades: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     net_profit: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
@@ -45,4 +48,4 @@ class Strategy(Base):
     )
 
     # Relationships
-    user = relationship("User", back_populates="strategies")
+    trading_account = relationship("TradingAccount", back_populates="strategies")
