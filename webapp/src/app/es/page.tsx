@@ -130,7 +130,7 @@ export default function LandingPageES() {
           <div className="absolute inset-0 bg-gradient-to-t from-surface-primary via-transparent to-transparent z-10" />
           <Image
             src="/ironrisk-shield-mockup.png"
-            alt="IronRisk MT4/MT5 Dashboard Mockup"
+            alt="IronRisk MetaTrader 5 Dashboard Mockup"
             width={1600}
             height={900}
             className="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity duration-700"
@@ -165,7 +165,7 @@ export default function LandingPageES() {
               {
                 icon: "📡",
                 title: "3. Conecta el EA",
-                desc: "Pega tu API Token en el EA. IronRisk proyecta el escudo visual en tu MT4/MT5 en tiempo real.",
+                desc: "Pega tu API Token en el EA. IronRisk proyecta el escudo visual en tu MetaTrader 5 en tiempo real.",
               },
             ].map((step, i) => (
               <div
