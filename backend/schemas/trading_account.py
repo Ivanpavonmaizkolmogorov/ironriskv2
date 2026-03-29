@@ -1,7 +1,7 @@
 """Pydantic schemas for Trading Accounts requests/responses."""
 
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Any
 from datetime import datetime
 
 
@@ -18,6 +18,7 @@ class TradingAccountResponse(BaseModel):
     account_number: Optional[str] = None
     api_token: str
     is_active: bool
+    default_dashboard_layout: Optional[dict] = None
     created_at: datetime
 
     class Config:
@@ -26,3 +27,8 @@ class TradingAccountResponse(BaseModel):
 
 class RevokeTradingAccountRequest(BaseModel):
     account_id: str
+
+
+class UpdateWorkspaceSettingsRequest(BaseModel):
+    """Schema for updating workspace-level settings (El Padre)."""
+    default_dashboard_layout: Optional[Any] = None

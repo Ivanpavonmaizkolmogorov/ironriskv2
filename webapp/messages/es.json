@@ -1,0 +1,144 @@
+{
+  "metrics": {
+    "max_drawdown": {
+      "label": "Maximum Drawdown",
+      "tableLabel": "Max DD",
+      "tooltip": "La mayor caída histórica de capital desde el pico más alto hasta el valle más bajo.",
+      "chartGuide": "La campana muestra qué tan probables son las diferentes profundidades de caída. Si la barra actual está a la derecha de la curva, la estrategia se encuentra en territorio estadísticamente inexplorado."
+    },
+    "ev": {
+      "label": "Expectancy",
+      "tableLabel": "Expectancy",
+      "tooltip": "Beneficio medio esperado por cada operación (Beneficio Neto / Total de Operaciones).",
+      "chartGuide": "Distribución del valor esperado por trade. Mide la magnitud de tu ventaja estadística en bruto."
+    },
+    "daily_loss": {
+      "label": "Daily Loss",
+      "tableLabel": "Daily Loss",
+      "tooltip": "La máxima pérdida sufrida a lo largo de un solo día de negociación.",
+      "chartGuide": "Probabilidad teórica de alcanzar determinados rangos de pérdida diaria. Vital para ajustar los límites de Drawdown Diario en pruebas de fondeo (Prop Firms)."
+    },
+    "stagnation_days": {
+      "label": "Stag. Days",
+      "tableLabel": "Stag Days",
+      "tooltip": "El mayor periodo de tiempo (en días) que la estrategia ha tardado en recuperar un nuevo máximo histórico de beneficios.",
+      "chartGuide": "La distribución predice cuántos días suele estar el capital estancado antes de remontar. Colas muy largas implican meses en Drawdown temporal."
+    },
+    "stagnation_trades": {
+      "label": "Stag. Trades",
+      "tableLabel": "Stag Trds",
+      "tooltip": "Número máximo de operaciones ejecutadas durante una fase de Drawdown hasta lograr un nuevo pico histórico.",
+      "chartGuide": "Refleja cuántos 'disparos' estadísticos cuesta en promedio salir de un bache. Ayuda a distinguir si la estrategia está rota o si solo necesita operar más."
+    },
+    "consecutive_losses": {
+      "label": "Consecutive Losses",
+      "tableLabel": "Consec L.",
+      "tooltip": "El número máximo de operaciones perdedoras hiladas de forma ininterrumpida.",
+      "chartGuide": "Riesgo de rachas de perdedoras (Losing Streaks). El modelo estima la probabilidad de sufrir N pérdidas seguidas, algo crucial para no quemar la cuenta."
+    },
+    "live_max_drawdown": {
+      "label": "Live Drawdown",
+      "tableLabel": "Live DD",
+      "tooltip": "El Drawdown exacto que estás sufriendo actualmente, medido desde el último pico de capital de la cuenta."
+    },
+    "live_daily_loss": {
+      "label": "Live Daily Loss",
+      "tableLabel": "Live Daily Loss",
+      "tooltip": "La pérdida acumulada a lo largo del día natural de hoy (operaciones cerradas + flotante). El contador se reinicia exactamente a la medianoche (UTC)."
+    },
+    "live_stagnation_days": {
+      "label": "Live Stag. Days",
+      "tableLabel": "Live Stag Days",
+      "tooltip": "Los días consecutivos en vivo que llevas estancado en un drawdown relativo desde el último pico histórico."
+    },
+    "live_stagnation_trades": {
+      "label": "Live Stag. Trades",
+      "tableLabel": "Live Stag Trds",
+      "tooltip": "Número de operaciones ejecutadas sucesivamente en vivo sin haber logrado todavía un nuevo récord en el balance."
+    },
+    "live_consecutive_losses": {
+      "label": "Live Consecutive Losses",
+      "tableLabel": "Live Consec L.",
+      "tooltip": "La racha de operaciones fallidas contabilizadas ininterrumpidamente hasta este instante."
+    }
+  },
+  "connection": {
+    "api_label": "API",
+    "ea_label": "EA",
+    "api_tooltip": "Estado del Servidor. Refleja si el dashboard web puede comunicarse con la API de IronRisk en tiempo real.",
+    "ea_tooltip": "Latido del Asesor Experto (EA). Muestra hace cuánto tiempo MetaTrader 5 envió con éxito la telemetría del riesgo que estás asumiendo ahora mismo en vivo."
+  },
+  "workspaceSettings": {
+    "title": "Configuración del Espacio de Trabajo",
+    "subtitle": "Ajustes globales para la cuenta {account}. Afecta a todos los EAs que subas.",
+    "masterRiskTitle": "LÍMITES DE RIESGO MAESTROS",
+    "masterRiskDesc": "Al activar un límite aquí estarás forzando a todos los EAs de esta cuenta a evaluar dicho riesgo. Apagarlo deshabilitará el escrutinio de riesgo en TODA la cuenta (sobreescribiendo la configuración individual de la estrategia).",
+    "templateTitle": "DISEÑO DEL DASHBOARD MT5 (MAESTRO)"
+  },
+  "thankYou": {
+    "title": "¡Ya estás en la lista!",
+    "desc": "Gracias por unirte a la lista de espera de IronRisk. Te avisaremos por email en cuanto queden plazas libres para la Beta Cerrada.",
+    "button": "Volver al Inicio"
+  },
+  "workspaceManager": {
+    "pageTitle": "Tus Espacios de Trabajo",
+    "pageDesc": "Cada cuenta de trading actúa como un entorno de trabajo aislado con su propio token de API y estrategias.",
+    "title": "Cuentas de Trading",
+    "downloadEA": "Descargar EA Dashboard (v55)",
+    "description": "Crea un contenedor virtual para cada una de tus terminales MetaTrader (ej. \"Fondeada 100k\"). Cada cuenta recibe un token de conexión API exclusivo.",
+    "newAccount": "Nueva Cuenta",
+    "placeholderName": "Nombre de la Cuenta (ej. FTMO 100k)",
+    "placeholderBroker": "Broker (opcional)",
+    "placeholderActNo": "Número de Cuenta MT5 (opcional)",
+    "btnCreate": "Crear Cuenta",
+    "actBroker": "Broker",
+    "actNumber": "N° Cuenta",
+    "actToken": "Token",
+    "btnEnter": "Entrar al Workspace",
+    "btnEntering": "Entrando al Sector...",
+    "btnCopy": "Copiar Token",
+    "btnDelete": "Eliminar Cuenta",
+    "confirmDeleteTitle": "⚠️ ¿Eliminar Cuenta?",
+    "confirmDeleteDesc": "Esta acción es completamente IRREVERSIBLE. ¿Estás seguro de que quieres destruir esta cuenta Y todas sus estrategias?",
+    "copied": "Token copiado al portapapeles",
+    "loadingBtn": "Entrando al Sector...",
+    "emptyState": "No hay cuentas de trading activas. Crea una para empezar.",
+    "archived": "Archivada",
+    "logout": "Cerrar Sesión",
+    "navWorkspaces": "← Espacios",
+    "btnSettings": "⚙️ Configuración",
+    "btnNewStrategy": "+ Estrategia",
+    "tokenLabel": "Token:",
+    "cardBacktest": "Backtest",
+    "cardPortfolioBacktest": "Portfolio Backtest",
+    "tradesCount": "trades",
+    "liveSince": "LIVE DESDE:",
+    "tooltipStartDate": "Fecha frontera: trades posteriores se consideran Live",
+    "warningExcluded": "⚠️ {count} trades reales excluidos por start_date",
+    "warningNoTradesAdjust": "⚠️ {count} trades reales excluidos — ajusta start_date",
+    "waitingLive": "Sin trades live aún — esperando sincronización del EA",
+    "loadingLive": "Cargando datos live...",
+    "cardDistribution": "Distribución",
+    "clickMetricDist": "Click en una métrica para ver su distribución",
+    "generatingDist": "Generando Distribución Teórica...",
+    "generatingDistHover": "Cargando...",
+    "cardRiskMetrics": "Risk Metrics",
+    "liveBadge": "LIVE",
+    "maxBadge": "MAX:"
+  },
+  "charts": {
+    "interactive": {
+      "value": "Valor",
+      "bin": "Rango",
+      "probDensity": "Densidad de Prob.",
+      "probWorseX": "Prob. Peor > X",
+      "empFreq": "Frec. Empírica",
+      "empWorseX": "Frec. Empírica > X",
+      "fit": "Ajuste",
+      "empirical": "Empírica",
+      "current": "Actual",
+      "loading": "Mapeando matriz probabilística...",
+      "noData": "Ningún modelo matemático generado"
+    }
+  }
+}

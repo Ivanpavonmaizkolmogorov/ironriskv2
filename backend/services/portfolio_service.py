@@ -140,14 +140,20 @@ def recalculate_portfolio(db: Session, portfolio: Portfolio) -> Portfolio:
         "strategy_names": [s.name for s in strategies],
     }
 
-    # Also run RiskEngine on the combined pnls for full analysis
+    # Also run RiskEngine and DistributionAnalyzer on the combined pnls for full analysis
     try:
-        trades_for_engine = [{"pnl": float(p)} for p in pnls]
+        trades_for_engine = [{"pnl": float(t["pnl"]), "exit_time": t.get("date", "")} for t in all_trades]
         engine = RiskEngine.create_default()
         full_metrics = engine.analyze_backtest(trades_for_engine)
         metrics_snapshot.update(full_metrics)
+
+        from services.stats.analyzer import DistributionAnalyzer
+        analyzer = DistributionAnalyzer()
+        trade_dicts = [{"profit": t["pnl"], "time": t.get("date", "")} for t in all_trades]
+        portfolio.distribution_fit = analyzer.analyze_strategy(trade_dicts)
     except Exception as e:
-        logger.warning(f"RiskEngine failed on portfolio: {e}")
+        logger.warning(f"RiskEngine/Analyzer failed on portfolio: {e}")
+        portfolio.distribution_fit = {}
 
     # 5. Build risk_config
     max_dd_limit = round(max_drawdown, 2)
@@ -156,8 +162,13 @@ def recalculate_portfolio(db: Session, portfolio: Portfolio) -> Portfolio:
     cl_params = metrics_snapshot.get("ConsecutiveLossesMetric", {})
     sd_params = metrics_snapshot.get("StagnationDaysMetric", {})
     st_params = metrics_snapshot.get("StagnationTradesMetric", {})
+    ep_params = metrics_snapshot.get("PnlMetric", {})
 
     risk_config = {
+        "expected_payoff": {
+            "enabled": True,
+            "limit": round(ep_params.get("mean_pnl", 0) - 2 * ep_params.get("std_pnl", 0), 2),
+        },
         "max_drawdown": {"enabled": True, "limit": max_dd_limit},
         "daily_loss": {"enabled": True, "limit": daily_loss_limit},
         "consecutive_losses": {
@@ -194,7 +205,7 @@ def recalculate_portfolio(db: Session, portfolio: Portfolio) -> Portfolio:
     return portfolio
 
 
-def add_strategy_to_auto_portfolios(db: Session, strategy: Strategy) -> None:
+def add_strategy_to_auto_portfolios(db: Session, strategy: Strategy, skip_recalc: bool = False) -> None:
     """Add a newly created strategy to all auto_include_new portfolios."""
     portfolios = db.query(Portfolio).filter(
         Portfolio.trading_account_id == strategy.trading_account_id,
@@ -207,12 +218,13 @@ def add_strategy_to_auto_portfolios(db: Session, strategy: Strategy) -> None:
             ids.append(strategy.id)
             p.strategy_ids = ids
             db.commit()
-            recalculate_portfolio(db, p)
+            if not skip_recalc:
+                recalculate_portfolio(db, p)
             logger.info(f"Auto-added strategy '{strategy.name}' to portfolio '{p.name}'")
 
 
 def remove_strategy_from_portfolios(db: Session, strategy_id: str, trading_account_id: str) -> None:
-    """Remove a deleted strategy from all portfolios and recalculate."""
+    """Remove a deleted strategy from all portfolios. Cascade deletes custom portfolios."""
     portfolios = db.query(Portfolio).filter(
         Portfolio.trading_account_id == trading_account_id,
     ).all()
@@ -220,11 +232,44 @@ def remove_strategy_from_portfolios(db: Session, strategy_id: str, trading_accou
     for p in portfolios:
         ids = list(p.strategy_ids or [])
         if strategy_id in ids:
-            ids.remove(strategy_id)
-            p.strategy_ids = ids
+            if getattr(p, "is_default", False):
+                ids.remove(strategy_id)
+                p.strategy_ids = ids
+                db.commit()
+                recalculate_portfolio(db, p)
+                logger.info(f"Removed strategy from default portfolio '{p.name}'")
+            else:
+                db.delete(p)
+                db.commit()
+                logger.info(f"Cascade deleted custom portfolio '{p.name}' because strategy '{strategy_id}' was removed")
+
+
+def remove_strategies_bulk_from_portfolios(db: Session, strategy_ids: list[str], trading_account_id: str) -> None:
+    """Cascade remove multiple strategies from portfolios at once. Recalculates default portfolio ONLY ONCE if changed."""
+    portfolios = db.query(Portfolio).filter(
+        Portfolio.trading_account_id == trading_account_id,
+    ).all()
+
+    strategy_ids_set = set(strategy_ids)
+
+    for p in portfolios:
+        ids = list(p.strategy_ids or [])
+        intersection = strategy_ids_set.intersection(ids)
+        if not intersection:
+            continue
+
+        if getattr(p, "is_default", False):
+            # Remove all deleted IDs from default portfolio at once
+            new_ids = [s_id for s_id in ids if s_id not in strategy_ids_set]
+            p.strategy_ids = new_ids
             db.commit()
             recalculate_portfolio(db, p)
-            logger.info(f"Removed strategy from portfolio '{p.name}'")
+            logger.info(f"Bulk removed {len(intersection)} strategies from default portfolio '{p.name}'")
+        else:
+            # Cascade delete custom portfolios containing any of the deleted strategies
+            db.delete(p)
+            db.commit()
+            logger.info(f"Cascade deleted custom portfolio '{p.name}' due to bulk strategy removal")
 
 
 def get_portfolios_for_account(db: Session, trading_account_id: str) -> list[Portfolio]:
@@ -261,6 +306,7 @@ def _point_pnl(point: dict, curve: list) -> float:
 def _default_risk_config(max_dd: float, daily_loss: float) -> dict:
     """Build default risk_config structure."""
     return {
+        "expected_payoff": {"enabled": True, "limit": 0},
         "max_drawdown": {"enabled": True, "limit": max_dd},
         "daily_loss": {"enabled": True, "limit": daily_loss},
         "consecutive_losses": {"enabled": False, "limit": 0},

@@ -33,11 +33,15 @@ class Portfolio(Base):
     equity_curve: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
     metrics_snapshot: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
     gauss_params: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
+    distribution_fit: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
 
     # Risk configuration (same structure as Strategy.risk_config)
     risk_config: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
     max_drawdown_limit: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     daily_loss_limit: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+
+    # UI Configuration for the MT5 Dashboard
+    dashboard_layout: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
 
     # Aggregated stats
     total_trades: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

@@ -8,6 +8,7 @@ from models.strategy import Strategy
 from schemas.strategy import StrategyUpdate
 from services.csv_parser import parse_csv
 from core.risk_engine import RiskEngine
+from services.stats.analyzer import DistributionAnalyzer
 from services.portfolio_service import (
     add_strategy_to_auto_portfolios,
     remove_strategy_from_portfolios,
@@ -28,6 +29,7 @@ def create_strategy_from_csv(
     daily_loss_limit: float,
     csv_content: bytes,
     column_mapping: dict | None = None,
+    skip_recalc: bool = False,
 ) -> Strategy:
     """Full pipeline: parse CSV → run RiskEngine → persist strategy.
     
@@ -41,11 +43,23 @@ def create_strategy_from_csv(
     trades, summary = parse_csv(csv_content, column_mapping=column_mapping)
     logger.info(f"CSV parsed OK: {summary['total_trades']} trades, net_profit={summary['net_profit']:.2f}")
 
+    # Auto-populate start_date from last CSV trade if not provided
+    if not start_date and summary.get("last_trade_date"):
+        start_date = summary["last_trade_date"]
+        logger.info(f"Auto-populated start_date from last CSV trade: {start_date}")
+
     # 2. Run metrics engine
     logger.info("Running RiskEngine analysis...")
     engine = RiskEngine.create_default()
     metrics_snapshot = engine.analyze_backtest(trades)
     logger.info(f"RiskEngine OK: {list(metrics_snapshot.keys())}")
+
+    # 3. Run distribution fitting on all registered metrics
+    logger.info("Running DistributionAnalyzer...")
+    analyzer = DistributionAnalyzer()
+    trade_dicts = [{"profit": t["pnl"], "time": t.get("exit_time", "")} for t in trades]
+    distribution_fit = analyzer.analyze_strategy(trade_dicts)
+    logger.info(f"DistributionAnalyzer OK: {list(distribution_fit.keys())}")
 
     # ── UPSERT CHECK: does a strategy with this magic already exist? ──
     existing = None
@@ -58,23 +72,17 @@ def create_strategy_from_csv(
     if existing:
         old_count = existing.total_trades or 0
         new_count = summary["total_trades"]
-        if new_count <= old_count:
-            logger.info(
-                f"Upsert: strategy '{existing.name}' (magic={magic_number}) "
-                f"already has {old_count} trades, CSV has {new_count}. "
-                f"No new trades — skipping update."
-            )
-            return existing  # Nothing new
 
         logger.info(
             f"Upsert: strategy '{existing.name}' (magic={magic_number}) "
-            f"updating from {old_count} → {new_count} trades "
-            f"({new_count - old_count} new)"
+            f"updating from {old_count} -> {new_count} trades "
+            f"(force recalculating metrics)"
         )
         # Update data fields, PRESERVE risk_config and identity
         existing.metrics_snapshot = metrics_snapshot
         existing.equity_curve = summary["equity_curve"]
         existing.gauss_params = summary["gauss_params"]
+        existing.distribution_fit = distribution_fit
         existing.total_trades = summary["total_trades"]
         existing.net_profit = summary["net_profit"]
         # Update limits only if they were auto-populated (0) or if the new backtest suggests larger values
@@ -144,6 +152,7 @@ def create_strategy_from_csv(
         metrics_snapshot=metrics_snapshot,
         equity_curve=summary["equity_curve"],
         gauss_params=summary["gauss_params"],
+        distribution_fit=distribution_fit,
         total_trades=summary["total_trades"],
         net_profit=summary["net_profit"],
     )
@@ -154,14 +163,17 @@ def create_strategy_from_csv(
 
     # Auto-add to portfolios with auto_include_new=True (e.g., Global)
     ensure_default_portfolio(db, trading_account_id)
-    add_strategy_to_auto_portfolios(db, strategy)
+    add_strategy_to_auto_portfolios(db, strategy, skip_recalc=skip_recalc)
     return strategy
 
 
 from models.trading_account import TradingAccount
 
-def get_user_strategies(db: Session, user_id: str):
-    return db.query(Strategy).join(TradingAccount).filter(TradingAccount.user_id == user_id).all()
+def get_user_strategies(db: Session, user_id: str, trading_account_id: str = None):
+    query = db.query(Strategy).join(TradingAccount).filter(TradingAccount.user_id == user_id)
+    if trading_account_id:
+        query = query.filter(Strategy.trading_account_id == trading_account_id)
+    return query.all()
 
 
 def get_strategy_by_id(db: Session, strategy_id: str, user_id: str) -> Strategy:
@@ -188,6 +200,30 @@ def delete_strategy(db: Session, strategy_id: str, user_id: str) -> None:
     remove_strategy_from_portfolios(db, strategy.id, strategy.trading_account_id)
     db.delete(strategy)
     db.commit()
+
+
+def delete_strategies_bulk(db: Session, strategy_ids: list[str], user_id: str) -> int:
+    """Deletes multiple strategies efficiently."""
+    strategies = db.query(Strategy).join(TradingAccount).filter(
+        Strategy.id.in_(strategy_ids), TradingAccount.user_id == user_id
+    ).all()
+
+    if not strategies:
+        return 0
+
+    trading_account_id = strategies[0].trading_account_id
+    valid_ids = [s.id for s in strategies]
+    
+    # 1. Update portfolios in bulk!
+    from services.portfolio_service import remove_strategies_bulk_from_portfolios
+    remove_strategies_bulk_from_portfolios(db, valid_ids, trading_account_id)
+
+    # 2. Delete the strategies
+    for s in strategies:
+        db.delete(s)
+    db.commit()
+
+    return len(valid_ids)
 
 
 def update_strategy(

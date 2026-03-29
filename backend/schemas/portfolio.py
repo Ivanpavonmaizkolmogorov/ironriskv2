@@ -28,6 +28,7 @@ class PortfolioResponse(BaseModel):
     is_default: bool
     equity_curve: Optional[list] = None
     gauss_params: Optional[dict] = None
+    distribution_fit: Optional[dict] = None
     metrics_snapshot: Optional[dict] = None
     risk_config: Optional[dict] = None
     max_drawdown_limit: float

@@ -29,6 +29,7 @@ class StrategyUpdate(BaseModel):
     max_drawdown_limit: Optional[float] = None
     daily_loss_limit: Optional[float] = None
     risk_config: Optional[dict] = None
+    dashboard_layout: Optional[dict] = None
 
 
 class CreateStrategyRequest(BaseModel):
@@ -40,6 +41,7 @@ class CreateStrategyRequest(BaseModel):
     start_date: Optional[str] = None
     max_drawdown_limit: float = 0.0
     daily_loss_limit: float = 0.0
+    dashboard_layout: Optional[dict] = None
 
 
 # --- Responses ---
@@ -70,6 +72,8 @@ class StrategyResponse(BaseModel):
     gauss_params: Optional[dict] = None
     metrics_snapshot: Optional[dict] = None
     risk_config: Optional[dict] = None
+    dashboard_layout: Optional[dict] = None
+    distribution_fit: Optional[dict] = None
 
     class Config:
         from_attributes = True

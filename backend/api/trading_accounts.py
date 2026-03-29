@@ -7,7 +7,8 @@ from typing import List
 from models.database import get_db
 from models.user import User
 from schemas.trading_account import (
-    CreateTradingAccountRequest, TradingAccountResponse, RevokeTradingAccountRequest
+    CreateTradingAccountRequest, TradingAccountResponse, RevokeTradingAccountRequest,
+    UpdateWorkspaceSettingsRequest,
 )
 from services.auth_service import get_current_user
 from services.trading_account_service import (
@@ -39,3 +40,31 @@ def delete_account(
 ):
     revoke_trading_account(db, user.id, account_id)
     return {"detail": "Trading account revoked"}
+
+
+@router.patch("/{account_id}/settings", response_model=TradingAccountResponse)
+def update_workspace_settings(
+    account_id: str,
+    req: UpdateWorkspaceSettingsRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update workspace-level settings (El Padre: master dashboard layout)."""
+    from models.trading_account import TradingAccount
+    from sqlalchemy.orm.attributes import flag_modified
+
+    account = db.query(TradingAccount).filter(
+        TradingAccount.id == account_id,
+        TradingAccount.user_id == user.id
+    ).first()
+    if not account:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Trading account not found")
+
+    if req.default_dashboard_layout is not None:
+        account.default_dashboard_layout = req.default_dashboard_layout
+        flag_modified(account, "default_dashboard_layout")
+
+    db.commit()
+    db.refresh(account)
+    return account

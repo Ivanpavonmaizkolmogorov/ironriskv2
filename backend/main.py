@@ -13,6 +13,7 @@ from api.strategies import router as strategies_router
 from api.live import router as live_router
 from api.trading_accounts import router as trading_accounts_router
 from api.portfolios import router as portfolios_router
+from api.orphans import router as orphans_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,10 +33,18 @@ app = FastAPI(
 )
 
 # CORS — permissive for development
-origins = [o.strip() for o in settings.CORS_ORIGINS.split(",")]
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://192.168.1.135:3000",
+    "*"  # Fallback for API tokens, but Starlette handles specific headers better
+]
+if hasattr(settings, "CORS_ORIGINS") and settings.CORS_ORIGINS:
+    origins.extend([o.strip() for o in settings.CORS_ORIGINS.split(",")])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,9 +56,15 @@ app.add_middleware(
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception on {request.method} {request.url}:")
     logger.error(traceback.format_exc())
+    origin = request.headers.get("origin", "")
+    headers = {}
+    if origin in ["http://localhost:3000", "http://127.0.0.1:3000"]:
+        headers["Access-Control-Allow-Origin"] = origin
+        headers["Access-Control-Allow-Credentials"] = "true"
     return JSONResponse(
         status_code=500,
         content={"detail": f"Internal server error: {str(exc)}"},
+        headers=headers,
     )
 
 
@@ -59,6 +74,7 @@ app.include_router(strategies_router)
 app.include_router(live_router)
 app.include_router(trading_accounts_router)
 app.include_router(portfolios_router)
+app.include_router(orphans_router, prefix="/api/orphans", tags=["Orphan Magics"])
 
 
 @app.get("/")

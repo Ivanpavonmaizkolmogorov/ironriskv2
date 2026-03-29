@@ -347,9 +347,33 @@ class BootstrapDriftTracker:
 | **1** | `stats/` package: registries + distribuciones + métricas + analyzer + FitResult | 🔴 P0 | Free |
 | **2** | `RiskProfile` (Shield/Statistical) + `RiskContext` | 🔴 P0 | Free |
 | **3** | Heartbeat con `risk_context` + badge EA | 🟡 P1 | Free |
-| **4** | `ChartRenderer` BMP + imagen en EA | 🟡 P1 | Premium |
-| **5** | `RealTrade` sync + `DriftTracker` (conjugate/bootstrap) | 🟢 P2 | Premium |
-| **6** | Percentil empírico local en EA | 🟢 P2 | Free |
+| **4** | **Backend-Driven UI** (Config JSON en Web → Motor Render MQL5) | 🟡 P1 | Premium |
+| **5** | **PnL como Métrica Integral** (Modelado completo Backend → Motor UI Web/EA) | 🟡 P1 | Premium |
+| **6** | `RealTrade` sync + `DriftTracker` (Teorema de Bayes: conjugate/bootstrap) | 🟢 P2 | Premium |
+
+> [!IMPORTANT]
+> ### Fase 6 — Frontera Bayesiana: `start_date`
+> 
+> El campo `start_date` de cada estrategia es la **frontera temporal** que separa los dos mundos:
+> 
+> - **Trades con `close_time <  start_date`** → **Prior** (backtest/historial importado)
+> - **Trades con `close_time >= start_date`** → **Evidencia nueva** (live, para actualización Bayesiana)
+> 
+> **¿Por qué es crítico?**
+> 
+> Un usuario puede exportar su historial real de operaciones manuales como CSV e importarlo como "backtest".
+> Cuando activa el EA, esas mismas operaciones empiezan a llegar como `RealTrade`. Sin `start_date`:
+> - El DriftTracker contaría operaciones **dos veces** (como prior Y como evidencia)
+> - La posterior Bayesiana estaría contaminada
+> - Los percentiles y alertas de riesgo serían incorrectos
+> 
+> **Valor por defecto:** fecha del último trade del CSV importado (el parser la extrae automáticamente).
+> Esto garantiza que solo las operaciones **posteriores** a la importación se traten como evidencia nueva.
+> 
+> **Editable:** El usuario puede ajustar `start_date` manualmente si importó datos parciales
+> o si quiere redefinir dónde empieza el "live".
+
+*Nota: La Fase 5 requiere estandarizar la Esperanza Matemática (PnL) como métrica de riesgo que pase por la evaluación estadística y envíe JSON al EA de la misma forma que el Max Drawdown, preparando el terreno antes de construir el DriftTracker en la Fase 6.*
 
 ## Archivos
 
@@ -373,13 +397,17 @@ class BootstrapDriftTracker:
 | `services/stats/risk_profile.py` | NEW | 2 |
 | `api/live.py` | MODIFY (+risk_context) | 3 |
 | `EA .mq5` | MODIFY (badge) | 3 |
-| `services/stats/chart_renderer.py` | NEW | 4 |
-| `api/strategies.py` | MODIFY (+chart endpoint) | 4 |
-| `EA .mq5` | MODIFY (bitmap) | 4 |
-| `models/real_trade.py` | NEW | 5 |
-| `services/stats/drift_tracker.py` | NEW | 5 |
-| `api/strategies.py` | MODIFY (+sync endpoint) | 5 |
-| `EA .mq5` | MODIFY (sync + local percentil) | 5, 6 |
+| `api/live.py` | MODIFY (+ endpoint `/layout_config` JSON) | 4 |
+| `Dashboard (webapp)` | MODIFY (Configurador visual de widgets/tarjetas) | 4 |
+| `EA .mq5` | MODIFY (Añadir Parseador JSON y Motor Gráfico Dinámico) | 4 |
+| `services/stats/metrics/pnl.py` | NEW — ExpectedPayoffMetric | 5 |
+| `services/stats/distributions/pnl.py` | MODIFY — Ajustar distribuciones para PnL Metric | 5 |
+| `Dashboard (webapp)` | MODIFY — Tarjeta PnL como Riesgo Estándar | 5 |
+| `EA .mq5` | MODIFY — Evaluar PnL en el Motor JSON | 5 |
+| `models/real_trade.py` | NEW | 6 |
+| `services/stats/drift_tracker.py` | NEW | 6 |
+| `api/strategies.py` | MODIFY (+sync endpoint) | 6 |
+| `EA .mq5` | MODIFY (sync live trades) | 6 |
 
 > [!IMPORTANT]
 > **Dependencias**: `scipy`, `matplotlib`, `numpy`. Instalar en venv antes de empezar.

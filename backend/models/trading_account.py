@@ -4,7 +4,7 @@ import uuid
 import secrets
 from datetime import datetime, timezone
 
-from sqlalchemy import String, DateTime, Boolean, ForeignKey
+from sqlalchemy import String, DateTime, Boolean, ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -31,6 +31,10 @@ class TradingAccount(Base):
         String(64), unique=True, nullable=False, default=generate_api_token, index=True
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # UI Configuration for the MT5 Dashboard (Master Template for all workspace EAs)
+    default_dashboard_layout: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
@@ -39,3 +43,4 @@ class TradingAccount(Base):
     user = relationship("User", back_populates="trading_accounts")
     strategies = relationship("Strategy", back_populates="trading_account", cascade="all, delete-orphan")
     portfolios = relationship("Portfolio", back_populates="trading_account", cascade="all, delete-orphan")
+    real_trades = relationship("RealTrade", back_populates="trading_account", cascade="all, delete-orphan")

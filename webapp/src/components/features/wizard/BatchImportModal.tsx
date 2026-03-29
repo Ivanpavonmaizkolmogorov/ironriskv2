@@ -1,11 +1,11 @@
 /** Batch Import Modal — upload multiple CSV files at once with shared column mapping. */
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { strategyAPI } from "@/services/api";
+import { strategyAPI, portfolioAPI } from "@/services/api";
 import { useStrategyStore } from "@/store/useStrategyStore";
 import { useWizardStore } from "@/store/useWizardStore";
 
@@ -83,15 +83,20 @@ function autoDetect(headers: string[]): Record<string, string> {
 export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: BatchImportModalProps) {
   const router = useRouter();
   const { fetchStrategies } = useStrategyStore();
-  const { stepThreeData } = useWizardStore();
+  const { 
+    stepThreeData, 
+    isBatchImporting: isImporting, 
+    setIsBatchImporting: setIsImporting,
+    batchProgress: progress,
+    setBatchProgress: setProgress 
+  } = useWizardStore();
 
   const [stage, setStage] = useState<Stage>("drop");
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
-  const [isImporting, setIsImporting] = useState(false);
-  const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [existingMagics, setExistingMagics] = useState<Set<number>>(new Set());
+  const cancelRef = useRef(false);
 
   // Fetch existing strategies to detect duplicates
   useEffect(() => {
@@ -190,50 +195,55 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
   const handleImportAll = async () => {
     setIsImporting(true);
     setProgress({ done: 0, total: entries.length });
+    cancelRef.current = false;
 
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i];
-      if (entry.status === "done") {
-        setProgress((p) => ({ ...p, done: p.done + 1 }));
-        continue;
-      }
+    const CONCURRENCY = 5;
+    let currentDone = 0;
 
-      // Mark uploading
-      setEntries((prev) =>
-        prev.map((e, idx) => (idx === i ? { ...e, status: "uploading" } : e))
-      );
+    for (let i = 0; i < entries.length; i += CONCURRENCY) {
+      if (cancelRef.current) break;
 
-      const formData = new FormData();
-      formData.append("trading_account_id", tradingAccountId);
-      formData.append("name", entry.name);
-      formData.append("description", "");
-      formData.append("magic_number", entry.magic || "0");
-      formData.append("start_date", "");
-      formData.append("max_drawdown_limit", String(stepThreeData.maxDrawdown));
-      formData.append("daily_loss_limit", String(stepThreeData.dailyLoss));
-      if (Object.keys(columnMapping).length > 0) {
-        formData.append("column_mapping", JSON.stringify(columnMapping));
-      }
-      formData.append("file", entry.file);
+      const chunk = entries.slice(i, i + CONCURRENCY).map((entry, offset) => ({ entry, idx: i + offset }));
+      
+      await Promise.allSettled(chunk.map(async ({ entry, idx }) => {
+        if (entry.status === "done") {
+          currentDone++;
+          setProgress((p) => ({ ...p, done: currentDone }));
+          return;
+        }
 
-      try {
-        await strategyAPI.upload(formData);
-        setEntries((prev) =>
-          prev.map((e, idx) => (idx === i ? { ...e, status: "done" } : e))
-        );
-      } catch (err: unknown) {
-        const message =
-          (err as { response?: { data?: { detail?: string } } })?.response?.data
-            ?.detail || "Upload failed";
-        setEntries((prev) =>
-          prev.map((e, idx) =>
-            idx === i ? { ...e, status: "error", error: message } : e
-          )
-        );
-      }
+        setEntries((prev) => prev.map((e, j) => (j === idx ? { ...e, status: "uploading" } : e)));
 
-      setProgress((p) => ({ ...p, done: p.done + 1 }));
+        const formData = new FormData();
+        formData.append("trading_account_id", tradingAccountId);
+        formData.append("name", entry.name);
+        formData.append("description", "");
+        formData.append("magic_number", entry.magic || "0");
+        formData.append("start_date", "");
+        formData.append("max_drawdown_limit", String(stepThreeData.maxDrawdown));
+        formData.append("daily_loss_limit", String(stepThreeData.dailyLoss));
+        formData.append("skip_recalc", "true"); // Fast Mass Upload!
+        if (Object.keys(columnMapping).length > 0) {
+          formData.append("column_mapping", JSON.stringify(columnMapping));
+        }
+        formData.append("file", entry.file);
+
+        try {
+          await strategyAPI.upload(formData);
+          setEntries((prev) => prev.map((e, j) => (j === idx ? { ...e, status: "done" } : e)));
+        } catch (err: unknown) {
+          const message = (err as any)?.response?.data?.detail || "Upload failed";
+          setEntries((prev) => prev.map((e, j) => j === idx ? { ...e, status: "error", error: message } : e));
+        }
+
+        currentDone++;
+        setProgress((p) => ({ ...p, done: currentDone }));
+      }));
     }
+
+    try {
+      if (currentDone > 0) await portfolioAPI.recalculateAll(tradingAccountId);
+    } catch { /* skip errors */ }
 
     setIsImporting(false);
     await fetchStrategies();
@@ -256,28 +266,54 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-surface-primary border border-iron-700 rounded-2xl shadow-2xl">
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-surface-primary border-b border-iron-800 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <div>
-            <h2 className="text-lg font-bold text-iron-100">📦 Batch Import</h2>
-            <p className="text-xs text-iron-500 mt-0.5">
-              {stage === "drop" && "Select multiple CSV files"}
-              {stage === "map" && "Map columns to IronRisk fields"}
-              {stage === "preview" && `${entries.length} strategies ready to import`}
-            </p>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="w-full max-w-3xl max-h-[90vh] flex flex-col bg-surface-primary border border-iron-700 rounded-2xl shadow-2xl overflow-hidden">
+        {/* Header (Sticky) */}
+        <div className="bg-surface-primary border-b border-iron-800 px-6 py-4 flex flex-col justify-center shadow-sm z-10 shrink-0">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-iron-100">📦 Batch Import</h2>
+              <p className="text-xs text-iron-500 mt-0.5">
+                {stage === "drop" && "Select multiple CSV files"}
+                {stage === "map" && "Map columns to IronRisk fields"}
+                {stage === "preview" && `${entries.length} strategies ready to import`}
+              </p>
+            </div>
+            <button
+              onClick={handleClose}
+              className="text-iron-500 hover:text-iron-200 text-xl transition-colors"
+              disabled={isImporting}
+            >
+              ✕
+            </button>
           </div>
-          <button
-            onClick={handleClose}
-            className="text-iron-500 hover:text-iron-200 text-xl transition-colors"
-            disabled={isImporting}
-          >
-            ✕
-          </button>
+          
+          {/* Sticky Progress bar */}
+          {isImporting && (
+            <div className="mt-4 space-y-1">
+              <div className="flex justify-between text-xs text-iron-400">
+                <span>Importing...</span>
+                <span>
+                  {progress.done}/{progress.total}
+                </span>
+              </div>
+              <div className="w-full bg-iron-800 rounded-full h-2">
+                <div
+                  className="bg-risk-green h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${
+                      progress.total > 0
+                        ? (progress.done / progress.total) * 100
+                        : 0
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* ════════════════ STAGE 1: DROP ZONE ════════════════ */}
           {stage === "drop" && (
             <label
@@ -363,7 +399,7 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
                 </span>
               </div>
 
-              <div className="flex justify-between pt-2">
+              <div className="sticky -bottom-6 bg-surface-primary p-4 border-t border-iron-800 -mx-6 -mb-6 flex justify-between z-10 shadow-[0_-10px_15px_rgba(0,0,0,0.3)]">
                 <Button
                   variant="ghost"
                   onClick={() => {
@@ -386,31 +422,7 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
           {/* ════════════════ STAGE 3: PREVIEW TABLE ════════════════ */}
           {stage === "preview" && (
             <>
-              {/* Progress bar */}
-              {isImporting && (
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-iron-400">
-                    <span>Importing...</span>
-                    <span>
-                      {progress.done}/{progress.total}
-                    </span>
-                  </div>
-                  <div className="w-full bg-iron-800 rounded-full h-2">
-                    <div
-                      className="bg-risk-green h-2 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${
-                          progress.total > 0
-                            ? (progress.done / progress.total) * 100
-                            : 0
-                        }%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Duplicate warning banner */}
+              {/* duplicate warning banner */}
               {entries.some((e) => isDuplicate(e.magic) && e.status === "ready") && (
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 flex items-start gap-2">
                   <span className="text-amber-400 text-sm shrink-0">⚠️</span>
@@ -547,7 +559,7 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
               )}
 
               {/* Actions */}
-              <div className="flex justify-between pt-2">
+              <div className="sticky -bottom-6 bg-surface-primary p-4 border-t border-iron-800 -mx-6 -mb-6 flex justify-between z-10 shadow-[0_-10px_15px_rgba(0,0,0,0.3)]">
                 <Button
                   variant="ghost"
                   onClick={() => setStage("map")}
@@ -556,6 +568,15 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
                   ← Mapping
                 </Button>
                 <div className="flex gap-3">
+                  {isImporting && !allDone && (
+                    <Button
+                      variant="ghost"
+                      className="text-risk-red hover:bg-risk-red/10 border border-risk-red/30"
+                      onClick={() => { cancelRef.current = true; }}
+                    >
+                      ⏹ Cancel
+                    </Button>
+                  )}
                   {allDone ? (
                     <Button
                       onClick={() => {

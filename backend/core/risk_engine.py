@@ -7,6 +7,8 @@ from .metrics.drawdown_metric import DrawdownMetric
 from .metrics.stagnation_days_metric import StagnationDaysMetric
 from .metrics.stagnation_trades_metric import StagnationTradesMetric
 from .metrics.consecutive_losses_metric import ConsecutiveLossesMetric
+from .metrics.pnl_metric import PnlMetric
+from .metrics.daily_loss_metric import DailyLossMetric
 
 
 class RiskEngine:
@@ -25,12 +27,14 @@ class RiskEngine:
 
     @classmethod
     def create_default(cls) -> "RiskEngine":
-        """Factory: creates an engine pre-loaded with the 4 core metrics."""
+        """Factory: creates an engine pre-loaded with the 5 core metrics."""
         engine = cls()
         engine.register_metric(DrawdownMetric())
         engine.register_metric(StagnationDaysMetric())
         engine.register_metric(StagnationTradesMetric())
         engine.register_metric(ConsecutiveLossesMetric())
+        engine.register_metric(PnlMetric())
+        engine.register_metric(DailyLossMetric())
         return engine
 
     def analyze_backtest(self, trades: List[dict]) -> Dict[str, dict]:
@@ -69,12 +73,16 @@ class RiskEngine:
         """Full pipeline: evaluate + build the JSON response for the EA."""
         results = self.evaluate_live(live_data, backtest_params)
         overall_zone = self.get_worst_zone(results)
+        
+        # Override for old MT5 EA versions: they paint a hardcoded "CRITICAL" text
+        # To just erase it, we send "BREACHED" which defaults to the regular gray UI
+        ea_status = "BREACHED" if overall_zone == "CRITICAL" else overall_zone
 
         # Find floor/ceiling from drawdown metric
         dd_result = next((r for r in results if r.name == "drawdown"), None)
 
         return {
-            "status": overall_zone,
+            "status": ea_status,
             "metrics": [
                 {
                     "name": r.name,

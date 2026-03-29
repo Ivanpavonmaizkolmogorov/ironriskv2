@@ -14,6 +14,7 @@ class HeartbeatRequest(BaseModel):
     consecutive_losses: int = 0
     stagnation_days: int = 0
     stagnation_trades: int = 0
+    floating_by_magic: Optional[dict[str, float]] = None  # v46: per-magic floating PnL
 
 
 class MetricStatus(BaseModel):
@@ -34,3 +35,21 @@ class HeartbeatResponse(BaseModel):
     max_drawdown_limit: float = 0.0
     daily_loss_limit: float = 0.0
     risk_config: Optional[dict] = None
+    risk_context: Optional[dict] = None
+    portfolio_equity: Optional[float] = None
+
+
+class SyncTradeRequest(BaseModel):
+    """A single closed trade sent by the EA."""
+    ticket: int
+    magic_number: int
+    symbol: str
+    volume: float
+    profit: float
+    close_time: int  # MT5 time is Unix timestamp
+
+
+class SyncTradesPayload(BaseModel):
+    """Payload to batch-sync recently closed trades."""
+    api_token: str
+    trades: List[SyncTradeRequest]

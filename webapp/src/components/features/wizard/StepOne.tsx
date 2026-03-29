@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useWizardStore } from "@/store/useWizardStore";
@@ -10,6 +11,8 @@ import type { TradingAccount } from "@/types/tradingAccount";
 import BatchImportModal from "./BatchImportModal";
 
 export default function StepOne() {
+  const searchParams = useSearchParams();
+  const urlAccountId = searchParams.get("accountId");
   const { stepOneData, updateStepOne, setStep } = useWizardStore();
   const [accounts, setAccounts] = useState<TradingAccount[]>([]);
   const [showBatch, setShowBatch] = useState(false);
@@ -17,11 +20,13 @@ export default function StepOne() {
   useEffect(() => {
     tradingAccountAPI.list().then(res => {
       setAccounts(res.data);
-      if (res.data.length > 0 && !stepOneData.tradingAccountId) {
+      if (urlAccountId) {
+         updateStepOne({ tradingAccountId: urlAccountId });
+      } else if (res.data.length > 0 && !stepOneData.tradingAccountId) {
         updateStepOne({ tradingAccountId: res.data[0].id });
       }
     }).catch(console.error);
-  }, [stepOneData.tradingAccountId, updateStepOne]);
+  }, [urlAccountId, stepOneData.tradingAccountId, updateStepOne]);
 
   const canProceed = stepOneData.name.trim().length > 0 && stepOneData.tradingAccountId.length > 0;
 
@@ -36,6 +41,10 @@ export default function StepOne() {
         <label className="text-sm font-medium text-iron-200">Trading Account <span className="text-risk-red">*</span></label>
         {accounts.length === 0 ? (
           <p className="text-amber-400 text-sm py-2">No trading accounts. Please create one in Trading Accounts first.</p>
+        ) : urlAccountId ? (
+          <div className="w-full bg-surface-tertiary/50 border border-iron-800 rounded-lg px-4 py-2.5 text-iron-400 cursor-not-allowed">
+            {accounts.find(a => a.id === urlAccountId)?.name || "Loading workspace..."} (Locked)
+          </div>
         ) : (
           <select 
             value={stepOneData.tradingAccountId}

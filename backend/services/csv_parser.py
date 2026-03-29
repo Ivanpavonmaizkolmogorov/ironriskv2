@@ -121,10 +121,19 @@ def parse_csv(file_content: bytes, column_mapping: dict | None = None) -> Tuple[
         worst_daily_loss = abs(min(daily_pnl.values()))
     logger.info(f"Worst daily loss: {worst_daily_loss:.2f}")
 
+    # Extract last trade date for start_date default
+    last_trade_date = None
+    for t in reversed(trades):
+        d = t.get("exit_time") or t.get("date")
+        if d:
+            last_trade_date = d
+            break
+
     summary = {
         "total_trades": len(trades),
         "net_profit": float(np.sum(pnls)),
         "worst_daily_loss": worst_daily_loss,
+        "last_trade_date": last_trade_date,
         "gauss_params": gauss_params,
         "equity_curve": [
             {

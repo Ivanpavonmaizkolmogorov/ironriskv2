@@ -1,0 +1,144 @@
+{
+  "metrics": {
+    "max_drawdown": {
+      "label": "Maximum Drawdown",
+      "tableLabel": "Max DD",
+      "tooltip": "The largest historical drop in equity from the highest peak to the lowest trough.",
+      "chartGuide": "The bell curve shows the probability of different drawdown depths. If the current bar is to the right of the curve, the strategy is in statistically unexplored territory."
+    },
+    "ev": {
+      "label": "Expectancy",
+      "tableLabel": "Expectancy",
+      "tooltip": "Mathematical average expected return for each completed trade (Net Profit / Total Trades).",
+      "chartGuide": "Returns mathematical yield per trade. A Weibull distribution model is not applicable in this view."
+    },
+    "daily_loss": {
+      "label": "Daily Loss Limit",
+      "tableLabel": "Daily Loss",
+      "tooltip": "The maximum loss suffered during a single trading day.",
+      "chartGuide": "Theoretical probability of reaching certain daily loss ranges. Vital for adjusting Daily Drawdown limits for Prop Firm evaluation tests."
+    },
+    "stagnation_days": {
+      "label": "Stagnation (Days)",
+      "tableLabel": "Stag Days",
+      "tooltip": "The longest period (in days) the strategy has taken to recover to a new all-time high in profit.",
+      "chartGuide": "The distribution predicts how many days equity usually remains stagnant before recovering. Fat tails imply months in temporal Drawdown."
+    },
+    "stagnation_trades": {
+      "label": "Stagnation (Trades)",
+      "tableLabel": "Stag Trds",
+      "tooltip": "Maximum number of trades executed during a Drawdown phase before reaching a new historical peak.",
+      "chartGuide": "Reflects how many statistical 'shots' it costs on average to get out of a hole. Helps distinguish if a strategy is broken or just needs more trades to recover."
+    },
+    "consecutive_losses": {
+      "label": "Consecutive Losses",
+      "tableLabel": "Consec L.",
+      "tooltip": "The maximum number of back-to-back losing trades.",
+      "chartGuide": "Risk of losing streaks. The model estimates the probability of suffering N losses in a row, which is crucial to avoid blowing up the account."
+    },
+    "live_max_drawdown": {
+      "label": "Live Drawdown",
+      "tableLabel": "Live DD",
+      "tooltip": "The exact Drawdown you are currently experiencing, measured from the last all-time high of the account."
+    },
+    "live_daily_loss": {
+      "label": "Live Daily Loss",
+      "tableLabel": "Live Daily Loss",
+      "tooltip": "Your accumulated loss for today's calendar day (closed + floating). The counter resets exactly at midnight (UTC)."
+    },
+    "live_stagnation_days": {
+      "label": "Live Stag. Days",
+      "tableLabel": "Live Stag Days",
+      "tooltip": "The consecutive days you have been stuck in a relative drawdown since the last all-time high."
+    },
+    "live_stagnation_trades": {
+      "label": "Live Stag. Trades",
+      "tableLabel": "Live Stag Trds",
+      "tooltip": "The amount of live trades executed sequentially without having achieved a new profit peak yet."
+    },
+    "live_consecutive_losses": {
+      "label": "Live Consecutive Losses",
+      "tableLabel": "Live Consec L.",
+      "tooltip": "The ongoing streak of losing trades accumulated up to this exact moment."
+    }
+  },
+  "connection": {
+    "api_label": "API",
+    "ea_label": "EA",
+    "api_tooltip": "Server Status. Indicates if the web dashboard can reach the IronRisk API in real-time.",
+    "ea_tooltip": "Expert Advisor (EA) Heartbeat. Shows how long ago MetaTrader 5 successfully sent the live risk telemetry you are seeing."
+  },
+  "workspaceSettings": {
+    "title": "Workspace Settings",
+    "subtitle": "Global configuration for the {account} account. Applies to all EAs you use.",
+    "masterRiskTitle": "MASTER RISK ENFORCEMENTS",
+    "masterRiskDesc": "Enabling a limit here forces all EAs in this account to evaluate that risk. Disabling it shuts off risk scrutiny ACROSS the whole account (overriding any individual strategy settings).",
+    "templateTitle": "MT5 DASHBOARD TEMPLATE (MASTER)"
+  },
+  "thankYou": {
+    "title": "You're on the list!",
+    "desc": "Thank you for joining the IronRisk waitlist. We'll notify you via email as soon as Closed Beta spots become available.",
+    "button": "Return Home"
+  },
+  "workspaceManager": {
+    "pageTitle": "Your Workspaces",
+    "pageDesc": "Each trading account acts as an isolated workspace with its own API token and strategies.",
+    "title": "Trading Accounts",
+    "downloadEA": "Download Dashboard EA (v55)",
+    "description": "Create a virtual container for each of your MetaTrader terminals (e.g., \"FTMO 100k\"). Each account gets its own unique connection API token.",
+    "newAccount": "New Account",
+    "placeholderName": "Account Name (e.g., My FTMO)",
+    "placeholderBroker": "Broker (optional)",
+    "placeholderActNo": "MT5 Account Number (optional)",
+    "btnCreate": "Create Account",
+    "actBroker": "Broker",
+    "actNumber": "Act No",
+    "actToken": "Token",
+    "btnEnter": "Enter Workspace",
+    "btnEntering": "Entering Sector...",
+    "btnCopy": "Copy Token",
+    "btnDelete": "Delete Account",
+    "confirmDeleteTitle": "⚠️ Delete Account?",
+    "confirmDeleteDesc": "This action is completely IRREVERSIBLE. Are you sure you want to delete this account AND all its strategies?",
+    "copied": "Token copied to clipboard",
+    "loadingBtn": "Entering Sector...",
+    "emptyState": "No active trading accounts. Create one to get started.",
+    "archived": "Archived",
+    "logout": "Logout",
+    "navWorkspaces": "← Workspaces",
+    "btnSettings": "⚙️ Settings",
+    "btnNewStrategy": "+ New Strategy",
+    "tokenLabel": "Token:",
+    "cardBacktest": "Backtest",
+    "cardPortfolioBacktest": "Portfolio Backtest",
+    "tradesCount": "trades",
+    "liveSince": "LIVE SINCE:",
+    "tooltipStartDate": "Boundary date: trades after this are considered Live",
+    "warningExcluded": "⚠️ {count} real trades excluded by start_date",
+    "warningNoTradesAdjust": "⚠️ {count} real trades excluded — adjust start_date",
+    "waitingLive": "No live trades yet — waiting for EA sync",
+    "loadingLive": "Loading live data...",
+    "cardDistribution": "Distribution",
+    "clickMetricDist": "Click a metric to see its distribution",
+    "generatingDist": "Generating Theory Distribution...",
+    "generatingDistHover": "Loading...",
+    "cardRiskMetrics": "Risk Metrics",
+    "liveBadge": "LIVE",
+    "maxBadge": "MAX:"
+  },
+  "charts": {
+    "interactive": {
+      "value": "Value",
+      "bin": "Bin",
+      "probDensity": "Prob. Density",
+      "probWorseX": "Prob. Worse > X",
+      "empFreq": "Empirical Freq",
+      "empWorseX": "Emp. Worse > X",
+      "fit": "Fit",
+      "empirical": "Empirical",
+      "current": "Current",
+      "loading": "Fetching Mathematical Matrix...",
+      "noData": "No interactive data generated"
+    }
+  }
+}

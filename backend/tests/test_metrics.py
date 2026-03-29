@@ -88,7 +88,7 @@ class TestStagnationTradesMetric:
 class TestRiskEngine:
     def test_create_default(self):
         engine = RiskEngine.create_default()
-        assert len(engine._metrics) == 4
+        assert len(engine._metrics) == 6
 
     def test_analyze_backtest(self):
         engine = RiskEngine.create_default()
@@ -98,6 +98,8 @@ class TestRiskEngine:
         assert "ConsecutiveLossesMetric" in params
         assert "StagnationDaysMetric" in params
         assert "StagnationTradesMetric" in params
+        assert "PnlMetric" in params
+        assert "DailyLossMetric" in params
 
     def test_build_live_response(self):
         engine = RiskEngine.create_default()
@@ -116,7 +118,7 @@ class TestRiskEngine:
         assert "metrics" in response
         assert "floor_level" in response
         assert "ceiling_level" in response
-        assert len(response["metrics"]) == 4
+        assert len(response["metrics"]) == 6
 
     def test_worst_zone(self):
         engine = RiskEngine.create_default()

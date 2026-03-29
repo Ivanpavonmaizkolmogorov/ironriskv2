@@ -9,7 +9,7 @@ interface StrategyState {
   selectedStrategy: Strategy | null;
   isLoading: boolean;
   error: string | null;
-  fetchStrategies: () => Promise<void>;
+  fetchStrategies: (accountId?: string, silent?: boolean) => Promise<void>;
   selectStrategy: (id: string) => void;
   deleteStrategy: (id: string) => Promise<void>;
   updateStrategy: (id: string, data: Partial<Strategy>) => Promise<boolean>;
@@ -21,15 +21,27 @@ export const useStrategyStore = create<StrategyState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  fetchStrategies: async () => {
-    set({ isLoading: true, error: null });
+  fetchStrategies: async (accountId?: string, silent = false) => {
+    if (!silent) set({ isLoading: true, error: null });
     try {
-      const res = await strategyAPI.list();
+      const res = await strategyAPI.list(accountId);
       const strategies = res.data;
       set({ strategies, isLoading: false });
+      
+      const currentSelected = get().selectedStrategy;
       // Auto-select first if none selected
-      if (!get().selectedStrategy && strategies.length > 0) {
+      if (!currentSelected && strategies.length > 0) {
         set({ selectedStrategy: strategies[0] });
+      } else if (currentSelected) {
+        // Update the selected strategy with fresh data
+        const updatedSelected = strategies.find((s: Strategy) => s.id === currentSelected.id);
+        if (updatedSelected) {
+          set({ selectedStrategy: updatedSelected });
+        } else if (strategies.length > 0) {
+          set({ selectedStrategy: strategies[0] });
+        } else {
+          set({ selectedStrategy: null });
+        }
       }
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Failed to load strategies";

@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta, timezone
 
 from jose import jwt, JWTError
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -11,16 +11,21 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from models.database import get_db, get_settings
 from models.user import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    """Hash password using raw bcrypt (passlib has version conflicts)."""
+    pwd_bytes = password[:72].encode("utf-8")
+    return bcrypt.hashpw(pwd_bytes, bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    """Verify password using raw bcrypt."""
+    try:
+        return bcrypt.checkpw(plain[:72].encode("utf-8"), hashed.encode("utf-8"))
+    except Exception:
+        return False
 
 
 def create_jwt(user_id: str, email: str) -> str:

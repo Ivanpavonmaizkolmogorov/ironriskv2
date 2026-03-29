@@ -35,6 +35,11 @@ interface WizardState {
   updateStepThree: (data: Partial<StepThreeData>) => void;
   submitStrategy: (columnMapping?: Record<string, string>) => Promise<string | null>;
   reset: () => void;
+  // Global Batch Import State
+  isBatchImporting: boolean;
+  batchProgress: { done: number; total: number };
+  setIsBatchImporting: (isImporting: boolean) => void;
+  setBatchProgress: (progress: { done: number; total: number } | ((prev: { done: number; total: number }) => { done: number; total: number })) => void;
 }
 
 const initialState = {
@@ -44,6 +49,8 @@ const initialState = {
   stepThreeData: { maxDrawdown: 0, dailyLoss: 0 },
   isSubmitting: false,
   error: null,
+  isBatchImporting: false,
+  batchProgress: { done: 0, total: 0 },
 };
 
 export const useWizardStore = create<WizardState>((set, get) => ({
@@ -93,4 +100,10 @@ export const useWizardStore = create<WizardState>((set, get) => ({
   },
 
   reset: () => set(initialState),
+  setIsBatchImporting: (isImporting) => set({ isBatchImporting: isImporting }),
+  setBatchProgress: (progress) =>
+    set((state) => ({
+      batchProgress:
+        typeof progress === "function" ? progress(state.batchProgress) : progress,
+    })),
 }));

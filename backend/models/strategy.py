@@ -33,11 +33,18 @@ class Strategy(Base):
     # Equity curve data for charts — JSON array
     equity_curve: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
 
-    # Gaussian distribution params for the bell chart
+    # Gaussian distribution params for the bell chart (DEPRECATED → distribution_fit)
     gauss_params: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
+
+    # Statistical fit results — output of DistributionAnalyzer.analyze_strategy()
+    # Keys are metric names, values are FitResult.to_dict()
+    distribution_fit: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
 
     # Risk configuration — which variables to monitor and their limits
     risk_config: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
+
+    # UI Configuration for the MT5 Dashboard
+    dashboard_layout: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
 
     # Trade count for stats
     total_trades: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
