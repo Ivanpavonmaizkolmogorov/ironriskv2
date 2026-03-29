@@ -33,16 +33,10 @@ logger = logging.getLogger(__name__)
 # Default neutral prior for a new bot with no track record
 DEFAULT_PRIOR = 0.5
 
-# How much the prior increases after each HWM recovery
-PRIOR_REWARD = 0.05
-
-# Maximum prior (can never reach 1.0 — always some doubt)
-MAX_PRIOR = 0.95
-
 # Maximum posterior (the system NEVER reaches 100% confidence, even with perfect data)
 MAX_POSTERIOR = 0.85
 
-# Minimum live trades required to compute a meaningful credibility interval
+# Minimum trades required to compute a meaningful credibility interval
 MIN_TRADES_FOR_CI = 30
 
 
@@ -184,13 +178,10 @@ class BayesEngine:
 
         P(A|B,C,...) = Product(P(xi|A)) * P(A) / P(B,C,...)
         Using Naive Bayes independence assumption.
+        
+        Prior is FIXED (user-configurable). All information enters
+        through the evidence (likelihoods). No HWM bonus.
         """
-        # Evolve prior based on HWM recovery track record
-        evolved_prior = min(
-            prior + hwm_recoveries * PRIOR_REWARD,
-            MAX_PRIOR,
-        )
-
         likelihoods: dict[str, float] = {}
         evidence_values: dict[str, float] = {}
 
@@ -208,8 +199,8 @@ class BayesEngine:
             ci = self.compute_credibility_interval(trades_pnl or [], confidence=ci_confidence)
             ev_zero = bool(ci["lower"] <= 0 <= ci["upper"]) if ci else None
             return BayesResult(
-                prior=evolved_prior,
-                posterior=evolved_prior,
+                prior=prior,
+                posterior=prior,
                 p_evidence=0.5,
                 p_likelihood=1.0,
                 p_null=0.5,
@@ -231,13 +222,13 @@ class BayesEngine:
         product_likelihood_not_a = 0.5 ** len(likelihoods)
 
         # Bayes theorem
-        numerator = product_likelihood_a * evolved_prior
-        denominator = numerator + product_likelihood_not_a * (1.0 - evolved_prior)
+        numerator = product_likelihood_a * prior
+        denominator = numerator + product_likelihood_not_a * (1.0 - prior)
 
         if denominator > 0:
             posterior = numerator / denominator
         else:
-            posterior = evolved_prior
+            posterior = prior
 
         posterior = max(min(posterior, max_posterior), 0.0001)
 
@@ -249,7 +240,7 @@ class BayesEngine:
             ev_zero = bool(ci["lower"] <= 0 <= ci["upper"])
 
         return BayesResult(
-            prior=evolved_prior,
+            prior=prior,
             posterior=posterior,
             p_evidence=denominator if denominator > 0 else 0.5,
             p_likelihood=product_likelihood_a,
