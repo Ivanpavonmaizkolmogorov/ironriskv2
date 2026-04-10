@@ -16,6 +16,7 @@ class PortfolioUpdate(BaseModel):
     name: Optional[str] = None
     strategy_ids: Optional[List[str]] = None
     risk_config: Optional[dict] = None
+    start_date: Optional[str] = None
 
 
 class PortfolioResponse(BaseModel):
@@ -26,6 +27,7 @@ class PortfolioResponse(BaseModel):
     strategy_ids: List[str]
     auto_include_new: bool
     is_default: bool
+    start_date: Optional[str] = None
     equity_curve: Optional[list] = None
     gauss_params: Optional[dict] = None
     distribution_fit: Optional[dict] = None

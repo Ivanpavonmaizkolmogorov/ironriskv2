@@ -1,8 +1,8 @@
 """Pydantic schemas for Trading Accounts requests/responses."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class CreateTradingAccountRequest(BaseModel):
@@ -19,7 +19,17 @@ class TradingAccountResponse(BaseModel):
     api_token: str
     is_active: bool
     default_dashboard_layout: Optional[dict] = None
+    theme: Optional[str] = None
+    has_connected: bool = False
+    last_heartbeat_at: Optional[datetime] = None
     created_at: datetime
+
+    @field_validator("last_heartbeat_at", "created_at", mode="before")
+    @classmethod
+    def ensure_tz(cls, v: Any) -> Any:
+        if isinstance(v, datetime) and v.tzinfo is None:
+            return v.replace(tzinfo=timezone.utc)
+        return v
 
     class Config:
         from_attributes = True
@@ -32,3 +42,5 @@ class RevokeTradingAccountRequest(BaseModel):
 class UpdateWorkspaceSettingsRequest(BaseModel):
     """Schema for updating workspace-level settings (El Padre)."""
     default_dashboard_layout: Optional[Any] = None
+    theme: Optional[str] = None
+    name: Optional[str] = None

@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -9,20 +10,7 @@ import { strategyAPI, portfolioAPI } from "@/services/api";
 import { useStrategyStore } from "@/store/useStrategyStore";
 import { useWizardStore } from "@/store/useWizardStore";
 
-/* ─────────────────── Column mapping config (shared with StepTwo) ─────── */
-const MAPPING_FIELDS = [
-  { key: "profit", label: "Profit", required: true, hint: "e.g. Profit, Beneficio, PnL" },
-  { key: "commission", label: "Commission", required: false, hint: "e.g. Commission, Comisión" },
-  { key: "swap", label: "Swap", required: false, hint: "e.g. Swap" },
-  { key: "exit_time", label: "Exit Time", required: false, hint: "e.g. Close Time, Date" },
-] as const;
-
-const AUTO_DETECT: Record<string, string[]> = {
-  profit: ["profit", "beneficio", "pnl", "net_profit"],
-  commission: ["commission", "comision", "comisión"],
-  swap: ["swap"],
-  exit_time: ["exit_time", "close_time", "date", "exit_date", "close_date", "time", "fecha"],
-};
+import CsvColumnMapper, { autoDetectMapping } from "@/components/ui/CsvColumnMapper";
 
 /* ─────────────────── Types ─────────────────────────────────────────────── */
 interface FileEntry {
@@ -66,18 +54,7 @@ function countRows(text: string): number {
   return Math.max(0, text.split("\n").filter((l) => l.trim().length > 0).length - 1);
 }
 
-/** Auto-detect column mapping from headers */
-function autoDetect(headers: string[]): Record<string, string> {
-  const mapping: Record<string, string> = {};
-  const normalized = headers.map((h) =>
-    h.trim().replace(/['"]/g, "").replace(/\s+/g, "_").toLowerCase()
-  );
-  for (const [field, aliases] of Object.entries(AUTO_DETECT)) {
-    const idx = normalized.findIndex((h) => aliases.includes(h));
-    if (idx >= 0) mapping[field] = headers[idx];
-  }
-  return mapping;
-}
+
 
 /* ─────────────────── Component ─────────────────────────────────────────── */
 export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: BatchImportModalProps) {
@@ -97,6 +74,11 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [existingMagics, setExistingMagics] = useState<Set<number>>(new Set());
   const cancelRef = useRef(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fetch existing strategies to detect duplicates
   useEffect(() => {
@@ -139,7 +121,7 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
         if (loaded === 0) {
           firstHeaders = headers;
           setCsvHeaders(headers);
-          setColumnMapping(autoDetect(headers));
+          setColumnMapping(autoDetectMapping(headers));
         }
 
         newEntries.push({
@@ -263,10 +245,10 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <div className="w-full max-w-3xl max-h-[90vh] flex flex-col bg-surface-primary border border-iron-700 rounded-2xl shadow-2xl overflow-hidden">
         {/* Header (Sticky) */}
         <div className="bg-surface-primary border-b border-iron-800 px-6 py-4 flex flex-col justify-center shadow-sm z-10 shrink-0">
@@ -343,53 +325,11 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
           {/* ════════════════ STAGE 2: COLUMN MAPPING ════════════════ */}
           {stage === "map" && (
             <>
-              <div className="bg-surface-secondary border border-iron-700 rounded-xl p-5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-iron-200">
-                    📋 Column Mapping
-                  </h3>
-                  <span className="text-xs text-iron-500">
-                    {csvHeaders.length} columns detected ·{" "}
-                    {isProfitMapped ? "✓ Ready" : "⚠ Map Profit column"}
-                  </span>
-                </div>
-
-                {MAPPING_FIELDS.map(({ key, label, required, hint }) => (
-                  <div key={key} className="flex items-center gap-3">
-                    <div className="w-32 shrink-0">
-                      <span
-                        className={`text-sm font-medium ${
-                          required ? "text-iron-100" : "text-iron-400"
-                        }`}
-                      >
-                        {label}
-                        {required && (
-                          <span className="text-risk-red ml-1">*</span>
-                        )}
-                      </span>
-                      <p className="text-xs text-iron-600">{hint}</p>
-                    </div>
-                    <select
-                      value={columnMapping[key] || ""}
-                      onChange={(e) => updateMapping(key, e.target.value)}
-                      className={`flex-1 bg-surface-tertiary border rounded-lg px-3 py-2 text-sm text-iron-100 focus:outline-none focus:ring-1 transition-colors ${
-                        columnMapping[key]
-                          ? "border-risk-green/40 focus:ring-risk-green/30"
-                          : "border-iron-700 focus:ring-iron-500"
-                      }`}
-                    >
-                      <option value="">
-                        — {required ? "Select column" : "Skip (optional)"} —
-                      </option>
-                      {csvHeaders.map((h) => (
-                        <option key={h} value={h}>
-                          {h}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
-              </div>
+              <CsvColumnMapper
+                csvHeaders={csvHeaders}
+                initialMapping={columnMapping}
+                onMappingChange={(map) => setColumnMapping(map)}
+              />
 
               {/* Files summary */}
               <div className="text-sm text-iron-400">
@@ -399,23 +339,6 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
                 </span>
               </div>
 
-              <div className="sticky -bottom-6 bg-surface-primary p-4 border-t border-iron-800 -mx-6 -mb-6 flex justify-between z-10 shadow-[0_-10px_15px_rgba(0,0,0,0.3)]">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setStage("drop");
-                    setEntries([]);
-                  }}
-                >
-                  ← Back
-                </Button>
-                <Button
-                  onClick={() => setStage("preview")}
-                  disabled={!isProfitMapped}
-                >
-                  Next → Preview
-                </Button>
-              </div>
             </>
           )}
 
@@ -558,54 +481,78 @@ export default function BatchImportModal({ isOpen, onClose, tradingAccountId }: 
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="sticky -bottom-6 bg-surface-primary p-4 border-t border-iron-800 -mx-6 -mb-6 flex justify-between z-10 shadow-[0_-10px_15px_rgba(0,0,0,0.3)]">
-                <Button
-                  variant="ghost"
-                  onClick={() => setStage("map")}
-                  disabled={isImporting}
-                >
-                  ← Mapping
-                </Button>
-                <div className="flex gap-3">
-                  {isImporting && !allDone && (
-                    <Button
-                      variant="ghost"
-                      className="text-risk-red hover:bg-risk-red/10 border border-risk-red/30"
-                      onClick={() => { cancelRef.current = true; }}
-                    >
-                      ⏹ Cancel
-                    </Button>
-                  )}
-                  {allDone ? (
-                    <Button
-                      onClick={() => {
-                        handleClose();
-                        router.push("/dashboard");
-                      }}
-                    >
-                      Go to Dashboard →
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleImportAll}
-                      disabled={
-                        isImporting ||
-                        entries.length === 0 ||
-                        entries.every((e) => !e.name.trim())
-                      }
-                      isLoading={isImporting}
-                    >
-                      🚀 Import {entries.filter((e) => e.status !== "done").length}{" "}
-                      Strategies
-                    </Button>
-                  )}
-                </div>
-              </div>
             </>
           )}
         </div>
+
+        {/* ════════════════ FOOTERS ════════════════ */}
+        {stage === "map" && (
+          <div className="bg-surface-primary p-4 border-t border-iron-800 flex justify-between shrink-0">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setStage("drop");
+                setEntries([]);
+              }}
+            >
+              ← Back
+            </Button>
+            <Button
+              onClick={() => setStage("preview")}
+              disabled={!isProfitMapped}
+            >
+              Next → Preview
+            </Button>
+          </div>
+        )}
+
+        {stage === "preview" && (
+          <div className="bg-surface-primary p-4 border-t border-iron-800 flex justify-between shrink-0">
+            <Button
+              variant="ghost"
+              onClick={() => setStage("map")}
+              disabled={isImporting}
+            >
+              ← Mapping
+            </Button>
+            <div className="flex gap-3">
+              {isImporting && !allDone && (
+                <Button
+                  variant="ghost"
+                  className="text-risk-red hover:bg-risk-red/10 border border-risk-red/30"
+                  onClick={() => { cancelRef.current = true; }}
+                >
+                  ⏹ Cancel
+                </Button>
+              )}
+              {allDone ? (
+                <Button
+                  onClick={() => {
+                    handleClose();
+                    router.push(`/dashboard/account/${tradingAccountId}`);
+                  }}
+                >
+                  Go to Account →
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleImportAll}
+                  disabled={
+                    isImporting ||
+                    entries.length === 0 ||
+                    entries.every((e) => !e.name.trim())
+                  }
+                  isLoading={isImporting}
+                >
+                  🚀 Import {entries.filter((e) => e.status !== "done").length}{" "}
+                  Strategies
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

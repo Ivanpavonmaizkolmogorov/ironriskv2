@@ -61,7 +61,9 @@ def render_metric_chart(fit: FitResult, current_val: float = None, width=420, he
 
     # Mark current value - skip if None
     if current_val is not None:
-        ax.axvline(x=current_val, color=curr_col, linestyle='--', linewidth=2, label=f'Current: {current_val:.1f}')
+        p_val = fit.percentile(current_val)
+        
+        ax.axvline(x=current_val, color=curr_col, linestyle='--', linewidth=2, label=f'Current: {current_val:.1f} (P{p_val})')
         xlim = ax.get_xlim()
         
         if current_val > xlim[1]:
@@ -69,7 +71,7 @@ def render_metric_chart(fit: FitResult, current_val: float = None, width=420, he
             xlim = ax.get_xlim()
         
         ha = 'left' if current_val < xlim[0] + (xlim[1]-xlim[0])*0.7 else 'right'
-        ax.text(current_val, ax.get_ylim()[1]*0.9, f' {current_val:.1f} ', color=curr_col, 
+        ax.text(current_val, ax.get_ylim()[1]*0.9, f' {current_val:.1f} (P{p_val}) ', color=curr_col, 
                 fontsize=9, fontweight='bold', ha=ha)
     
     ax.set_ylabel('Density', color=text_col, fontsize=8)

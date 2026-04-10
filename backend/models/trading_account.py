@@ -34,6 +34,13 @@ class TradingAccount(Base):
 
     # UI Configuration for the MT5 Dashboard (Master Template for all workspace EAs)
     default_dashboard_layout: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
+    
+    # Optional workspace-specific flavor override
+    theme: Mapped[str | None] = mapped_column(String(50), nullable=True)
+
+    last_heartbeat_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
@@ -44,3 +51,7 @@ class TradingAccount(Base):
     strategies = relationship("Strategy", back_populates="trading_account", cascade="all, delete-orphan")
     portfolios = relationship("Portfolio", back_populates="trading_account", cascade="all, delete-orphan")
     real_trades = relationship("RealTrade", back_populates="trading_account", cascade="all, delete-orphan")
+
+    @property
+    def has_connected(self) -> bool:
+        return self.last_heartbeat_at is not None

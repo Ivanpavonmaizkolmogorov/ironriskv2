@@ -29,9 +29,10 @@ export class MetricFormatter {
   }
 
   private formatWithSpaces(numStr: string): string {
-    // Splits decimal and integer parts, applies space to thousands in integer part
+    // Splits decimal and integer parts, applies non-breaking space (\u00A0) to thousands in integer part
+    // Using \u00A0 prevents the number from wrapping/breaking across lines in the UI
     const parts = numStr.split('.');
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, "\u00A0");
     return parts.join('.');
   }
 

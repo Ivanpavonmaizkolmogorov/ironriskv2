@@ -25,5 +25,11 @@ IronRisk is a multi-language application powered by `next-intl`.
 - **Performance**: Return JSON payloads efficiently. Only return heavy calculation datasets (like equity curves) when expressly requested by the frontend to not lock the UI.
 
 ## 5. Development Philosophy
-- **Object-Oriented Design (OOP)**: Favor centralized registries and dictionaries over duplicated hardcoded values. If five components need a "Max Drawdown" definition, they should read it from a single central source.
+- **Strict Object-Oriented Design (OOP)**: Favor centralized registries and dictionaries over duplicated hardcoded values. If five components need a "Max Drawdown" definition, they should read it from a single central source.
+- **Strict OOP Rules**: 
+  - All business logic must reside within classes (`class`). 
+  - In Frontend: Use service classes for complex logic, not standalone/anonymous functions. 
+  - In Backend: Maintain the existing OOP service pattern. 
+  - **Rule**: If a calculation spans more than 10 lines, encapsulate it within a class method.
+  - **Rule**: Never use standalone functions for domain logic — always use instantiable or static classes.
 - **Non-Intrusive UX**: Tooltips should behave beautifully with dotted underlines instead of giant annoying floating `(i)` icons. 

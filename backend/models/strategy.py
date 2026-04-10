@@ -21,6 +21,17 @@ class Strategy(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=True, default="")
     magic_number: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    
+    # Aliases: additional magic numbers that belong to this same strategy
+    # (e.g., trader reinstalled bot with a different magic)
+    magic_aliases: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
+    
+    @property
+    def all_magic_numbers(self) -> list[int]:
+        """Return primary magic + all aliases. Used for trade filtering."""
+        aliases = self.magic_aliases or []
+        return [self.magic_number] + [int(m) for m in aliases if m != self.magic_number]
+    
     start_date: Mapped[str] = mapped_column(String(20), nullable=True)
 
     # Hard Stops (user-defined pain limits)
@@ -49,6 +60,18 @@ class Strategy(Base):
     # Trade count for stats
     total_trades: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     net_profit: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+
+    # Bayesian backtest discount factor
+    # 1.0 = real account (no discount), 20.0 = backtest/optimization tool
+    bt_discount: Mapped[float] = mapped_column(Float, nullable=False, default=10.0)
+
+    # Risk Multiplier (Factor de Escalado)
+    # Scales all backtest PnL by this factor before any calculation.
+    # Use case: BT done at 0.01 lots, live at 1.0 lot → multiplier = 100.
+    risk_multiplier: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
+
+    # Original (un-scaled) equity curve — preserved so multiplier changes can re-derive
+    original_equity_curve: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

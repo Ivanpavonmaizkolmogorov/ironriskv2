@@ -1,7 +1,7 @@
 /** Strategy Wizard page — 3-step onboarding flow. */
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
@@ -17,15 +17,19 @@ export default function WizardPage() {
   const { isAuthenticated } = useAuthStore();
   const { currentStep, reset } = useWizardStore();
 
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    if (!isAuthenticated) router.push("/login");
-  }, [isAuthenticated, router]);
+    setMounted(true);
+    if (mounted && !isAuthenticated) router.push("/login");
+  }, [isAuthenticated, router, mounted]);
 
   // Reset wizard on mount
   useEffect(() => {
-    reset();
-  }, [reset]);
+    if (mounted) reset();
+  }, [reset, mounted]);
 
+  if (!mounted) return null;
   if (!isAuthenticated) return null;
 
   return (

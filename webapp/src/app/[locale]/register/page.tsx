@@ -4,21 +4,26 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("landing");
+  const isEn = locale === "en";
   const { register, isAuthenticated, isLoading, error, clearError } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [localError, setLocalError] = useState("");
 
   useEffect(() => {
-    if (isAuthenticated) router.push("/dashboard");
-  }, [isAuthenticated, router]);
+    if (isAuthenticated) router.push(`/${locale}/dashboard`);
+  }, [isAuthenticated, router, locale]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,24 +31,32 @@ export default function RegisterPage() {
     setLocalError("");
 
     if (password !== confirmPassword) {
-      setLocalError("Passwords do not match");
+      setLocalError(isEn ? "Passwords do not match" : "Las contraseñas no coinciden");
       return;
     }
     if (password.length < 6) {
-      setLocalError("Password must be at least 6 characters");
+      setLocalError(isEn ? "Password must be at least 6 characters" : "La contraseña debe tener mínimo 6 caracteres");
       return;
     }
-    await register(email, password);
+    await register(email, password, inviteCode);
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6">
+    <main className="min-h-screen flex items-center justify-center px-6 relative">
+      <Link 
+        href={`/${locale}`} 
+        className="absolute top-6 left-6 md:top-8 md:left-8 text-sm text-iron-500 hover:text-iron-300 flex items-center gap-2 transition-colors"
+      >
+        <span>←</span> {isEn ? "Back to Home" : "Volver al inicio"}
+      </Link>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-iron-100">
             IRON<span className="text-risk-green">RISK</span>
           </h1>
-          <p className="text-sm text-iron-500 mt-2">Create your control tower account</p>
+          <p className="text-sm text-iron-500 mt-2">
+            {isEn ? "Create your control tower account" : "Crea tu torre de control"}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -56,21 +69,32 @@ export default function RegisterPage() {
             required
           />
           <Input
-            label="Password"
+            label={t("password")}
             type="password"
-            placeholder="Min 6 characters"
+            placeholder={t("passwordPlaceholder")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
           <Input
-            label="Confirm Password"
+            label={isEn ? "Confirm Password" : "Confirmar Contraseña"}
             type="password"
-            placeholder="••••••••"
+            placeholder={t("passwordPlaceholder")}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
+          
+          <div className="pt-2">
+            <Input
+              label={t("betaCodeLabel")}
+              type="text"
+              placeholder={t("betaCodePlaceholder")}
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              className="border-risk-blue/40 focus:border-risk-blue font-mono"
+            />
+          </div>
 
           {(error || localError) && (
             <div className={`border rounded-lg p-3 ${
@@ -83,28 +107,32 @@ export default function RegisterPage() {
                   ? "text-amber-400"
                   : "text-risk-red"
               }`}>
-                {error || localError}
+                {error?.toLowerCase().includes("invalid beta") || error?.toLowerCase().includes("invalid_invite") ? t("errorInvalidCode") : (error || localError)}
               </p>
               {error?.toLowerCase().includes("already registered") && (
                 <p className="text-sm text-iron-400 mt-2">
-                  You already have an account.{" "}
-                  <Link href="/login" className="text-risk-green hover:underline font-medium">
-                    Sign in here →
+                  {isEn ? "You already have an account." : "Ya tienes una cuenta."}{" "}
+                  <Link href={`/${locale}/login`} className="text-risk-green hover:underline font-medium">
+                    {t("login")} →
                   </Link>
                 </p>
               )}
             </div>
           )}
 
-          <Button type="submit" isLoading={isLoading} className="w-full">
-            Create Account
+          <Button type="submit" isLoading={isLoading} className="w-full mt-2">
+            {t("register")}
           </Button>
+
+          <p className="text-xs text-iron-400 mt-4 text-center leading-relaxed px-2">
+            {t("betaNoCodeMsg")}
+          </p>
         </form>
 
         <p className="text-center text-sm text-iron-500 mt-6">
-          Already have an account?{" "}
-          <Link href="/login" className="text-risk-green hover:underline">
-            Sign in
+          {isEn ? "Already have an account?" : "¿Ya tienes una cuenta?"}{" "}
+          <Link href={`/${locale}/login`} className="text-risk-green hover:underline">
+            {t("login")}
           </Link>
         </p>
       </div>

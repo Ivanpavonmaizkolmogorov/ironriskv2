@@ -5,6 +5,9 @@ from .strategy import Strategy
 from .trading_account import TradingAccount
 from .portfolio import Portfolio
 from .real_trade import RealTrade
+from .user_preferences import UserPreferences
+from .user_theme import UserTheme
+from .user_alerts import UserAlertConfig, UserAlertHistory
 
 __all__ = [
     "Base",
@@ -17,4 +20,8 @@ __all__ = [
     "TradingAccount",
     "Portfolio",
     "RealTrade",
+    "UserPreferences",
+    "UserTheme",
+    "UserAlertConfig",
+    "UserAlertHistory",
 ]

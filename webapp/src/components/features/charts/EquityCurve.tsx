@@ -36,9 +36,11 @@ type EquityVariant = keyof typeof VARIANT_THEMES;
 interface EquityCurveProps {
   data: EquityPoint[];
   variant?: EquityVariant;
+  hideAxes?: boolean;
+  hideTooltip?: boolean;
 }
 
-export default function EquityCurve({ data, variant = "backtest" }: EquityCurveProps) {
+export default function EquityCurve({ data, variant = "backtest", hideAxes = false, hideTooltip = false }: EquityCurveProps) {
   const theme = VARIANT_THEMES[variant];
 
   if (!data || data.length === 0) {
@@ -108,20 +110,24 @@ export default function EquityCurve({ data, variant = "backtest" }: EquityCurveP
               <stop offset="95%" stopColor={theme.color} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#2a2e35" />
-          <XAxis
-             dataKey={xKey}
-            tick={{ fill: "#78828f", fontSize: 11 }}
-            axisLine={{ stroke: "#3e444f" }}
-            tickLine={false}
-          />
-          <YAxis
-            tick={{ fill: "#78828f", fontSize: 11 }}
-            axisLine={{ stroke: "#3e444f" }}
-            tickLine={false}
-            tickFormatter={(v: number) => `$${v.toFixed(0)}`}
-          />
-          <Tooltip content={<CustomTooltip />} />
+          {!hideAxes && <CartesianGrid strokeDasharray="3 3" stroke="#2a2e35" />}
+          {!hideAxes && (
+            <XAxis
+              dataKey={xKey}
+              tick={{ fill: "#78828f", fontSize: 11 }}
+              axisLine={{ stroke: "#3e444f" }}
+              tickLine={false}
+            />
+          )}
+          {!hideAxes && (
+            <YAxis
+              tick={{ fill: "#78828f", fontSize: 11 }}
+              axisLine={{ stroke: "#3e444f" }}
+              tickLine={false}
+              tickFormatter={(v: number) => `$${v.toFixed(0)}`}
+            />
+          )}
+          {!hideTooltip && <Tooltip content={<CustomTooltip />} />}
           <Area
             type="monotone"
             dataKey="equity"

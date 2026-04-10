@@ -1,0 +1,49 @@
+# Frontend (se despliega por separado en Vercel)
+webapp/
+webapp/**
+
+# SQLite local
+*.db
+*.db.bak
+*.sqlite
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+venv/
+backend/venv/
+.pytest_cache/
+
+# Temp/debug files
+*.log
+*.bin
+*.txt
+backend/dump_*.json
+backend/test_*.py
+backend/check_*.py
+backend/migrate_*.py
+backend/rescue_*.py
+backend/cleanup_*.py
+backend/simular_*.py
+backend/analyze_*.py
+backend/extract_*.py
+backend/fix_*.py
+backend/print_*.py
+backend/verify_*.py
+backend/query.py
+backend/temp*.py
+backend/t2.py
+backend/reset_password.py
+backend/_*.py
+
+# Docs
+docs/
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
+.next/

@@ -56,6 +56,7 @@ def _chi2_discrete_test(data: np.ndarray, dist, params: tuple, max_bins: int = 2
 
 
 @register("consecutive_losses")
+@register("stagnation")
 class GeometricDist(DistributionCandidate):
     name = "Geometric"
     scipy_name = "geom"
@@ -72,6 +73,7 @@ class GeometricDist(DistributionCandidate):
 
 
 @register("consecutive_losses")
+@register("stagnation")
 class PoissonDist(DistributionCandidate):
     name = "Poisson"
     scipy_name = "poisson"
@@ -87,6 +89,7 @@ class PoissonDist(DistributionCandidate):
 
 
 @register("consecutive_losses")
+@register("stagnation")
 class NegBinomialDist(DistributionCandidate):
     name = "Negative Binomial"
     scipy_name = "nbinom"

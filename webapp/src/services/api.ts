@@ -25,11 +25,17 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("ironrisk_jwt");
-      // Only redirect if not already on login or register page
-      const path = window.location.pathname;
-      if (path !== "/login" && path !== "/register") {
-        window.location.href = "/login";
+      // If the 401 came from a login or register attempt, let the component handle it (e.g., show "Bad Password" in Simulator modal)
+      const isAuthEndpoint = error.config?.url?.includes("/api/auth/login") || error.config?.url?.includes("/api/auth/register");
+      
+      if (!isAuthEndpoint) {
+        localStorage.removeItem("ironrisk_jwt");
+        // Only redirect if not already on login or register page
+        const path = window.location.pathname;
+        if (!path.includes("/login") && !path.includes("/register")) {
+          // Use Next-intl friendly pathing if possible, or just default root login.
+          window.location.href = "/login";
+        }
       }
     }
     return Promise.reject(error);
@@ -40,11 +46,15 @@ export default api;
 
 // --- Auth endpoints ---
 export const authAPI = {
-  register: (email: string, password: string) =>
-    api.post("/api/auth/register", { email, password }),
+  register: (email: string, password: string, locale: string = "es", invite_code?: string) =>
+    api.post("/api/auth/register", { email, password, locale, invite_code }),
   login: (email: string, password: string) =>
     api.post("/api/auth/login", { email, password }),
   getMe: () => api.get("/api/auth/me"),
+  forgotPassword: (email: string, locale: string = "es") =>
+    api.post("/api/auth/forgot-password", { email, locale }),
+  resetPassword: (token: string, new_password: string) =>
+    api.post("/api/auth/reset-password", { token, new_password }),
 };
 
 // --- Trading Account endpoints ---
@@ -54,7 +64,7 @@ export const tradingAccountAPI = {
   list: () => api.get("/api/trading-accounts/"),
   revoke: (accountId: string) =>
     api.delete(`/api/trading-accounts/${accountId}`),
-  updateSettings: (accountId: string, data: { default_dashboard_layout?: any }) =>
+  updateSettings: (accountId: string, data: { default_dashboard_layout?: any; theme?: string | null; name?: string }) =>
     api.patch(`/api/trading-accounts/${accountId}/settings`, data),
 };
 
@@ -81,42 +91,43 @@ export const strategyAPI = {
     const query = value !== undefined && value !== null ? `?value=${value}` : '';
     return api.get(`/api/strategies/${id}/chart-data/${metric}${query}`);
   },
-  getBayes: (id: string, params?: {
-    override_prior?: number;
-    override_dd?: number;
-    override_daily_loss?: number;
-    override_stag_days?: number;
-    override_stag_trades?: number;
-    override_consec?: number;
-    use_hybrid?: boolean;
-    max_posterior?: number;
-    min_trades_ci?: number;
-    ci_confidence?: number;
-    disabled_metrics?: string;
-  }) => {
+  getBayes: (id: string, params?: Record<string, any>) => {
     const searchParams = new URLSearchParams();
     if (params) {
-      if (params.override_prior !== undefined) searchParams.set('override_prior', String(params.override_prior));
-      if (params.override_dd !== undefined) searchParams.set('override_dd', String(params.override_dd));
-      if (params.override_daily_loss !== undefined) searchParams.set('override_daily_loss', String(params.override_daily_loss));
-      if (params.override_stag_days !== undefined) searchParams.set('override_stag_days', String(params.override_stag_days));
-      if (params.override_stag_trades !== undefined) searchParams.set('override_stag_trades', String(params.override_stag_trades));
-      if (params.override_consec !== undefined) searchParams.set('override_consec', String(params.override_consec));
-      if (params.use_hybrid !== undefined) searchParams.set('use_hybrid', String(params.use_hybrid));
-      if (params.max_posterior !== undefined) searchParams.set('max_posterior', String(params.max_posterior));
-      if (params.min_trades_ci !== undefined) searchParams.set('min_trades_ci', String(params.min_trades_ci));
-      if (params.ci_confidence !== undefined) searchParams.set('ci_confidence', String(params.ci_confidence));
-      if (params.disabled_metrics) searchParams.set('disabled_metrics', params.disabled_metrics);
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          searchParams.set(key, String(value));
+        }
+      });
     }
     const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
     return api.get(`/api/strategies/${id}/bayes${query}`);
   },
+  createFromSimulation: (data: {
+    trading_account_id: string;
+    name: string;
+    magic_number?: number;
+    risk_config?: Record<string, any>;
+    decomposition?: Record<string, any>;
+    risk_suggestions?: Record<string, any>;
+    extracted_stats?: Record<string, any>;
+    equity_curve?: Record<string, any>[];
+    start_date?: string;
+    bt_discount?: number;
+  }) => api.post("/api/strategies/create-from-simulation", data),
+  applyMultiplier: (id: string, risk_multiplier: number) =>
+    api.post(`/api/strategies/${id}/apply-multiplier`, { risk_multiplier }),
+  getTrades: (id: string, limit: number = 50, offset: number = 0) =>
+    api.get(`/api/strategies/${id}/trades?limit=${limit}&offset=${offset}`),
 };
 
 // --- Sandbox: Orphan Magics endpoints ---
 export const orphanAPI = {
   list: (accountId: string) => api.get(`/api/orphans/${accountId}`),
   delete: (orphanId: number) => api.delete(`/api/orphans/${orphanId}`),
+  trades: (accountId: string, magic: number) => api.get(`/api/orphans/${accountId}/trades/${magic}`),
+  link: (accountId: string, magic: number, strategyId: string) =>
+    api.post(`/api/orphans/${accountId}/link/${magic}/${strategyId}`),
 };
 
 // --- Portfolio endpoints ---
@@ -129,6 +140,8 @@ export const portfolioAPI = {
   update: (id: string, data: Partial<import("@/types/strategy").Portfolio>) =>
     api.put(`/api/portfolios/${id}`, data),
   delete: (id: string) => api.delete(`/api/portfolios/${id}`),
+  getTrades: (id: string, limit: number = 50, offset: number = 0) =>
+    api.get(`/api/portfolios/${id}/trades?limit=${limit}&offset=${offset}`),
   getChart: (id: string, metric: string, value?: number) => {
     const query = value !== undefined && value !== null ? `?value=${value}` : '';
     return api.get(`/api/portfolios/${id}/chart/${metric}${query}`, {
@@ -139,4 +152,38 @@ export const portfolioAPI = {
     const query = value !== undefined && value !== null ? `?value=${value}` : '';
     return api.get(`/api/portfolios/${id}/chart-data/${metric}${query}`);
   },
+  getBayes: (id: string, params?: Record<string, any>) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          searchParams.set(key, String(value));
+        }
+      });
+    }
+    const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return api.get(`/api/portfolios/${id}/bayes${query}`);
+  },
+};
+
+// --- User Preferences & Theme endpoints ---
+export const preferencesAPI = {
+  getPreferences: () => api.get("/api/user/preferences"),
+  updateTheme: (theme: string, applyToAll: boolean = false) => 
+    api.patch("/api/user/preferences/theme", { theme, apply_to_all_workspaces: applyToAll }),
+  getThemes: () => api.get("/api/user/themes"),
+  createCustomTheme: (data: { label: string, mode: string, colors: Record<string, string> }) => 
+    api.post("/api/user/themes/custom", data),
+  updateCustomTheme: (id: string, data: { label: string, mode: string, colors: Record<string, string> }) => 
+    api.put(`/api/user/themes/custom/${id}`, data),
+  deleteCustomTheme: (id: string) => 
+    api.delete(`/api/user/themes/custom/${id}`),
+};
+
+// --- Admin endpoints ---
+export const adminAPI = {
+  listUsers: () => api.get('/api/admin/users'),
+  deleteUser: (userId: string) => api.delete(`/api/admin/users/${userId}`),
+  updateUser: (userId: string, data: { is_admin?: boolean, password?: string }) =>
+    api.patch(`/api/admin/users/${userId}`, data),
 };

@@ -1,0 +1,2 @@
+EXCEL: 152 trades, Comm=-2805.07, Swap=460.65, Profit=24479.87, TOTAL=22135.45
+HTML: 152 trades, Comm=-2805.07, Swap=460.65, Profit=24479.87, TOTAL=22135.45

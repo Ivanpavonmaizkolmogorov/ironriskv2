@@ -2,30 +2,37 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useWizardStore } from "@/store/useWizardStore";
 import { useStrategyStore } from "@/store/useStrategyStore";
 import { usePortfolioStore } from "@/store/usePortfolioStore";
+import { useThemeStore } from "@/store/useThemeStore";
 import { metricFormatter } from "@/utils/MetricFormatter";
 import { strategyAPI, tradingAccountAPI, portfolioAPI } from "@/services/api";
 import type { TradingAccount } from "@/types/tradingAccount";
 import type { EquityPoint } from "@/types/strategy";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import ThemeSelector from "@/components/features/ThemeSelector";
 import StrategyTable from "@/components/features/StrategyTable";
 import EditStrategyModal from "@/components/features/EditStrategyModal";
 import WorkspaceSettingsModal from "@/components/features/WorkspaceSettingsModal";
 import EquityCurve from "@/components/features/charts/EquityCurve";
 import OrphanInbox from "@/components/features/OrphanInbox";
-import { useTranslations } from "next-intl";
+import PactBanner from "@/components/features/PactBanner";
+import { useTranslations, useLocale } from "next-intl";
 import MetricTooltip from "@/components/ui/MetricTooltip";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import { ALL_TABLE_VIEWS, BacktestView, type TableViewDef } from "@/components/features/tableConfigs";
+import { DASHBOARD_VIEWS } from "@/components/features/dashboard/dashboardViewConfigs";
+import type { DashboardContext } from "@/components/features/dashboard/dashboardViewConfigs";
 import ConnectionStatus from "@/components/ui/ConnectionStatus";
 import { getConnectionMonitor } from "@/services/ConnectionMonitor";
 import InteractiveDistribution from "@/components/features/charts/InteractiveDistribution";
+import AlertsDrawer from "@/components/features/AlertsDrawer";
+import api from "@/services/api";
 
 
 export default function DashboardPage() {
@@ -34,11 +41,14 @@ export default function DashboardPage() {
   const t = useTranslations("metrics");
   const tWorkspace = useTranslations("workspaceManager");
   const accountId = params.id as string;
+  const locale = useLocale();
   const [mounted, setMounted] = useState(false);
   const [account, setAccount] = useState<TradingAccount | null>(null);
   const [copied, setCopied] = useState(false);
   const [chartData, setChartData] = useState<any>(null);
   const [isInteractiveMode, setIsInteractiveMode] = useState<boolean>(false);
+  const { effectiveThemeData } = useThemeStore();
+  const isLightMode = effectiveThemeData?.mode === "light";
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isWorkspaceSettingsOpen, setIsWorkspaceSettingsOpen] = useState(false);
@@ -47,13 +57,56 @@ export default function DashboardPage() {
   const [deleteProgress, setDeleteProgress] = useState<{done: number, total: number} | null>(null);
   const [deletedSuccess, setDeletedSuccess] = useState<string | null>(null);
 
+  // Global alerts
+  const [isGlobalAlertsOpen, setIsGlobalAlertsOpen] = useState(false);
+  const [alertCount, setAlertCount] = useState(0);
+  const [telegramLinked, setTelegramLinked] = useState(true); // optimistic default
+
+  const searchParams = useSearchParams();
+
   // Table View Engine state
   const [tableView, setTableView] = useState<TableViewDef>(BacktestView);
+
+  // Dashboard Top-Level View Engine state
+  const [activeDashboardView, setActiveDashboardView] = useState<string>(searchParams.get("view") || "inspector");
 
   const [checkedPortfolioIds, setCheckedPortfolioIds] = useState<Set<string>>(new Set());
   const [isCreatingPortfolio, setIsCreatingPortfolio] = useState(false);
   const [newPortfolioName, setNewPortfolioName] = useState("");
-  const [activeTab, setActiveTab] = useState<"strategies" | "portfolios">("strategies");
+  const [activeTab, setActiveTab] = useState<"strategies" | "portfolios">((searchParams.get("tab") as any) || "strategies");
+
+  // Keep URL search params in sync so language switcher doesn't lose state
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    let changed = false;
+    
+    if (activeDashboardView !== "inspector" && url.searchParams.get("view") !== activeDashboardView) {
+      url.searchParams.set("view", activeDashboardView);
+      changed = true;
+    } else if (activeDashboardView === "inspector" && url.searchParams.has("view")) {
+      url.searchParams.delete("view");
+      changed = true;
+    }
+
+    if (activeTab !== "strategies" && url.searchParams.get("tab") !== activeTab) {
+      url.searchParams.set("tab", activeTab);
+      changed = true;
+    } else if (activeTab === "strategies" && url.searchParams.has("tab")) {
+      url.searchParams.delete("tab");
+      changed = true;
+    }
+
+    if (changed) {
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [activeDashboardView, activeTab]);
+
+  // Fetch alert count + telegram status on mount
+  useEffect(() => {
+    api.get("/api/alerts/user/all").then(r => setAlertCount((r.data || []).length)).catch(() => {});
+    api.get("/api/telegram/status").then(r => setTelegramLinked(r.data.is_linked)).catch(() => {});
+  }, []);
+
   
   // Batch Import Progress
   const { isBatchImporting, batchProgress } = useWizardStore();
@@ -62,6 +115,10 @@ export default function DashboardPage() {
   const [chartUrl, setChartUrl] = useState<string | null>(null);
   const [chartLoading, setChartLoading] = useState(false);
   const [liveEquity, setLiveEquity] = useState<{ curve: EquityPoint[]; trades: number; pnl: number; totalAll: number } | null>(null);
+  const [liveEquityVersion, setLiveEquityVersion] = useState(0);
+
+  // Fork dropdown for "+ Strategy" button
+  const [showNewStrategyFork, setShowNewStrategyFork] = useState(false);
 
   // ═══ Splitter state ═══
   const DEFAULT_SPLIT = 0.55;
@@ -98,6 +155,14 @@ export default function DashboardPage() {
   const { portfolios, selectedPortfolio, isLoading: isPortfoliosLoading, fetchPortfolios, selectPortfolio, deletePortfolio, createPortfolio } =
     usePortfolioStore();
 
+  // Check if any strategy has magic_number=0 (blocks manual creation)
+  const hasMagicZero = strategies.some((s: any) => s.magic_number === 0);
+
+  const unconfiguredCount = strategies.filter((s: any) => {
+    const rc = s.risk_config;
+    return !rc || !rc.max_drawdown || !rc.max_drawdown.limit || rc.max_drawdown.limit === 0;
+  }).length;
+
   const activeAsset = selectedPortfolio || selectedStrategy;
 
   useEffect(() => {
@@ -116,13 +181,19 @@ export default function DashboardPage() {
       fetchPortfolios(accountId);
       tradingAccountAPI.list().then(res => {
         const found = res.data.find((a: TradingAccount) => a.id === accountId);
-        if (found) setAccount(found);
+        if (found) {
+           setAccount(found);
+           useThemeStore.getState().setWorkspaceContext(accountId, found.theme || null);
+        }
       }).catch(console.error);
       
       const interval = setInterval(() => {
         fetchStrategies(accountId, true); // Quiet background poll every 5s
       }, 5000);
-      return () => clearInterval(interval);
+      return () => {
+         clearInterval(interval);
+         useThemeStore.getState().setWorkspaceContext(null, null); // Clear context on unmount
+      };
     }
   }, [mounted, isAuthenticated, router, loadUser, fetchStrategies, accountId]);
 
@@ -163,7 +234,7 @@ export default function DashboardPage() {
         });
       })
       .catch((err) => { console.error("[LiveEquity] Error:", err); setLiveEquity(null); });
-  }, [activeAsset?.id, account?.api_token]);
+  }, [activeAsset?.id, account?.api_token, liveEquityVersion]);
 
   const copyToken = () => {
     if (!account) return;
@@ -356,6 +427,7 @@ export default function DashboardPage() {
             </span>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeSelector mode="workspace" />
             <LanguageSwitcher />
             {account && (
               <div className="flex items-center bg-risk-green/10 border border-risk-green/30 rounded-lg px-2 py-1 gap-2">
@@ -383,11 +455,66 @@ export default function DashboardPage() {
               </div>
             )}
 
-            <Link href={`/dashboard/wizard?accountId=${accountId}`}>
-              <Button size="sm">{tWorkspace("btnNewStrategy")}</Button>
-            </Link>
-            <OrphanInbox accountId={accountId} />
-            {account && (
+            {/* 🔔 Global Alerts Button */}
+            <button
+              onClick={() => setIsGlobalAlertsOpen(true)}
+              className="relative flex items-center gap-1.5 bg-iron-800/60 hover:bg-iron-700/80 border border-iron-700/50 hover:border-risk-blue/40 rounded-lg px-3 py-1.5 transition-all duration-200 group"
+              title="Gestionar alertas Telegram"
+            >
+              <span className="text-base group-hover:animate-[bellShake_0.5s_ease-in-out]">🔔</span>
+              <span className="text-xs font-semibold text-iron-300 group-hover:text-iron-100 hidden sm:inline">
+                {locale === 'es' ? 'Alertas' : 'Alerts'}
+              </span>
+              {alertCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center bg-risk-blue text-white text-[10px] font-bold rounded-full px-1 shadow-[0_0_8px_rgba(59,130,246,0.4)] animate-in zoom-in-50 duration-200">
+                  {alertCount}
+                </span>
+              )}
+              {alertCount === 0 && !telegramLinked && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)] animate-pulse" 
+                  title="Telegram no conectado" />
+              )}
+            </button>
+
+            <div className="relative">
+              <Button size="sm" onClick={() => setShowNewStrategyFork(prev => !prev)}>{tWorkspace("btnNewStrategy")}</Button>
+              {showNewStrategyFork && (
+                <div className="absolute right-0 top-full mt-2 w-72 bg-surface-secondary border border-iron-700 rounded-xl p-3 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200 space-y-2">
+                  <Link href={`/dashboard/wizard?accountId=${accountId}`}
+                    className="flex items-start gap-3 p-3 rounded-lg border border-iron-700 hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all text-left group"
+                    onClick={() => setShowNewStrategyFork(false)}
+                  >
+                    <span className="text-xl">📊</span>
+                    <div>
+                      <span className="text-xs font-semibold text-iron-200">{tWorkspace("optionUpload")}</span>
+                      <p className="text-[10px] text-iron-500 mt-0.5">{tWorkspace("optionUploadDesc")}</p>
+                    </div>
+                  </Link>
+                  {hasMagicZero ? (
+                    <div className="flex items-start gap-3 p-3 rounded-lg border border-iron-800 opacity-50 cursor-not-allowed">
+                      <span className="text-xl">🚫</span>
+                      <div>
+                        <span className="text-xs font-semibold text-iron-400">{tWorkspace("optionManual")}</span>
+                        <p className="text-[10px] text-iron-600 mt-0.5">{tWorkspace("optionManualBlocked")}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <Link href={`/${locale}/dashboard/simulate?accountId=${accountId}&mode=manual`}
+                      className="flex items-start gap-3 p-3 rounded-lg border border-iron-700 hover:border-amber-500/50 hover:bg-amber-500/5 transition-all text-left group"
+                      onClick={() => setShowNewStrategyFork(false)}
+                    >
+                      <span className="text-xl">✋</span>
+                      <div>
+                        <span className="text-xs font-semibold text-iron-200">{tWorkspace("optionManual")}</span>
+                        <p className="text-[10px] text-iron-500 mt-0.5">{tWorkspace("optionManualDesc")}</p>
+                      </div>
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+            <OrphanInbox accountId={accountId} onLinked={() => { fetchStrategies(accountId); setLiveEquityVersion(v => v + 1); }} />
+            {account && user?.is_admin && (
               <Link href="/dashboard/bayes-sandbox" title="Bayes Sandbox (Master)">
                 <Button variant="ghost" size="sm" className="text-iron-500 hover:text-[#00aaff] transition-colors">
                   🧠
@@ -400,291 +527,152 @@ export default function DashboardPage() {
                 {tWorkspace("btnSettings")}
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={() => {
-              useAuthStore.getState().logout();
-              router.push("/login");
+            <Button variant="ghost" size="sm" className="min-w-[120px] text-center" onClick={() => {
+              router.push(`/${locale}`);
+              setTimeout(() => {
+                useAuthStore.getState().logout();
+              }, 200);
             }}>
-              {tWorkspace("logout")}
+              {t("logout")}
             </Button>
           </div>
         </div>
       </nav>
+
+      {/* Global Alerts Drawer */}
+      {isGlobalAlertsOpen && account && (
+        <AlertsDrawer
+          isOpen={isGlobalAlertsOpen}
+          onClose={() => {
+            setIsGlobalAlertsOpen(false);
+            api.get("/api/alerts/user/all").then(r => setAlertCount((r.data || []).length)).catch(() => {});
+            api.get("/api/telegram/status").then(r => setTelegramLinked(r.data.is_linked)).catch(() => {});
+          }}
+          strategies={strategies}
+          portfolios={portfolios}
+          accountId={account?.id || ""}
+          initialTargetId={typeof selectedStrategy === 'string' ? selectedStrategy : selectedStrategy?.id}
+        />
+      )}
+
+      <PactBanner 
+        unconfiguredCount={unconfiguredCount} 
+        accountId={accountId} 
+        onConfigure={() => {
+          const unconfigured = strategies.find((s: any) => {
+            const rc = s.risk_config;
+            return !rc || !rc.max_drawdown || !rc.max_drawdown.limit || rc.max_drawdown.limit === 0;
+          });
+          if (unconfigured) {
+            setActiveTab("strategies");
+            selectPortfolio("");
+            selectStrategy(unconfigured.id);
+            setIsEditModalOpen(true);
+          }
+        }}
+      />
 
       <div ref={splitterContainerRef} className="flex-1 min-h-0 max-w-7xl mx-auto w-full px-6 py-4 flex flex-col">
 
         {/* TOP: Terminal Analytics — scrollable panel */}
         <div className="overflow-auto" style={{ height: `calc(${splitRatio * 100}% - 20px)` }}>
           <div className="w-full flex flex-col">
-            {activeAsset ? (
-              <div className="grid lg:grid-cols-2 gap-4 items-start">
-
-                {/* ═══ LEFT COLUMN: Equity Curves (Backtest + Live) ═══ */}
-                <div className="flex flex-col gap-4">
-
-                  {/* CARD 1: Backtest Equity Curve */}
-                  <Card>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-base font-semibold text-iron-100 flex items-center gap-2 truncate" title={activeAsset.name}>
-                        📈 {"strategy_ids" in activeAsset ? tWorkspace("cardPortfolioBacktest") : tWorkspace("cardBacktest")} — {activeAsset.name}
-                      </h3>
-                      <span className="text-xs font-mono text-iron-500">
-                        {activeAsset.total_trades} {tWorkspace("tradesCount")}
-                      </span>
-                    </div>
-                    {/* Only show Editable Start Date for single Strategies, not Portfolios */}
-                    {!("strategy_ids" in activeAsset) && (
-                      <div className="flex items-center gap-2 mb-2 -mt-1">
-                        <span className="text-[10px] text-iron-600 font-medium tracking-wider">📅 {tWorkspace("liveSince")}</span>
-                        <input
-                          type="text"
-                          defaultValue={(activeAsset as any).start_date || "—"}
-                          key={activeAsset.id + "-start_date"}
-                          className="bg-transparent border-b border-iron-700 text-xs font-mono text-iron-400 px-1 py-0.5
-                            focus:outline-none focus:border-risk-green/50 focus:text-iron-200 transition-colors w-44"
-                          title={tWorkspace("tooltipStartDate")}
-                          onBlur={async (e) => {
-                            const newVal = e.target.value.trim();
-                            if (newVal && newVal !== "—" && newVal !== (activeAsset as any).start_date) {
-                              try {
-                                await strategyAPI.update(activeAsset.id, { start_date: newVal });
-                                fetchStrategies(accountId);
-                              } catch { /* silent */ }
-                            }
-                          }}
-                          onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-                        />
-                      </div>
-                    )}
-                    <EquityCurve data={activeAsset.equity_curve || []} />
-                  </Card>
-
-                  {/* CARD 2: Live Equity Curve */}
-                  <Card>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-base font-semibold text-iron-100 flex items-center gap-2">
-                        📈 <span className="text-cyan-400">{tWorkspace("liveBadge")}</span>
-                      </h3>
-                      {liveEquity && liveEquity.trades > 0 && (
-                        <div className="flex items-center gap-3">
-                          <span className={`text-xs font-mono font-semibold ${liveEquity.pnl >= 0 ? 'text-risk-green' : 'text-risk-red'}`}>
-                            {metricFormatter.format("net_profit", liveEquity.pnl)}
-                          </span>
-                          <span className="text-xs font-mono text-iron-500">
-                            {liveEquity.trades} {tWorkspace("tradesCount")}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    {liveEquity ? (
-                      <>
-                        {liveEquity.totalAll > liveEquity.trades && (
-                          <p className="text-[10px] text-amber-500/80 mb-2 font-mono">
-                            {tWorkspace("warningExcluded", { count: liveEquity.totalAll - liveEquity.trades })}
-                          </p>
-                        )}
-                        {liveEquity.trades > 0 ? (
-                          <EquityCurve data={liveEquity.curve} variant="live" />
-                        ) : (
-                          <div className="flex items-center justify-center h-32 text-iron-600 text-xs">
-                            {liveEquity.totalAll > 0
-                              ? tWorkspace("warningNoTradesAdjust", { count: liveEquity.totalAll })
-                              : tWorkspace("waitingLive")}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="flex items-center justify-center h-32 text-iron-600 text-xs">
-                        {tWorkspace("loadingLive")}
-                      </div>
-                    )}
-                  </Card>
-
-                </div>
-
-                {/* ═══ RIGHT COLUMN: Analysis (Distribution + Metrics) ═══ */}
-                <div className="flex flex-col gap-4">
-
-                  {/* CARD 3: Distribution Analysis */}
-                  <Card className="flex flex-col">
-                    {activeChartMetric ? (
-                      <>
-                          <div className="flex flex-col mb-3">
-                            <div className="flex w-full justify-between items-center">
-                              <h3 className="text-base font-semibold text-iron-100 capitalize">
-                                📊 {tWorkspace("cardDistribution")} ({activeChartMetric.replace(/_/g, ' ')})
-                              </h3>
-                              <div className="flex items-center gap-3">
-                                {chartLoading && <span className="text-xs text-iron-500 animate-pulse">{tWorkspace("generatingDistHover")}</span>}
-                                {chartUrl && chartData && (
-                                  <button
-                                    onClick={() => setIsInteractiveMode(!isInteractiveMode)}
-                                    className={`text-xs px-2 py-1 rounded transition-colors flex items-center gap-1 ${isInteractiveMode ? 'bg-risk-green/20 text-risk-green border border-risk-green/50' : 'bg-iron-800 text-iron-400 border border-iron-700 hover:text-iron-200'}`}
-                                    title="Toggle Superman Interactive Mode"
-                                  >
-                                    <span>🦸‍♂️</span> {isInteractiveMode ? 'Interactive' : 'Static'}
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                            {(() => {
-                               try {
-                                 const guide = t(`${activeChartMetric}.chartGuide`);
-                                 if (guide) {
-                                   return (
-                                     <p className="text-xs text-iron-500 mt-1.5 leading-relaxed pr-4">
-                                       {guide}
-                                     </p>
-                                   );
-                                 }
-                               } catch (e) { return null; }
-                               return null;
-                            })()}
-                          </div>
-                        <div className="w-full flex-1 flex justify-center bg-surface-tertiary rounded-lg border border-iron-800 p-2">
-                           {isInteractiveMode && chartData ? (
-                             <InteractiveDistribution chartData={chartData} loading={chartLoading} />
-                           ) : chartUrl ? (
-                             // eslint-disable-next-line @next/next/no-img-element
-                             <img src={chartUrl} alt="Risk Chart" className="object-contain max-h-[280px] mix-blend-screen" />
-                           ) : chartLoading ? (
-                             <div className="flex items-center justify-center h-full w-full">
-                                 <span className="text-xs text-iron-500 animate-pulse">{tWorkspace("generatingDist")}</span>
-                             </div>
-                           ) : null}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex items-center justify-center h-full min-h-[200px] text-iron-600 text-sm">
-                        {tWorkspace("clickMetricDist")}
-                      </div>
-                    )}
-                  </Card>
-
-                  {/* CARD 4: Risk Metrics Snapshot */}
-                  {activeAsset.metrics_snapshot && (
-                    <Card>
-                      <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-base font-semibold text-iron-100">
-                          🧮 {tWorkspace("cardRiskMetrics")}
-                        </h3>
-                        {(() => {
-                          const riskCfg = activeAsset.risk_config as Record<string, any> | null;
-                          if (riskCfg?.last_updated) {
-                            const d = new Date(riskCfg.last_updated);
-                            return (
-                              <span className="text-xs bg-iron-800 text-iron-400 px-2 py-1 rounded-md border border-iron-700 font-mono" title="Last EA Heartbeat Sync">
-                                🕒 {d.toLocaleTimeString()}
-                              </span>
-                            );
-                          }
-                          return null;
-                        })()}
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        {Object.entries(activeAsset.metrics_snapshot)
-                          .filter(([key]) => key !== "PnlMetric" && key !== "PnlPerTradeMetric" && key !== "combined_strategies" && key !== "strategy_names")
-                          .sort(([keyA], [keyB]) => {
-                            const order = ["DrawdownMetric", "DailyLossMetric", "StagnationDaysMetric", "StagnationTradesMetric", "ConsecutiveLossesMetric"];
-                            const a = order.indexOf(keyA);
-                            const b = order.indexOf(keyB);
-                            return (a === -1 ? 99 : a) - (b === -1 ? 99 : b);
-                          })
-                          .map(([key, params]) => {
-                          const displayName = key.replace("Metric", "").replace(/([A-Z])/g, " $1").trim();
-                          
-                          let displayValue = 0;
-                          const maxKey = Object.keys(params as object).find((k) => k.startsWith("max_"));
-                          if (maxKey) displayValue = (params as Record<string, number>)[maxKey];
-                          
-                          const metricMap: Record<string, string> = {
-                            DrawdownMetric: "max_drawdown",
-                            DailyLossMetric: "daily_loss",
-                            ConsecutiveLossesMetric: "consecutive_losses",
-                            StagnationDaysMetric: "stagnation_days",
-                            StagnationTradesMetric: "stagnation_trades",
-                          };
-                          const mappedKey = metricMap[key] || key;
-
-                          const riskCfg = activeAsset.risk_config as Record<string, Record<string, number>> | null;
-                          const hasHeartbeat = !!(riskCfg as any)?.last_updated;
-                          const liveCurrentVal = hasHeartbeat ? riskCfg?.[mappedKey]?.current : undefined;
-
-                          return (
-                            <div 
-                              key={key} 
-                              onClick={() => openChart(mappedKey, liveCurrentVal, true)}
-                              className={`rounded-lg p-2.5 text-center relative group cursor-pointer transition-colors ${
-                                activeChartMetric === mappedKey 
-                                  ? "bg-risk-green/10 border border-risk-green/30" 
-                                  : "bg-surface-tertiary border border-transparent hover:border-iron-700"
-                              }`}
-                            >
-                              <div className="text-[10px] text-iron-500 font-medium uppercase tracking-wider mb-1.5">
-                                <MetricTooltip metricKey={hasHeartbeat && liveCurrentVal !== undefined ? `live_${mappedKey}` : mappedKey} variant="card">
-                                  {displayName}
-                                </MetricTooltip>
-                              </div>
-                              <div className="flex flex-col items-center gap-0.5">
-                                <div className="flex items-baseline gap-1 whitespace-nowrap">
-                                  <span className="text-lg font-mono text-iron-100 font-semibold whitespace-nowrap tracking-tight">
-                                    {hasHeartbeat && liveCurrentVal !== undefined
-                                      ? metricFormatter.format(mappedKey, liveCurrentVal)
-                                      : typeof displayValue === "number"
-                                        ? metricFormatter.format(mappedKey, displayValue)
-                                        : "—"}
-                                  </span>
-                                  {hasHeartbeat && liveCurrentVal !== undefined && (
-                                    <span className="text-[9px] text-risk-green font-mono tracking-tighter">● {tWorkspace("liveBadge")}</span>
-                                  )}
-                                  {!hasHeartbeat && typeof displayValue === "number" && (
-                                    <span className="text-[9px] text-iron-500 font-mono tracking-tighter">{tWorkspace("cardBacktest").toUpperCase()}</span>
-                                  )}
-                                </div>
-                                {hasHeartbeat && (
-                                  <div className="flex items-baseline gap-1 opacity-80 whitespace-nowrap">
-                                    <span className="text-[10px] text-iron-600 font-medium">{tWorkspace("maxBadge")}</span>
-                                    <span className="text-xs font-mono text-iron-400 whitespace-nowrap">
-                                      {typeof displayValue === "number" ? metricFormatter.format(mappedKey, displayValue) : "—"}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </Card>
-                  )}
-
-                </div>
-
+            {/* === DASHBOARD TOP LAYER (VIEW CONTROLLER) === */}
+            <div className="flex flex-col gap-4">
+              {/* Toolbar */}
+              <div className="flex bg-surface-tertiary p-1 rounded-lg border border-iron-800 w-fit">
+                {DASHBOARD_VIEWS.map((dv) => {
+                  const isActive = activeDashboardView === dv.id;
+                  const dvName = dv.id === "ml-bayes" ? tWorkspace("tabBayes") : dv.id === "inspector" ? tWorkspace("tabInspector") : dv.id === "macro" ? tWorkspace("tabMacro") : dv.name;
+                  return (
+                    <button
+                      key={dv.id}
+                      onClick={() => setActiveDashboardView(dv.id)}
+                      className={`
+                        px-3 py-1 text-[11px] uppercase tracking-wider font-bold rounded flex items-center gap-1.5 transition-all
+                        ${isActive ? "bg-iron-700 text-iron-50 shadow-[0_2px_10px_rgba(0,0,0,0.5)] border border-iron-600/50" : "text-iron-500 border border-transparent hover:text-iron-300 hover:bg-iron-800/50"}
+                      `}
+                    >
+                      {dvName}
+                    </button>
+                  );
+                })}
               </div>
-            ) : (
-              <Card className="flex items-center justify-center py-12">
-                <p className="text-iron-500 text-sm">
-                  Click on any strategy or portfolio below to view its advanced analytics
-                </p>
-              </Card>
-            )}
+
+              {/* Injected View */}
+              {activeAsset ? (() => {
+                 const ctx: DashboardContext = {
+                   activeAsset,
+                   liveEquity,
+                   chartLoading,
+                   chartUrl,
+                   chartData,
+                   activeChartMetric,
+                   lastChartReq,
+                   openChart,
+                   setLiveEquityVersion,
+                   liveEquityVersion,
+                   accountId,
+                   fetchStrategies,
+                   tWorkspace,
+                   isLightMode,
+                   isInteractiveMode,
+                   setIsInteractiveMode
+                 };
+                 const currentView = DASHBOARD_VIEWS.find(v => v.id === activeDashboardView);
+                 return currentView ? currentView.renderComponent(ctx) : null;
+              })() : (
+               <Card className="flex items-center justify-center py-12">
+                 <p className="text-iron-500 text-sm">
+                   Click on any strategy or portfolio below to view its advanced analytics
+                 </p>
+               </Card>
+              )}
+            </div>
           </div>
         </div>
 
           {/* ═══ DRAGGABLE SPLITTER ═══ */}
           <div
-            className="group relative flex items-center justify-center shrink-0 py-1 cursor-row-resize"
+            className="group relative flex items-center justify-center shrink-0 py-1.5 cursor-row-resize"
             onMouseDown={onSplitterMouseDown}
           >
-            <div className="w-full h-[2px] rounded-full bg-iron-800 group-hover:bg-cyan-500/60 transition-colors" />
-            <button
-              onClick={(e) => { e.stopPropagation(); setSplitRatio(DEFAULT_SPLIT); }}
-              className="absolute right-2 w-5 h-5 rounded-full bg-iron-800 hover:bg-iron-700 border border-iron-700
-                flex items-center justify-center text-iron-500 hover:text-iron-300 transition-colors opacity-0 group-hover:opacity-100"
-              title="Restablecer tamaño"
+            <div className="absolute w-full h-[2px] rounded-full bg-iron-800 group-hover:bg-cyan-500/60 transition-colors" />
+            
+            <div 
+              className="relative z-10 flex items-center gap-2 bg-surface-primary px-3 opacity-0 group-hover:opacity-100 transition-opacity" 
+              onMouseDown={(e) => e.stopPropagation()}
             >
-              <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M2 8h12M8 2v12" />
-              </svg>
-            </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setSplitRatio(0.85); }}
+                className="w-5 h-5 rounded-full bg-iron-800 hover:bg-cyan-500/20 border border-iron-700 hover:border-cyan-500/50 flex items-center justify-center text-iron-500 hover:text-cyan-400 transition-colors"
+                title="Maximizar Panel Superior"
+              >
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 5l4 4 4-4" />
+                </svg>
+              </button>
+              
+              <button
+                onClick={(e) => { e.stopPropagation(); setSplitRatio(DEFAULT_SPLIT); }}
+                className="w-5 h-5 rounded-full bg-iron-800 hover:bg-iron-700 border border-iron-700 flex items-center justify-center text-iron-500 hover:text-iron-300 transition-colors"
+                title="Restablecer Equilibrio"
+              >
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M2 8h12M8 2v12" />
+                </svg>
+              </button>
+
+              <button
+                onClick={(e) => { e.stopPropagation(); setSplitRatio(0.15); }}
+                className="w-5 h-5 rounded-full bg-iron-800 hover:bg-cyan-500/20 border border-iron-700 hover:border-cyan-500/50 flex items-center justify-center text-iron-500 hover:text-cyan-400 transition-colors"
+                title="Maximizar Panel Inferior"
+              >
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 11l4-4 4 4" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* BOTTOM: Tab Switcher + Data Grids */}
@@ -798,13 +786,31 @@ export default function DashboardPage() {
 
                 {!isLoading && strategies.length === 0 && (
                   <Card>
-                    <p className="text-center text-iron-500 text-sm py-8">
-                      No strategies in this workspace yet.
-                      <br />
-                      <Link href={`/dashboard/wizard?accountId=${accountId}`} className="text-risk-green hover:underline">
-                        Create your first one →
-                      </Link>
-                    </p>
+                    <div className="py-6 space-y-4">
+                      <p className="text-center text-iron-400 text-sm font-medium">{tWorkspace("emptyWorkspace")}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4">
+                        <Link href={`/dashboard/wizard?accountId=${accountId}`}
+                          className="flex flex-col items-center gap-2 p-4 rounded-xl border border-iron-700 hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all">
+                          <span className="text-2xl">📊</span>
+                          <span className="text-sm font-medium text-iron-200">{tWorkspace("optionUpload")}</span>
+                          <span className="text-[10px] text-iron-500 text-center">{tWorkspace("optionUploadDesc")}</span>
+                        </Link>
+                        {hasMagicZero ? (
+                          <div className="flex flex-col items-center gap-2 p-4 rounded-xl border border-iron-800 opacity-50 cursor-not-allowed">
+                            <span className="text-2xl">🚫</span>
+                            <span className="text-sm font-medium text-iron-400">{tWorkspace("optionManual")}</span>
+                            <span className="text-[10px] text-iron-600 text-center">{tWorkspace("optionManualBlocked")}</span>
+                          </div>
+                        ) : (
+                          <Link href={`/${locale}/dashboard/simulate?accountId=${accountId}&mode=manual`}
+                            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-iron-700 hover:border-amber-500/50 hover:bg-amber-500/5 transition-all">
+                            <span className="text-2xl">✋</span>
+                            <span className="text-sm font-medium text-iron-200">{tWorkspace("optionManual")}</span>
+                            <span className="text-[10px] text-iron-500 text-center">{tWorkspace("optionManualDesc")}</span>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
                   </Card>
                 )}
               </>
@@ -832,6 +838,7 @@ export default function DashboardPage() {
                       strategies={portfolios.filter(p => !p.is_default)}
                       universeContext={strategies}
                       selectedId={selectedPortfolio?.id}
+                      selectedChildId={selectedStrategy?.id}
                       checkedIds={checkedPortfolioIds}
                       allChecked={allPortfoliosChecked}
                       someChecked={somePortfoliosChecked}
@@ -848,19 +855,13 @@ export default function DashboardPage() {
                         });
                       }}
                       onSelect={(id) => { selectStrategy(""); selectPortfolio(id); }}
+                      onSelectChild={(id) => { selectPortfolio(""); selectStrategy(id); }}
                       onEdit={async (id) => {
                         const p = portfolios.find(x => x.id === id);
                         if (!p || p.is_default) return;
-                        const newName = window.prompt("Introduce el nuevo nombre del portfolio:", p.name);
-                        if (newName && newName.trim() !== "" && newName.trim() !== p.name) {
-                          try {
-                            await portfolioAPI.update(id, { name: newName.trim() });
-                            fetchPortfolios(accountId);
-                          } catch (e) {
-                            console.error("Failed to rename portfolio", e);
-                            alert("No se pudo renombrar el portfolio.");
-                          }
-                        }
+                        selectStrategy("");
+                        selectPortfolio(id);
+                        setIsEditModalOpen(true);
                       }}
                       onDelete={async (id) => {
                         if (!confirm("⚠️ Delete this portfolio? This cannot be undone.")) return;
@@ -882,10 +883,24 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {isEditModalOpen && selectedStrategy && (
+      {isEditModalOpen && (selectedStrategy || selectedPortfolio) && (
         <EditStrategyModal
-          strategy={selectedStrategy}
-          onSave={updateStrategy}
+          strategy={(selectedStrategy || selectedPortfolio)!}
+          onSave={async (id, data) => {
+            if (selectedStrategy) {
+              const ok = await updateStrategy(id, data);
+              // Refresh live equity chart (aliases may have changed)
+              setLiveEquityVersion(v => v + 1);
+              // Refresh global alert count
+              api.get("/api/alerts/user/all").then(r => setAlertCount((r.data || []).length)).catch(() => {});
+              return ok;
+            } else if (selectedPortfolio) {
+              const res = await portfolioAPI.update(id, data);
+              await fetchPortfolios(accountId);
+              api.get("/api/alerts/user/all").then(r => setAlertCount((r.data || []).length)).catch(() => {});
+              return !!res?.data;
+            }
+          }}
           onClose={() => setIsEditModalOpen(false)}
         />
       )}

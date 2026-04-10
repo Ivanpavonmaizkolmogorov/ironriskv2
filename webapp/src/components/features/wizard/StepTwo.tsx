@@ -7,27 +7,13 @@ import Button from "@/components/ui/Button";
 import { useWizardStore } from "@/store/useWizardStore";
 import { useStrategyStore } from "@/store/useStrategyStore";
 
-/** Fields we want the user to map from their CSV */
-const MAPPING_FIELDS = [
-  { key: "profit", label: "Profit", required: true, hint: "e.g. Profit, Beneficio, PnL" },
-  { key: "commission", label: "Commission", required: false, hint: "e.g. Commission, Comisión" },
-  { key: "swap", label: "Swap", required: false, hint: "e.g. Swap" },
-  { key: "exit_time", label: "Exit Time", required: false, hint: "e.g. Close Time, Exit Time, Date" },
-] as const;
-
-/** Common aliases to auto-detect columns */
-const AUTO_DETECT: Record<string, string[]> = {
-  profit: ["profit", "beneficio", "pnl", "net_profit"],
-  commission: ["commission", "comision", "comisión"],
-  swap: ["swap"],
-  exit_time: ["exit_time", "close_time", "date", "exit_date", "close_date", "time", "fecha"],
-};
+import CsvColumnMapper, { autoDetectMapping } from "@/components/ui/CsvColumnMapper";
 
 export default function StepTwo() {
   const router = useRouter();
   const { fetchStrategies } = useStrategyStore();
   const {
-    stepTwoData, updateStepTwo, setStep,
+    stepOneData, stepTwoData, updateStepTwo, setStep,
     submitStrategy, isSubmitting, error,
   } = useWizardStore();
 
@@ -39,23 +25,12 @@ export default function StepTwo() {
     const strategyId = await submitStrategy(columnMapping);
     if (strategyId) {
       await fetchStrategies();
-      router.push("/dashboard");
+      const accountId = stepOneData.tradingAccountId;
+      router.push(accountId ? `/dashboard/account/${accountId}` : "/dashboard");
     }
   };
 
-  /** Auto-detect mapping based on common column names */
-  const autoDetect = (headers: string[]): Record<string, string> => {
-    const mapping: Record<string, string> = {};
-    const normalized = headers.map((h) => h.trim().replace(/['"]/g, "").replace(/\s+/g, "_").toLowerCase());
 
-    for (const [field, aliases] of Object.entries(AUTO_DETECT)) {
-      const idx = normalized.findIndex((h) => aliases.includes(h));
-      if (idx >= 0) {
-        mapping[field] = headers[idx];
-      }
-    }
-    return mapping;
-  };
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +62,7 @@ export default function StepTwo() {
         headers = headers.map((h) => h.trim().replace(/^["']|["']$/g, ""));
 
         setCsvHeaders(headers);
-        const detected = autoDetect(headers);
+        const detected = autoDetectMapping(headers);
         setColumnMapping(detected);
         setShowMapping(true);
 
@@ -102,18 +77,10 @@ export default function StepTwo() {
     [updateStepTwo]
   );
 
-  const updateMapping = (field: string, csvCol: string) => {
-    const newMapping = { ...columnMapping };
-    if (csvCol === "") {
-      delete newMapping[field];
-    } else {
-      newMapping[field] = csvCol;
-    }
+  const updateMappingFromComponent = useCallback((newMapping: Record<string, string>, isProfitMapped: boolean) => {
     setColumnMapping(newMapping);
-
-    // isValid = has file + has profit mapping
-    updateStepTwo({ isValid: stepTwoData.previewRows > 0 && !!newMapping.profit });
-  };
+    updateStepTwo({ isValid: stepTwoData.previewRows > 0 && isProfitMapped });
+  }, [stepTwoData.previewRows, updateStepTwo]);
 
   const isProfitMapped = !!columnMapping.profit;
 
@@ -158,48 +125,11 @@ export default function StepTwo() {
 
       {/* Column Mapping Panel */}
       {showMapping && csvHeaders.length > 0 && (
-        <div className="bg-surface-secondary border border-iron-700 rounded-xl p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-iron-200">📋 Column Mapping</h3>
-            <span className="text-xs text-iron-500">
-              {isProfitMapped ? "✓ Ready" : "⚠ Map the Profit column"}
-            </span>
-          </div>
-
-          {MAPPING_FIELDS.map(({ key, label, required, hint }) => (
-            <div key={key} className="flex items-center gap-3">
-              <div className="w-32 shrink-0">
-                <span className={`text-sm font-medium ${required ? "text-iron-100" : "text-iron-400"}`}>
-                  {label}
-                  {required && <span className="text-risk-red ml-1">*</span>}
-                </span>
-                <p className="text-xs text-iron-600">{hint}</p>
-              </div>
-              <select
-                value={columnMapping[key] || ""}
-                onChange={(e) => updateMapping(key, e.target.value)}
-                className={`
-                  flex-1 bg-surface-tertiary border rounded-lg px-3 py-2
-                  text-sm text-iron-100 focus:outline-none focus:ring-1
-                  transition-colors
-                  ${columnMapping[key]
-                    ? "border-risk-green/40 focus:ring-risk-green/30"
-                    : "border-iron-700 focus:ring-iron-500"
-                  }
-                `}
-              >
-                <option value="">— {required ? "Select column" : "Skip (optional)"} —</option>
-                {csvHeaders.map((h) => (
-                  <option key={h} value={h}>{h}</option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {stepTwoData.file && !stepTwoData.isValid && !isProfitMapped && (
-        <p className="text-amber-400 text-sm">⚠ Please map the &quot;Profit&quot; column to continue.</p>
+        <CsvColumnMapper 
+          csvHeaders={csvHeaders} 
+          initialMapping={columnMapping} 
+          onMappingChange={updateMappingFromComponent} 
+        />
       )}
 
       {error && (

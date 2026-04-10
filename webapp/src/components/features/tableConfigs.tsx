@@ -34,8 +34,21 @@ function getBtMax(s: RiskAsset, rootKey: string): number {
 
 function getLiveCurrent(s: RiskAsset, mapKey: string): number | undefined {
   const cfg = s.risk_config as any;
-  if (!cfg || !cfg.last_updated) return undefined;
-  return cfg[mapKey]?.current;
+  if (cfg && cfg.last_updated && cfg[mapKey]?.current !== undefined) {
+    return cfg[mapKey].current;
+  }
+  
+  // Fallback for portfolios that receive aggregated live data via bayesian calculations
+  if (s.bayesian_breakdown !== undefined) {
+      if (mapKey === "total_trades" && s.bayesian_breakdown.live_trades_total !== undefined) {
+          return s.bayesian_breakdown.live_trades_total;
+      }
+      if (mapKey === "net_profit" && s.bayesian_breakdown.live_ev !== undefined && s.bayesian_breakdown.live_trades_total !== undefined) {
+          return s.bayesian_breakdown.live_ev * s.bayesian_breakdown.live_trades_total;
+      }
+  }
+  
+  return undefined;
 }
 
 /** Determines if a specific metric has a mathematical fit available */
@@ -126,9 +139,9 @@ const COMMON_COLUMNS: Record<string, ColumnDef> = {
             {metricFormatter.format("net_profit", ev)}
           </span>
           {/* Visual comparison bar */}
-          <div className="w-full h-1 bg-iron-800 rounded-full overflow-hidden flex justify-end">
+          <div className="w-full h-1.5 bg-iron-800/60 rounded-full overflow-hidden flex justify-end">
             <div
-              className={`h-full ${isProfit ? "bg-risk-green/50" : "bg-risk-red/50"}`}
+              className={`h-full rounded-full ${isProfit ? "bg-risk-green" : "bg-risk-red"}`}
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -161,7 +174,8 @@ const LIVE_COLUMNS: Record<string, ColumnDef> = {
   },
   ev: {
     id: "live_ev",
-    label: "Expectancy",
+    label: "Live Expect.",
+    metricKey: "ev",
     align: "right",
     sortValue: (s) => {
       const trades = getLiveCurrent(s, "total_trades") || 0;
@@ -382,7 +396,60 @@ export const HybridView: TableViewDef = {
     COMMON_COLUMNS.name,
     COMMON_COLUMNS.magic,
     LIVE_COLUMNS.trades,
-    LIVE_COLUMNS.ev,
+    {
+      id: "hybrid_ev",
+      label: "Expectancy",
+      metricKey: "ev",
+      align: "right",
+      sortValue: (s) => {
+        const trades = getLiveCurrent(s, "total_trades") || 0;
+        const pnl = getLiveCurrent(s, "net_profit") || 0;
+        return trades ? pnl / trades : 0;
+      },
+      renderCell: (s, allAssets) => {
+        const trades = getLiveCurrent(s, "total_trades");
+        const isLive = trades !== undefined;
+        const livePnl = getLiveCurrent(s, "net_profit") || 0;
+        const liveEv = trades ? livePnl / trades : 0;
+        
+        const btTrades = s.total_trades || 0;
+        const btEv = btTrades ? s.net_profit / btTrades : 0;
+        
+        const liveAbsMax = Math.max(...allAssets.map(a => {
+          const t = getLiveCurrent(a, "total_trades") || 0;
+          const p = getLiveCurrent(a, "net_profit") || 0;
+          return t ? Math.abs(p / t) : 0;
+        }), 1);
+        const pct = liveAbsMax > 0 ? (Math.abs(liveEv) / liveAbsMax) * 100 : 0;
+        
+        let color = "text-iron-200";
+        let barColor = "bg-iron-600/50";
+        if (isLive && liveEv < 0) {
+           color = "text-risk-red animate-pulse";
+           barColor = "bg-risk-red/50";
+        } else if (isLive && liveEv < btEv * 0.5) {
+           color = "text-risk-yellow";
+           barColor = "bg-risk-yellow/50";
+        } else if (isLive && liveEv >= 0) {
+           color = "text-risk-green";
+           barColor = "bg-risk-green/50";
+        }
+        
+        return (
+          <div className="flex flex-col items-end leading-tight group gap-0.5 min-w-[60px]">
+             <span className={`font-mono tabular-nums font-semibold ${isLive ? color : "text-iron-600"}`}>
+               {isLive ? metricFormatter.format("net_profit", liveEv) : "—"}
+             </span>
+             <div className="w-full h-1 bg-iron-800 rounded-full overflow-hidden flex justify-end">
+               <div className={`h-full ${isLive ? barColor : "bg-transparent"}`} style={{ width: `${pct}%` }} />
+             </div>
+             <span className="text-[9px] text-iron-500 font-mono tracking-tighter uppercase opacity-80 group-hover:opacity-100 transition-opacity mt-0.5">
+               Backtest: {metricFormatter.format("net_profit", btEv)}
+             </span>
+          </div>
+        );
+      }
+    },
     {
       id: "hybrid_dd",
       label: "Drawdown",
@@ -531,4 +598,224 @@ export const HybridView: TableViewDef = {
   ]
 };
 
-export const ALL_TABLE_VIEWS = [BacktestView, LiveView, HybridView];
+const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
+  p_positive: {
+    id: "bayes_p_positive",
+    label: "P(Expectancy>0)",
+    metricKey: "bayes_p_positive",
+    align: "right",
+    sortValue: (s) => s.bayesian_breakdown?.decomposition?.p_positive || 0,
+    renderCell: (s) => {
+      const d = s.bayesian_breakdown?.decomposition;
+      const p = d?.p_positive;
+      if (p === undefined) return <span className="text-iron-600 font-mono">—</span>;
+      
+      const isLive = s.bayesian_breakdown !== undefined && s.bayesian_breakdown.live_trades_total > 0;
+
+      let color = "text-iron-200";
+      if (p < 0.5) color = "text-risk-red font-bold";
+      else if (p < 0.85) color = "text-risk-amber";
+      else color = "text-risk-green";
+      
+      const main = <span className={`font-mono text-xs ${color}`}>{(p * 100).toFixed(1)}%</span>;
+      
+      if (!isLive || d.bt_p_positive === undefined) return main;
+      
+      return (
+        <div className="flex flex-col items-end">
+           {main}
+           <span className="text-[9px] text-iron-500 font-mono mt-0.5">
+              Prior: {(d.bt_p_positive * 100).toFixed(1)}%
+           </span>
+        </div>
+      );
+    }
+  },
+  degradation: {
+    id: "bayes_degradation",
+    label: "Delta Expectancy",
+    metricKey: "bayes_degradation",
+    align: "right",
+    sortValue: (s) => {
+      const btTrades = s.total_trades || 0;
+      const priorEv = btTrades ? s.net_profit / btTrades : 0;
+      const postEv = s.bayesian_breakdown?.decomposition?.ev_mean;
+      if (postEv === undefined || priorEv === 0) return -999;
+      return ((postEv - priorEv) / Math.abs(priorEv)) * 100;
+    },
+    renderCell: (s) => {
+      const btTrades = s.total_trades || 0;
+      const priorEv = btTrades ? s.net_profit / btTrades : 0;
+      const postEv = s.bayesian_breakdown?.decomposition?.ev_mean;
+      
+      const isLive = s.bayesian_breakdown !== undefined && s.bayesian_breakdown.live_trades_total > 0;
+
+      if (!isLive || postEv === undefined || priorEv === 0) {
+         return <span className="text-iron-600 font-mono">—</span>;
+      }
+      
+      const decay = ((postEv - priorEv) / Math.abs(priorEv)) * 100;
+      const isNegative = decay < -5;
+      const isPositive = decay > 5;
+      
+      let color = "text-iron-300";
+      if (isNegative) color = "text-risk-red";
+      else if (isPositive) color = "text-risk-green";
+      
+      const sign = decay > 0 ? "+" : "";
+      
+      return (
+        <div className="flex flex-col items-end gap-0.5 min-w-[60px]">
+          <span className={`font-mono font-semibold text-sm ${color}`}>
+            {sign}{decay.toFixed(1)}%
+          </span>
+          <span className="text-[9px] text-iron-500 font-mono tracking-tighter uppercase opacity-80 mt-0.5">
+            {isNegative ? "Degradado" : isPositive ? "Optimizado" : "Estable"}
+          </span>
+        </div>
+      );
+    }
+  },
+  bayesian_ev: {
+    id: "bayes_ev",
+    label: "Expectancy Ajus.",
+    metricKey: "ev",
+    align: "right",
+    sortValue: (s) => s.bayesian_breakdown?.decomposition?.ev_mean || 0,
+    renderCell: (s, allAssets) => {
+      const isLive = s.bayesian_breakdown !== undefined && s.bayesian_breakdown.live_trades_total > 0;
+      
+      const btTrades = s.total_trades || 0;
+      const btEv = btTrades ? s.net_profit / btTrades : 0;
+      
+      const postEv = s.bayesian_breakdown?.decomposition?.ev_mean;
+      
+      if (!isLive || postEv === undefined) {
+         return (
+          <div className="flex flex-col items-end leading-tight group gap-0.5 min-w-[60px] opacity-50">
+             <span className="font-mono tabular-nums font-semibold text-iron-600">—</span>
+             <div className="w-full h-1 bg-transparent rounded-full flex justify-end"></div>
+             <span className="text-[9px] text-iron-500 font-mono tracking-tighter uppercase mt-0.5">PRIOR: {metricFormatter.format("net_profit", btEv)}</span>
+          </div>
+         );
+      }
+      
+      const liveAbsMax = Math.max(...allAssets.map(a => {
+        const ev = a.bayesian_breakdown?.decomposition?.ev_mean;
+        return ev ? Math.abs(ev) : 0;
+      }), 1);
+      
+      let pct = liveAbsMax > 0 ? (Math.abs(postEv) / liveAbsMax) * 100 : 0;
+      pct = Math.min(100, pct);
+      
+      let color = "text-iron-200";
+      let barColor = "bg-iron-500";
+      if (postEv < 0) {
+         color = "text-risk-red animate-pulse";
+         barColor = "bg-risk-red";
+      } else if (postEv < btEv * 0.5) {
+         color = "text-risk-yellow";
+         barColor = "bg-risk-yellow";
+      } else if (postEv >= 0) {
+         color = "text-risk-green";
+         barColor = "bg-risk-green";
+      }
+      
+      return (
+        <div className="flex flex-col items-end leading-tight group gap-0.5 min-w-[60px]">
+           <span className={`font-mono tabular-nums font-semibold ${color}`}>
+             {metricFormatter.format("net_profit", postEv)}
+           </span>
+           <div className="w-full h-1.5 bg-iron-800/60 rounded-full overflow-hidden flex justify-end">
+             <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
+           </div>
+           <span className="text-[9px] text-iron-500 font-mono tracking-tighter uppercase opacity-80 group-hover:opacity-100 transition-opacity mt-0.5" title="Prior BT Expectancy">
+             PRIOR: {metricFormatter.format("net_profit", btEv)}
+           </span>
+        </div>
+      );
+    }
+  },
+  weight: {
+    id: "bayes_weight",
+    label: "Peso Empírico",
+    metricKey: "bayes_weight",
+    align: "right",
+    sortValue: (s) => {
+      const d = s.bayesian_breakdown?.decomposition;
+      const bt = d ? (d.eff_bt_wins + d.eff_bt_losses) : (s.total_trades ?? 0);
+      const live = d?.n_live ?? s.bayesian_breakdown?.live_trades_total ?? 0;
+      return live / Math.max(1, bt + live);
+    },
+    renderCell: (s) => {
+      const d = s.bayesian_breakdown?.decomposition;
+      const isLive = s.bayesian_breakdown !== undefined && s.bayesian_breakdown.live_trades_total > 0;
+      
+      if (!isLive) return <span className="text-iron-600 font-mono">—</span>;
+      
+      const bt = d ? (d.eff_bt_wins + d.eff_bt_losses) : (s.total_trades ?? 0);
+      const live = d?.n_live ?? s.bayesian_breakdown?.live_trades_total ?? 0;
+      const total = bt + live;
+      
+      if (total === 0) return <span className="text-iron-600 font-mono">—</span>;
+      
+      const livePct = (live / total) * 100;
+      const btPct = (bt / total) * 100;
+      
+      return (
+        <div className="flex flex-col items-end gap-0.5 min-w-[70px]">
+          <span className="font-mono text-sm text-[#00aaff]">
+            {livePct.toFixed(1)}% Live
+          </span>
+          <span className="text-[9px] text-iron-500 font-mono tracking-tighter uppercase opacity-80 mt-0.5">
+            {btPct.toFixed(1)}% BT
+          </span>
+        </div>
+      );
+    }
+  },
+  blind_risk: {
+    id: "bayes_blind_risk",
+    label: "Riesgo Ciego",
+    metricKey: "bayes_blind_risk",
+    align: "right",
+    sortValue: (s) => 1 - (s.bayesian_breakdown?.decomposition?.p_positive || 1),
+    renderCell: (s) => {
+      const d = s.bayesian_breakdown?.decomposition;
+      const p = d?.p_positive;
+      if (p === undefined) return <span className="text-iron-600 font-mono">—</span>;
+      
+      const blind = 1 - p;
+      const pct = (blind * 100).toFixed(1);
+      
+      let color = "text-iron-500";
+      let icon = "⚪";
+      if (blind >= 0.5) { color = "text-risk-red font-bold"; icon = "🔴"; }
+      else if (blind >= 0.2) { color = "text-amber-400"; icon = "🟡"; }
+      
+      return (
+        <div className="flex items-center justify-end gap-1.5">
+          <span className="text-[10px]">{icon}</span>
+          <span className={`font-mono text-xs ${color}`}>{pct}%</span>
+        </div>
+      );
+    }
+  }
+};
+
+export const BayesianView: TableViewDef = {
+  id: "bayesian",
+  name: "🧠 Bayesian Engine",
+  defaultSortKey: "bayes_blind_risk",
+  defaultSortDir: "desc",
+  columns: [
+    COMMON_COLUMNS.name,
+    COMMON_COLUMNS.magic,
+    BAYESIAN_COLUMNS.blind_risk,
+    BAYESIAN_COLUMNS.bayesian_ev,
+    BAYESIAN_COLUMNS.degradation,
+    BAYESIAN_COLUMNS.weight,
+  ]
+};
+
+export const ALL_TABLE_VIEWS = [BacktestView, LiveView, HybridView, BayesianView];

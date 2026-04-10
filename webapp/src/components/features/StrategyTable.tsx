@@ -6,6 +6,8 @@ import type { RiskAsset, Strategy, Portfolio } from "@/types/strategy";
 import { metricFormatter } from "@/utils/MetricFormatter";
 import MetricTooltip from "@/components/ui/MetricTooltip";
 import { TableViewDef, BacktestView } from "./tableConfigs";
+import TradeLogDrawer from "./TradeLogDrawer";
+import { strategyAPI, portfolioAPI } from "@/services/api";
 
 /* ─── Types ─── */
 type SortKey = string;
@@ -14,12 +16,14 @@ type SortDir = "asc" | "desc";
 interface StrategyTableProps {
   strategies: RiskAsset[];
   selectedId?: string;
+  selectedChildId?: string;
   checkedIds: Set<string>;
   allChecked: boolean;
   someChecked: boolean;
   onToggleAll: () => void;
   onToggleCheck: (id: string, checked: boolean) => void;
   onSelect: (id: string) => void;
+  onSelectChild?: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   view?: TableViewDef;
@@ -55,7 +59,7 @@ function SortHeader({
     >
       <div className={`inline-flex items-center gap-1 ${align === "right" ? "justify-end" : align === "center" ? "justify-center" : "justify-start"}`}>
         {metricKey ? (
-          <MetricTooltip metricKey={metricKey} variant="table">{label}</MetricTooltip>
+          <MetricTooltip metricKey={metricKey} variant="table" />
         ) : (
           <span>{label}</span>
         )}
@@ -67,8 +71,8 @@ function SortHeader({
 
 /* ─── Main Component ─── */
 export default function StrategyTable({
-  strategies, selectedId, checkedIds, allChecked, someChecked,
-  onToggleAll, onToggleCheck, onSelect, onEdit, onDelete,
+  strategies, selectedId, selectedChildId, checkedIds, allChecked, someChecked,
+  onToggleAll, onToggleCheck, onSelect, onSelectChild, onEdit, onDelete,
   view = BacktestView, universeContext
 }: StrategyTableProps) {
 
@@ -83,6 +87,9 @@ export default function StrategyTable({
       return next;
     });
   };
+
+  /* Trade Log Drawer State */
+  const [drawerTarget, setDrawerTarget] = useState<{ id: string, name: string, type: "STRATEGY" | "PORTFOLIO" } | null>(null);
 
   /* Search */
   const [search, setSearch] = useState("");
@@ -100,9 +107,46 @@ export default function StrategyTable({
     }
   };
 
+  /* ─── Lazy Load Bayesian Data ─── */
+  const [bayesCache, setBayesCache] = useState<Record<string, any>>({});
+  const requestedBayes = React.useRef<Set<string>>(new Set());
+
+  React.useEffect(() => {
+    if (view.id === "bayesian") {
+      strategies.forEach(s => {
+        if (!requestedBayes.current.has(s.id)) {
+           requestedBayes.current.add(s.id);
+           const apiCaller = "strategy_ids" in s ? portfolioAPI : strategyAPI;
+           apiCaller.getBayes(s.id).then(res => {
+             setBayesCache(prev => ({...prev, [s.id]: res.data}));
+           }).catch(() => {});
+        }
+        
+        if ("strategy_ids" in s && s.strategy_ids) {
+            s.strategy_ids.forEach((childId: string) => {
+               if (!requestedBayes.current.has(childId)) {
+                 requestedBayes.current.add(childId);
+                 strategyAPI.getBayes(childId).then(res => {
+                   setBayesCache(prev => ({...prev, [childId]: res.data}));
+                 }).catch(() => {});
+               }
+            });
+        }
+      });
+    }
+  }, [view.id, strategies]);
+
+  const strategiesWithCache = useMemo(() => {
+    if (view.id !== "bayesian") return strategies;
+    return strategies.map(s => ({
+      ...s,
+      bayesian_breakdown: bayesCache[s.id] || s.bayesian_breakdown
+    })) as RiskAsset[];
+  }, [strategies, bayesCache, view.id]);
+
   /* Filtered + sorted list */
   const processed = useMemo(() => {
-    let list = strategies;
+    let list = strategiesWithCache;
 
     // Filter
     if (search.trim()) {
@@ -124,8 +168,10 @@ export default function StrategyTable({
         let vb: number | string = 0;
         
         if (col) {
-          va = col.sortValue(a);
-          vb = col.sortValue(b);
+           va = col.sortValue(a);
+           vb = col.sortValue(b);
+           if (va === undefined || va === null) va = -999999;
+           if (vb === undefined || vb === null) vb = -999999;
         }
         
         if (typeof va === 'string' && typeof vb === 'string') {
@@ -139,7 +185,17 @@ export default function StrategyTable({
     }
 
     return list;
-  }, [strategies, search, sortKey, sortDir, view.columns]);
+  }, [strategiesWithCache, search, sortKey, sortDir, view.columns]);
+
+  const universeContextWithCache = useMemo(() => {
+    if (view.id !== "bayesian") return universeContext || [];
+    return universeContext?.map(s => ({
+      ...s,
+      bayesian_breakdown: bayesCache[s.id] || s.bayesian_breakdown
+    })) as RiskAsset[];
+  }, [universeContext, bayesCache, view.id]);
+
+
 
   const [prevView, setPrevView] = useState(view.id);
   if (view.id !== prevView) {
@@ -250,10 +306,15 @@ export default function StrategyTable({
                     <td className="px-2 py-1.5 text-center">
                       <div className="flex justify-center gap-0.5 opacity-40 hover:opacity-100 transition-opacity">
                         <button
+                          onClick={(e) => { e.stopPropagation(); setDrawerTarget({ id: s.id, name: s.name, type: "strategy_ids" in s ? "PORTFOLIO" : "STRATEGY" }); }}
+                          className="text-iron-400 hover:text-risk-cyan transition-colors px-1 py-0.5 rounded hover:bg-risk-cyan/10 text-xs"
+                          title="View Trades"
+                        >🔍</button>
+                        <button
                           onClick={(e) => { e.stopPropagation(); onEdit(s.id); }}
                           className="text-iron-400 hover:text-iron-100 transition-colors px-1 py-0.5 rounded hover:bg-surface-tertiary text-xs"
                           title="Edit"
-                        >✏️</button>
+                        >⚙️</button>
                         <button
                           onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
                           className="text-iron-400 hover:text-risk-red transition-colors px-1 py-0.5 rounded hover:bg-risk-red/10 text-xs"
@@ -265,11 +326,24 @@ export default function StrategyTable({
 
                   {/* Child Rows (OOP Render) */}
                   {expandedIds.has(s.id) && "strategy_ids" in s && s.strategy_ids?.map((childId: string, childIdx: number) => {
-                      const child = universeContext?.find(u => u.id === childId);
+                      const child = universeContextWithCache?.find(u => u.id === childId);
                       if (!child) return null;
                       const isLast = childIdx === ((s as Portfolio).strategy_ids!.length - 1);
+                      const isChildSelected = child.id === (selectedChildId || selectedId);
+                      
                       return (
-                        <tr key={`child-${s.id}-${child.id}`} className={`bg-black/20 hover:bg-surface-secondary/50 text-[13px] opacity-70 hover:opacity-100 transition-all ${isLast ? "border-b border-iron-800/40" : ""}`}>
+                        <tr 
+                          key={`child-${s.id}-${child.id}`} 
+                          onClick={(e) => { e.stopPropagation(); if (onSelectChild) onSelectChild(child.id); else onSelect(child.id); }}
+                          className={`
+                            bg-black/20 text-[13px] transition-all cursor-pointer border-l-[3px] border-l-transparent
+                            ${isLast ? "border-b border-iron-800/40" : ""}
+                            ${isChildSelected 
+                              ? "!bg-risk-green/10 border-l-[3px] !border-l-risk-green shadow-[inset_0_0_20px_rgba(0,230,118,0.05)] opacity-100 font-medium" 
+                              : "hover:bg-surface-secondary/50 opacity-70 hover:opacity-100"
+                            }
+                          `}
+                        >
                           {/* Empty Checkbox & Expander */}
                           <td className="px-3 py-1.5" />
                           <td className="px-1 py-1.5 text-right text-iron-700 font-mono text-xs pr-2">↳</td>
@@ -277,12 +351,20 @@ export default function StrategyTable({
                           {/* OOP Dynamic Columns */}
                           {view.columns.map(c => (
                             <td key={c.id} className={`px-3 py-1.5 scale-95 origin-left ${c.align === "left" ? "text-left" : c.align === "center" ? "text-center" : "text-right"}`}>
-                              {c.renderCell(child, universeContext || processed, true)}
+                              {c.renderCell(child, universeContextWithCache || processed, true)}
                             </td>
                           ))}
 
-                          {/* Empty Actions */}
-                          <td className="px-2 py-1.5" />
+                          {/* Actions for child */}
+                          <td className="px-2 py-1.5 text-center">
+                            <div className="flex justify-center gap-0.5 opacity-40 hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setDrawerTarget({ id: child.id, name: child.name, type: "STRATEGY" }); }}
+                                  className="text-iron-400 hover:text-risk-cyan transition-colors px-1 py-0.5 rounded hover:bg-risk-cyan/10 text-xs"
+                                  title="View Trades"
+                                >🔍</button>
+                            </div>
+                          </td>
                         </tr>
                       );
                   })}
@@ -296,7 +378,7 @@ export default function StrategyTable({
             <tr className="sticky bottom-0 bg-surface-secondary border-t-2 border-iron-700 text-xs uppercase tracking-wider">
               <td className="px-3 py-2.5" />
               <td className="px-1 py-2.5" />
-              {view.columns.map(c => (
+               {view.columns.map(c => (
                 <td key={c.id} className={`px-3 py-2.5 ${c.align === "left" ? "text-left" : c.align === "center" ? "text-center" : "text-right"}`}>
                    {c.renderFooter ? c.renderFooter(processed) : ""}
                 </td>
@@ -306,6 +388,14 @@ export default function StrategyTable({
           </tfoot>
         </table>
       </div>
+
+      <TradeLogDrawer 
+        isOpen={drawerTarget !== null}
+        onClose={() => setDrawerTarget(null)}
+        targetId={drawerTarget?.id || null}
+        targetName={drawerTarget?.name || ""}
+        type={drawerTarget?.type || "STRATEGY"}
+      />
     </div>
   );
 }

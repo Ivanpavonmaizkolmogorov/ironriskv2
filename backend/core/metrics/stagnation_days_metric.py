@@ -31,8 +31,15 @@ class StagnationDaysMetric(BaseMetric):
         for t in trades:
             dt = t.get("exit_time") or t.get("close_time") or t.get("date")
             if isinstance(dt, str):
-                # Try common formats
-                for fmt in ("%Y.%m.%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+                for fmt in (
+                    "%Y.%m.%d %H:%M:%S", 
+                    "%Y.%m.%d %H:%M",
+                    "%Y/%m/%d %H:%M:%S",
+                    "%Y/%m/%d %H:%M",
+                    "%Y-%m-%dT%H:%M:%S", 
+                    "%Y-%m-%d %H:%M:%S", 
+                    "%Y-%m-%d"
+                ):
                     try:
                         dt = datetime.strptime(dt, fmt)
                         break

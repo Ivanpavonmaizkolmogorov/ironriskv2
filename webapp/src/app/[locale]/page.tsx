@@ -8,6 +8,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 
 /* ── tiny helper: staggered fade-in on scroll ── */
 function useFadeIn() {
@@ -32,79 +33,40 @@ export default function LandingPage() {
   const t = useTranslations("landing");
   const locale = useLocale();
   const router = useRouter();
-
-  const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-
+  const [isNavigating, setIsNavigating] = useState(false);
+  
   useFadeIn();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: `landing-${locale}` }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        router.push("/thank-you");
-      } else {
-        setError(data.error || t("errorSubmit"));
-      }
-    } catch {
-      setError(t("errorNetwork"));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const EmailForm = ({ id, large = false }: { id: string; large?: boolean }) => (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col sm:flex-row gap-3 justify-center"
-      id={id}
-    >
-      <input
-        type="email"
-        required
-        placeholder={t("emailPlaceholder")}
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className={`
-          bg-surface-tertiary/80 border border-iron-700/60 rounded-xl
-          text-iron-100 placeholder-iron-500 focus:outline-none
-          focus:border-risk-green/50 focus:ring-2 focus:ring-risk-green/20
-          backdrop-blur-sm transition-all duration-300
-          ${large ? "px-6 py-4 text-base min-w-[300px]" : "px-4 py-3 text-sm min-w-[260px]"}
-        `}
-      />
+  const SimulateButton = ({ large = false }: { large?: boolean }) => (
+    <div className="flex justify-center">
       <button
-        type="submit"
-        disabled={isLoading}
+        onClick={() => {
+          setIsNavigating(true);
+          router.push(`/${locale}/simulate`);
+        }}
+        disabled={isNavigating}
         className={`
-          bg-risk-green text-surface-primary font-semibold rounded-xl
-          whitespace-nowrap cursor-pointer
+          flex items-center justify-center gap-2
+          bg-risk-green text-surface-primary font-bold rounded-xl
+          whitespace-nowrap ${isNavigating ? 'cursor-wait opacity-80' : 'cursor-pointer'}
           hover:shadow-[0_0_40px_rgba(0,230,118,0.35)] hover:scale-[1.03]
           active:scale-[0.98]
-          transition-all duration-300 disabled:opacity-50
-          ${large ? "px-8 py-4 text-base" : "px-6 py-3 text-sm"}
+          transition-all duration-300
+          ${large ? "px-8 py-5 text-lg min-w-[300px]" : "px-6 py-3 text-sm min-w-[260px]"}
         `}
       >
-        {isLoading ? t("emailBtnLoading") : large ? t("emailBtnLarge") : t("emailBtnSmall")}
+        {isNavigating ? (
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 border-2 border-surface-primary/30 border-t-surface-primary rounded-full animate-spin" />
+            <span>{locale === 'en' ? 'Loading...' : 'Cargando...'}</span>
+          </div>
+        ) : (
+          large ? t("emailBtnLarge") : t("emailBtnSmall")
+        )}
       </button>
-      {error && <p className="text-risk-red text-sm mt-1">{error}</p>}
-    </form>
+    </div>
   );
 
-  const otherLocale = locale === "es" ? "en" : "es";
-  const otherLocaleLabel = locale === "es" ? "EN" : "ES";
-  const currentLocaleLabel = locale === "es" ? "ES" : "EN";
 
   return (
     <>
@@ -171,6 +133,19 @@ export default function LandingPage() {
           <div className="absolute inset-0 ir-grid-bg" />
         </div>
 
+        {/* ── Transition Overlay ── */}
+        {isNavigating && (
+          <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-surface-primary/95 backdrop-blur-xl animate-in fade-in duration-300">
+            <div className="w-16 h-16 border-4 border-iron-800 border-t-risk-green rounded-full animate-spin mb-6 shadow-[0_0_30px_rgba(0,230,118,0.4)]"></div>
+            <h2 className="text-2xl font-bold text-iron-100 mb-2">
+              {locale === 'en' ? 'Booting Simulator...' : 'Iniciando Laboratorio...'}
+            </h2>
+            <p className="text-sm text-risk-green font-mono">
+              {locale === 'en' ? 'Calibrating Edge Matrix' : 'Calibrando Matriz de Riesgo'}
+            </p>
+          </div>
+        )}
+
         {/* ── Nav ── */}
         <nav className="fixed top-0 w-full z-50 bg-surface-primary/70 backdrop-blur-2xl border-b border-iron-800/50">
           <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -178,27 +153,22 @@ export default function LandingPage() {
               IRON<span className="text-risk-green">RISK</span>
             </span>
             <div className="flex items-center gap-5">
-              <div className="flex gap-2 text-sm font-medium">
-                {locale === "es" ? (
-                  <>
-                    <span className="text-iron-100 cursor-default">ES</span>
-                    <span className="text-iron-700">/</span>
-                    <a href={`/${otherLocale}`} className="text-iron-500 hover:text-iron-300 transition-colors">{otherLocaleLabel}</a>
-                  </>
-                ) : (
-                  <>
-                    <a href="/es" className="text-iron-500 hover:text-iron-300 transition-colors">ES</a>
-                    <span className="text-iron-700">/</span>
-                    <span className="text-iron-100 cursor-default">{currentLocaleLabel}</span>
-                  </>
-                )}
+              <LanguageSwitcher />
+              <div className="flex items-center gap-3">
+                <a href={`/${locale}/login`} className="text-sm font-semibold text-iron-400 hover:text-white transition-colors">
+                  {t("navLogin")}
+                </a>
+                <button
+                  onClick={() => {
+                    setIsNavigating(true);
+                    router.push(`/${locale}/simulate`);
+                  }}
+                  disabled={isNavigating}
+                  className="px-4 py-2 text-sm bg-risk-green/15 text-risk-green border border-risk-green/25 rounded-lg hover:bg-risk-green/25 hover:border-risk-green/40 transition-all duration-300"
+                >
+                  {t("navCta")}
+                </button>
               </div>
-              <a
-                href="#waitlist"
-                className="px-4 py-2 text-sm bg-risk-green/15 text-risk-green border border-risk-green/25 rounded-lg hover:bg-risk-green/25 hover:border-risk-green/40 transition-all duration-300"
-              >
-                {t("navCta")}
-              </a>
             </div>
           </div>
         </nav>
@@ -225,8 +195,8 @@ export default function LandingPage() {
             </p>
 
             {/* Hero CTA */}
-            <div className="ir-fade ir-delay-3 ir-glow rounded-2xl inline-block">
-              <EmailForm id="hero-form" />
+            <div className="ir-fade ir-delay-3 ir-glow rounded-2xl inline-block mt-4">
+              <SimulateButton large />
             </div>
 
             <p className="ir-fade ir-delay-4 text-sm font-medium text-iron-500 mt-8 tracking-wide">
@@ -280,6 +250,36 @@ export default function LandingPage() {
                   <p className="text-sm text-iron-500 leading-relaxed">{step.desc}</p>
                 </div>
               ))}
+            </div>
+
+            {/* ── Feature Highlights ── */}
+            <div className="mt-16">
+              <h3 className="ir-fade text-lg md:text-2xl font-bold text-iron-200 text-center mb-8 tracking-tight">
+                {t("featSectionTitle")}
+              </h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                {[
+                  { icon: t("feat1Icon"), title: t("feat1Title"), desc: t("feat1Desc") },
+                  { icon: t("feat2Icon"), title: t("feat2Title"), desc: t("feat2Desc") },
+                ].map((feat, i) => (
+                  <div
+                    key={i}
+                    className={`ir-fade ir-delay-${i + 1} relative overflow-hidden bg-surface-secondary/40 backdrop-blur-sm border border-iron-800/50 rounded-2xl p-7
+                      hover:border-risk-green/25 hover:shadow-[0_0_40px_rgba(0,230,118,0.08)]
+                      transition-all duration-500 group cursor-default`}
+                  >
+                    {/* Subtle corner glow */}
+                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-risk-green/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="relative">
+                      <span className="text-3xl mb-4 block">{feat.icon}</span>
+                      <h4 className="text-base font-semibold text-iron-100 mb-2 group-hover:text-risk-green transition-colors duration-300">
+                        {feat.title}
+                      </h4>
+                      <p className="text-sm text-iron-500 leading-relaxed">{feat.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -362,8 +362,8 @@ export default function LandingPage() {
             </p>
 
             {/* Main CTA */}
-            <div className="ir-fade ir-delay-3 ir-glow rounded-2xl inline-block">
-              <EmailForm id="cta-form" large />
+            <div className="ir-fade ir-delay-3 ir-glow rounded-2xl inline-block mt-4">
+              <SimulateButton large />
             </div>
 
             <p className="ir-fade ir-delay-4 text-xs text-iron-600 mt-6">

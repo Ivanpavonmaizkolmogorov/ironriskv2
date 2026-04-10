@@ -14,11 +14,19 @@ export default function MetricTooltip({ metricKey, variant = "table", children }
   let tooltipText = "";
   
   try {
-    displayLabel = variant === "table" ? t(`${metricKey}.tableLabel`) : t(`${metricKey}.label`);
-    tooltipText = t(`${metricKey}.tooltip`);
+    // Si pasamos children (como un título customizado), no forzamos leer un .label inexistente
+    if (!children) {
+      displayLabel = variant === "table" ? t(`${metricKey}.tableLabel`) : t(`${metricKey}.label`);
+    }
+    
+    if (variant === "chart") {
+      try { tooltipText = t(`${metricKey}.chartGuide`); } 
+      catch { tooltipText = t(`${metricKey}.tooltip`); }
+    } else {
+      tooltipText = t(`${metricKey}.tooltip`);
+    }
   } catch (e) {
-    // Fallback if key is missing in json
-    return <span className="font-medium inline-block">{children || metricKey}</span>;
+    return <span className="font-medium inline-block relative z-10">{children || metricKey}</span>;
   }
 
   const content = children || displayLabel;

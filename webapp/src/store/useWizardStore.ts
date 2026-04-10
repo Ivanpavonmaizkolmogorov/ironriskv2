@@ -20,6 +20,7 @@ interface StepTwoData {
 interface StepThreeData {
   maxDrawdown: number;
   dailyLoss: number;
+  riskMultiplier: number;
 }
 
 interface WizardState {
@@ -46,7 +47,7 @@ const initialState = {
   currentStep: 1 as const,
   stepOneData: { tradingAccountId: "", name: "", description: "", magicNumber: 0, startDate: "" },
   stepTwoData: { file: null, previewRows: 0, isValid: false },
-  stepThreeData: { maxDrawdown: 0, dailyLoss: 0 },
+  stepThreeData: { maxDrawdown: 0, dailyLoss: 0, riskMultiplier: 1 },
   isSubmitting: false,
   error: null,
   isBatchImporting: false,
@@ -90,8 +91,19 @@ export const useWizardStore = create<WizardState>((set, get) => ({
       formData.append("file", stepTwoData.file);
 
       const res = await strategyAPI.upload(formData);
+      const strategyId = res.data.id;
+      
+      // Apply risk multiplier if not 1.0
+      if (stepThreeData.riskMultiplier && stepThreeData.riskMultiplier !== 1 && stepThreeData.riskMultiplier > 0) {
+        try {
+          await strategyAPI.applyMultiplier(strategyId, stepThreeData.riskMultiplier);
+        } catch (err) {
+          console.error("Failed to apply risk multiplier:", err);
+        }
+      }
+      
       set({ isSubmitting: false });
-      return res.data.id;
+      return strategyId;
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Upload failed";
       set({ error: message, isSubmitting: false });

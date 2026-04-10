@@ -43,5 +43,6 @@ def validate_api_token(db: Session, token_str: str) -> TradingAccount:
 
 def revoke_trading_account(db: Session, user_id: str, account_id: str) -> None:
     account = get_trading_account_by_id(db, account_id, user_id)
-    account.is_active = False # Or delete
+    # Hard delete — cascade will remove strategies, trades, etc.
+    db.delete(account)
     db.commit()

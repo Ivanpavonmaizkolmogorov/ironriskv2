@@ -15,9 +15,14 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRATION_MINUTES: int = 1440
     CORS_ORIGINS: str = "http://localhost:3000"
+    SMTP_EMAIL: str | None = None
+    SMTP_PASSWORD: str | None = None
+    TELEGRAM_BOT_TOKEN: str | None = None
+    BETA_ACCESS_CODE: str | None = None
 
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 
 @lru_cache

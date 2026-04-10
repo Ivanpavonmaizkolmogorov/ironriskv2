@@ -65,6 +65,12 @@ def update_workspace_settings(
         account.default_dashboard_layout = req.default_dashboard_layout
         flag_modified(account, "default_dashboard_layout")
 
+    if req.theme is not None:
+        account.theme = req.theme
+
+    if req.name is not None and req.name.strip():
+        account.name = req.name.strip()
+
     db.commit()
     db.refresh(account)
     return account

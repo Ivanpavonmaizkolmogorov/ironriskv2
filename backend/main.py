@@ -1,5 +1,5 @@
 """IronRisk V2 — FastAPI Backend Entrypoint."""
-
+# Triggering Uvicorn reload to load .env variables...
 import logging
 import traceback
 
@@ -7,13 +7,23 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from models.database import Base, engine, get_settings
+import asyncio
+from datetime import datetime, timezone
+from sqlalchemy import select
+
+from models.database import Base, engine, get_settings, SessionLocal
+from models.trading_account import TradingAccount
+from api.live import dispatch_alerts_background
 from api.auth import router as auth_router
 from api.strategies import router as strategies_router
 from api.live import router as live_router
 from api.trading_accounts import router as trading_accounts_router
 from api.portfolios import router as portfolios_router
 from api.orphans import router as orphans_router
+from api.preferences import router as preferences_router
+from api.simulate import router as simulate_router
+from api.admin import router as admin_router
+from api.telegram import router as telegram_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,19 +42,19 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS — permissive for development
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://192.168.1.135:3000",
-    "*"  # Fallback for API tokens, but Starlette handles specific headers better
+# CORS — dynamic based on FRONTEND_URL
+_cors_origins = [
+    "http://localhost:3000", "http://127.0.0.1:3000",
+    "http://localhost:3001", "http://127.0.0.1:3001",
 ]
+if hasattr(settings, "FRONTEND_URL") and settings.FRONTEND_URL:
+    _cors_origins.append(settings.FRONTEND_URL)
 if hasattr(settings, "CORS_ORIGINS") and settings.CORS_ORIGINS:
-    origins.extend([o.strip() for o in settings.CORS_ORIGINS.split(",")])
+    _cors_origins.extend([o.strip() for o in settings.CORS_ORIGINS.split(",")])
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,7 +68,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.error(traceback.format_exc())
     origin = request.headers.get("origin", "")
     headers = {}
-    if origin in ["http://localhost:3000", "http://127.0.0.1:3000"]:
+    if origin in _cors_origins:
         headers["Access-Control-Allow-Origin"] = origin
         headers["Access-Control-Allow-Credentials"] = "true"
     return JSONResponse(
@@ -75,6 +85,14 @@ app.include_router(live_router)
 app.include_router(trading_accounts_router)
 app.include_router(portfolios_router)
 app.include_router(orphans_router, prefix="/api/orphans", tags=["Orphan Magics"])
+app.include_router(preferences_router)
+app.include_router(simulate_router)
+app.include_router(admin_router)
+app.include_router(telegram_router)
+
+from api import alerts, metrics_schema
+app.include_router(alerts.router)
+app.include_router(metrics_schema.router)
 
 
 @app.get("/")
@@ -90,3 +108,40 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+async def ea_connectivity_watchdog():
+    """Periodically checks if any MT5 EA has disconnected (heartbeat staled)."""
+    while True:
+        await asyncio.sleep(60.0) # Check every 60 seconds
+        try:
+            with SessionLocal() as db:
+                now = datetime.now(timezone.utc)
+                # Ensure we only track active accounts
+                accounts = db.query(TradingAccount).filter(TradingAccount.is_active == True).all()
+                for acc in accounts:
+                    if acc.last_heartbeat_at:
+                        # SQLite might return a naive datetime depending on driver configurations
+                        last_hb = acc.last_heartbeat_at
+                        if last_hb.tzinfo is None:
+                            last_hb = last_hb.replace(tzinfo=timezone.utc)
+                            
+                        elapsed_seconds = (now - last_hb).total_seconds()
+                        elapsed_minutes = elapsed_seconds / 60.0
+                        if elapsed_minutes >= 1: # We dispatch it if it has been away for at least 1 min
+                            # The AlertEngine handles cooldowns, so this won't spam!
+                            dispatch_alerts_background(
+                                user_id=acc.user_id,
+                                target_type="account",
+                                target_id=acc.id,
+                                metrics={"ea_disconnect_minutes": elapsed_minutes}
+                            )
+        except Exception as e:
+            logger.error(f"Heartbeat Watchdog Error: {e}")
+
+from services.telegram_bot import telegram_bot_poller
+
+@app.on_event("startup")
+async def startup_event():
+    loop = asyncio.get_running_loop()
+    loop.create_task(ea_connectivity_watchdog())
+    loop.create_task(telegram_bot_poller())

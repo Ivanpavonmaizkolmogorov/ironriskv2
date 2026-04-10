@@ -4,6 +4,9 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import ThemeProvider from "@/components/ui/ThemeProvider";
+import { MetricsProvider } from "@/contexts/MetricsContext";
+import AdminToolbar from "@/components/ui/AdminToolbar";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -31,7 +34,12 @@ export default async function RootLayout({
     <html lang={locale} className="dark">
       <body className="min-h-screen bg-surface-primary text-iron-200 antialiased">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <ThemeProvider>
+            <MetricsProvider>
+              {children}
+              <AdminToolbar />
+            </MetricsProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
         <Analytics />
       </body>

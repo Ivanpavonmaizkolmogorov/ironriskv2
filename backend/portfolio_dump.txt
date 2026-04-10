@@ -1,0 +1,228 @@
+PORTFOLIO: Global (ID: 2a5e23f5-ef9c-4adc-a508-b6ad52e5212c)
+  max_drawdown_limit: 27334.97
+  metrics_snapshot.DrawdownMetric: {'max_drawdown': 27334.97000000009, 'mean_drawdown': 5036.219463977504, 'std_drawdown': 4958.977753772662, 'percentile_90': 11898.77099999987, 'percentile_95': 14916.873000000434, 'percentile_99': 20625.238300000226}
+  risk_config.max_drawdown: {'enabled': True, 'limit': 27334.97}
+  distribution_fit.max_drawdown: True
+  STRATEGIES:
+    - 79_gbpjpyLongBuyStopH1V34.1.26 Improved 0.11 (magic: 79):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 987.1}
+    - 48_usdjpyBuyStopPlusV5.H1. 9.8.24 - Improved 0.8 (magic: 48):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1392.66}
+    - 6_WS30.V1.Tickmill.RMBySp.H1.Strategy 5.2.18 - Improved 0.3 (magic: 6):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1077.37}
+    - 78_eurusd.Darw.V1.SellBK.H1.1.1.22 - Improved 0.14 (magic: 78):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1331.65}
+    - 67_usdjpyLongBuyStopH1.V4.4.8.27(1) - Improved 0.9 (magic: 67):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1818.78}
+    - 62_Nas100.fs.Axi.V1.H1.4.5.15(1) - Improved 0.6 (magic: 62):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1821.15}
+    - 15_XauUsdjpyLong.H1. 3.1.24 - Improved 0.11 (magic: 15):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 750.32}
+    - 47_usdjpyBuyStopV3.H1.3.3.26 Improved 0.4 (magic: 47):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1337.05}
+    - 55_gbpjpyLongBuyStopH1V310.2.14 Improved 0.4 (magic: 55):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1078.17}
+    - 68_usdjpyBuyStopV3.H1.9.1.25 Improved 0.14 (magic: 68):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1080.1}
+    - 87_XauUsdjpy.Darw.V4.ByBK.H1.4.10.16 - Improved 0.4 (magic: 87):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1255.34}
+    - 69_Nas100.fs.Axi.V2.H1.7.3.20 - Improved 0.1(1) (magic: 69):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1854.37}
+    - 65_usdjpyLongBuyStopH1.V4.3.1.24(2) - Improved 0.4 (magic: 65):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1928.23}
+    - 21_gbpjpyLongBuyStopH1V34.1.26 Improved 0.9 (magic: 21):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1480.39}
+    - 30_XauUsdjpyLong.H1. 10.9.27 - Improved 0.11 (magic: 30):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 791.77}
+    - 42_usdjpyBuyStopV3.H1.8.10.16(1) Improved 0.14 (magic: 42):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 2018.11}
+    - 59_usdjpyLongBuyStopH1.V4.4.8.27(1) - Improved 0.8 (magic: 59):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1496.36}
+    - 51_usdjpyBuyStopPlusV5.H1. 9.8.24 - Improved 0.0 (magic: 51):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1770.94}
+    - 38_eurusd.Darw.V1.SellBK.H1.1.2.21 - Improved 0.7 (magic: 38):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 449.18}
+    - 61_usdjpyLongBuyStopH1.V4.4.8.27(1) - Improved 0.2 (magic: 61):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1587.52}
+    - 80_gbpjpyLongBuyStopH1V34.1.26 Improved 0.13 (magic: 80):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1025.73}
+    - 32_usdjpyBuyStopV3.H1.5.7.20 Improved 0.9 (magic: 32):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 2065.35}
+    - 9_WS30_v2BKBySp_H1.Strategy 8.8.14(1) - Improved 0.1 (magic: 9):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 2287.77}
+    - 31_XauUsdjpyLong.H1. 10.9.27 - Improved 0.10 (magic: 31):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1461.85}
+    - 27_usdjpyBuyStopV3.H1.2.10.15 Improved 0.7 (magic: 27):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 653.8}
+    - 35_Xausdjpy.Long.H1.10.5.23 - Improved 0.11 (magic: 35):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 983.59}
+    - 66_usdjpyBuyStopV3.H1.7.1.25 Improved 0.0 (magic: 66):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 3406.93}
+    - 11_WS30_v3BKSellTickMill.H1. Strategy 8.6.16 - Improved 0.1 (magic: 11):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1587.6}
+    - 57_usdjpyLongBuyStopH1.V4.4.8.27(1) - Improved 0.4 (magic: 57):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1514.8}
+    - 54_WF Matrix - WF Matrix - Strategy 5.2.18 - Improved 0.3 (magic: 54):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1077.37}
+    - 74_usdjpyBuyStopPlusV5.H1. 3.10.14 - Improved 0.0 (magic: 74):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1544.06}
+    - 24_usdjpyBuyStopV3.H1.9.1.27 Improved 0.13 (magic: 24):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1157.52}
+    - 53_Nas100.fs.Axi.V3.H1.9.6.16 - Improved 0.6 (magic: 53):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1620.97}
+    - 75_usdjpyBuyStopPlusV5.H1. 2.5.22 - Improved 0.3 (magic: 75):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1252.7}
+    - 85_XauUsdjpy.Darw.V4.ByBK.H1.1.10.14(1) - Improved 0.5 (magic: 85):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 878.0}
+    - 18_usdjpyBuyStopPlusV5.H1. 1.5.23 - Improved 0.6 (magic: 18):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1755.94}
+    - 63_usdjpyLongBuyStopH1.V4.1.3.15(1) - Improved 0.0 (magic: 63):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 2167.97}
+    - 70_usdjpyBuyStopV3.H1.2.6.24 Improved 0.5 (magic: 70):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 934.39}
+    - 26_usdjpyBuyStopV3.H1.8.10.16(1) Improved 0.7 (magic: 26):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 2142.59}
+    - 77_usdjpyBuyStopV3.H1.9.1.25 Improved 0.9 (magic: 77):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1374.6}
+    - 58_usdjpyBuyStopPlusV5.H1. 8.8.22(1) - Improved 0.3 (magic: 58):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1290.74}
+    - 19_Xausdjpy.Long.H1.10.5.23 - Improved 0.0 (magic: 19):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 2028.91}
+    - 13_usdjpyBuyStopPlusV5.H1. 8.9.18 - Improved 0.3 (magic: 13):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 2008.83}
+    - 16_XauUsdjpyLong.H1. 3.1.24 - Improved 0.13 (magic: 16):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 853.52}
+    - 71_usdjpyBuyStopPlusV5.H1. 9.9.18 - Improved 0.8 (magic: 71):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1598.42}
+    - 36_WF Matrix - WF Matrix - Strategy 8.1.17 - Improved 0.7 (magic: 36):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 997.78}
+    - 83_usdjpyBuyStopPlusV5.H1. 2.9.19(1) - Improved 0.3 (magic: 83):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1126.01}
+    - 50_usdjpyBuyStopV3.H1.3.3.26 Improved 0.3 (magic: 50):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1610.48}
+    - 4_WS30_v3BKSellTickMill.H1. Strategy 6.5.22 - Improved 0.8 (magic: 4):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1037.15}
+    - 72_usdjpyBuyStopV3.H1.7.10.23 Improved 0.11 (magic: 72):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1874.21}
+    - 44_gbpjpyLongBuyStopH1V35.5.24(1) Improved 0.11 (magic: 44):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 851.98}
+    - 64_gbpjpyLongBuyStopH1V32.1.25 Improved 0.10 (magic: 64):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 939.16}
+    - 29_usdjpyBuyStopPlusV5.H1. 1.5.23 - Improved 0.9 (magic: 29):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1776.31}
+    - 33_Xausdjpy.Long.H1.10.5.23 - Improved 0.13 (magic: 33):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1522.85}
+    - 20_usdjpyBuyStopV3.H1.3.3.26 Improved 0.6 (magic: 20):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1622.66}
+    - 40_Nas100.fs.Axi.V3.H1.5.8.24(2) - Improved 0.1 (magic: 40):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1382.92}
+    - 12_WS30_v3BKSellTickMill.H1. Strategy 6.5.22 - Improved 0.10 (magic: 12):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1335.25}
+    - 86_XauUsdjpy.Darw.V4.ByBK.H1.8.1.19 - Improved 0.10 (magic: 86):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 724.26}
+    - 37_usdjpyBuyStopPlusV5.H1. 4.9.16 - Improved 0.10 (magic: 37):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 921.22}
+    - 2_WS30_v3BKSellTickMill.H1. Strategy 6.5.22 - Improved 0.2.sqx (magic: 2):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 990.14}
+    - 56_usdjpyBuyStopV3.H1.6.8.19 Improved 0.9 (magic: 56):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 2479.21}
+    - 88_DJ30.Axi.V4.ByBK.H1.6.4.22(1) - Improved 0.10 (magic: 88):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 832.54}
+    - 3_WS30_v3BKSellTickMill.H1. Strategy 8.6.16 - Improved 0.11 (magic: 3):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1594.8}
+    - 46_usdjpyBuyStopV3.H1.9.7.20(2) Improved 0.14 (magic: 46):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1924.26}
+    - 39_eurusd.Darw.V1.SellBK.H1.1.2.21 - Improved 0.2 (magic: 39):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 522.32}
+    - 25_usdjpyBuyStopV3.H1.9.1.27 Improved 0.0 (magic: 25):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1477.95}
+    - 76_usdjpyBuyStopV3.H1.10.9.14 Improved 0.7 (magic: 76):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1622.57}
+    - 52_usdjpyBuyStopPlusV5.H1. 8.1.24 - Improved 0.4 (magic: 52):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1125.6}
+    - 7_WS30_v3BKSellTickMill.H1. Strategy 8.6.16 - Improved 0.4 (magic: 7):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 990.14}
+    - 82_usdjpyBuyStopPlusV5.H1. 5.10.21(1) - Improved 0.2 (magic: 82):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1528.86}
+    - 28_XauUsdjpyLong.H1. 9.2.17(1) - Improved 0.14 (magic: 28):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1278.44}
+    - 1_WS30.V1.Tickmill.RMBySp.H1.Strategy 8.3.25 - Improved 0.7 (magic: 1):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1285.45}
+    - 84_XauUsdjpy.Darw.V4.ByBK.H1.7.4.24 - Improved 0.3 (magic: 84):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 873.28}
+    - 17_XauUsdjpyLong.H1. 3.1.24 - Improved 0.5 (magic: 17):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1095.84}
+    - 23_XauUsdjpyLong.H1. 9.1.15(1) - Improved 0.5 (magic: 23):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1098.84}
+    - 8_WS30_v3BKSellTickMill.H1. Strategy 8.6.16 - Improved 0.2 (magic: 8):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1754.94}
+    - 73_usdjpyBuyStopPlusV5.H1. 2.5.22 - Improved 0.7 (magic: 73):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1520.89}
+    - 49_usdjpyBuyStopPlusV5.H1. 9.8.24 - Improved 0.10 (magic: 49):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1091.82}
+    - 22_WF Matrix - WF Matrix - Strategy 8.3.25 - Improved 0.7 (magic: 22):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1285.45}
+    - 10_BTC_Tickmill_H1_V4.2.1.19(1) - Improved 0.6 (magic: 10):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1912.9}
+    - 34_XauUsdjpyLong.H1. 3.1.24 - Improved 0.9 (magic: 34):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 954.76}
+    - 60_BTC_Tickmill_H1_V4.5.1.20(1) - Improved 0.5 (magic: 60):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1859.11}
+    - 41_XauUsdjpyLong.H1. 9.2.17(1) - Improved 0.3 (magic: 41):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 718.14}
+    - 43_gbpjpyLongBuyStopH1V39.10.23 Improved 0.8 (magic: 43):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 897.68}
+    - 5_WS30.V1.Tickmill.RMBySp.H1.Strategy 8.1.17 - Improved 0.7 (magic: 5):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 997.78}
+    - 45_usdjpyBuyStopV3.H1.1.7.20 Improved 0.3 (magic: 45):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1276.32}
+    - 81_usdjpyBuyStopPlusV5.H1. 5.9.24(2) - Improved 0.6 (magic: 81):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1591.48}
+    - 14_Xausdjpy.Long.H1.9.9.20(1) - Improved 0.0 (magic: 14):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 1237.59}
+--------------------------------------------------
+PORTFOLIO: Global (ID: a05710f2-38a7-4d41-814a-ef02d3022f89)
+  max_drawdown_limit: 19810.47
+  metrics_snapshot.DrawdownMetric: {'max_drawdown': 19810.474999999977, 'mean_drawdown': 4219.0812985252705, 'std_drawdown': 3606.6608786292522, 'percentile_90': 8450.866839999804, 'percentile_95': 11092.476939999773, 'percentile_99': 16277.091986000274}
+  risk_config.max_drawdown: {'enabled': True, 'limit': 19810.47, 'current': 12346.4}
+  distribution_fit.max_drawdown: True
+  STRATEGIES:
+    - 19_Xausdjpy.Long.H1.10.5.23 - Improved 0.0 (magic: 3110523):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 17245.734999999957, 'p_amber': 85, 'p_red': 95, 'current': 2755.62}
+    - 58_usdjpyBuyStopPlusV5.H1. 8.8.22(1) - Improved 0.3 (magic: 95188):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 14456.28799999997, 'p_amber': 85, 'p_red': 95, 'current': 9286.55}
+    - 18_usdjpyBuyStopPlusV5.H1. 1.5.23 - Improved 0.6 (magic: 95115):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 17506.7218, 'p_amber': 85, 'p_red': 95, 'current': 8761.16}
+    - 21_gbpjpyLongBuyStopH1V34.1.26 Improved 0.9 (magic: 10134126):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 12237.28, 'p_amber': 85, 'p_red': 95, 'current': 3719.98}
+    - 14_Xausdjpy.Long.H1.9.9.20(1) - Improved 0.0 (magic: 12111):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 14479.803000000044, 'p_amber': 85, 'p_red': 95, 'current': 1944.24}
+--------------------------------------------------
+PORTFOLIO: Global (ID: e141d381-cb47-461a-ad63-54259a4d6477)
+  max_drawdown_limit: 990.14
+  metrics_snapshot.DrawdownMetric: {'max_drawdown': 990.1399999999999, 'mean_drawdown': 258.963653846154, 'std_drawdown': 205.52982475127655, 'percentile_90': 515.1000000000007, 'percentile_95': 655.1000000000001, 'percentile_99': 899.7193000000003}
+  risk_config.max_drawdown: {'enabled': True, 'limit': 990.14}
+  distribution_fit.max_drawdown: True
+  STRATEGIES:
+    - DarwinexZero (magic: 0):
+      risk_config.max_drawdown: {'enabled': False, 'limit': 884.43, 'current': 7381.23}
+    - 2_WS30_v3BKSellTickMill.H1. Strategy 6.5.22 - Improved 0.2.sqx (magic: 2):
+      risk_config.max_drawdown: {'enabled': False, 'limit': 990.14, 'current': 0.0}
+--------------------------------------------------
+PORTFOLIO: DrGero0007 (ID: 0f258ea0-2b82-44b5-84f6-40a80e86853a)
+  max_drawdown_limit: 19810.47
+  metrics_snapshot.DrawdownMetric: {'max_drawdown': 19810.474999999977, 'mean_drawdown': 4219.0812985252705, 'std_drawdown': 3606.6608786292522, 'percentile_90': 8450.866839999804, 'percentile_95': 11092.476939999773, 'percentile_99': 16277.091986000274}
+  risk_config.max_drawdown: {'enabled': True, 'limit': 19810.47, 'current': 12795.45}
+  distribution_fit.max_drawdown: True
+  STRATEGIES:
+    - 19_Xausdjpy.Long.H1.10.5.23 - Improved 0.0 (magic: 3110523):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 17245.734999999957, 'p_amber': 85, 'p_red': 95, 'current': 2755.62}
+    - 58_usdjpyBuyStopPlusV5.H1. 8.8.22(1) - Improved 0.3 (magic: 95188):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 14456.28799999997, 'p_amber': 85, 'p_red': 95, 'current': 9286.55}
+    - 18_usdjpyBuyStopPlusV5.H1. 1.5.23 - Improved 0.6 (magic: 95115):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 17506.7218, 'p_amber': 85, 'p_red': 95, 'current': 8761.16}
+    - 21_gbpjpyLongBuyStopH1V34.1.26 Improved 0.9 (magic: 10134126):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 12237.28, 'p_amber': 85, 'p_red': 95, 'current': 3719.98}
+    - 14_Xausdjpy.Long.H1.9.9.20(1) - Improved 0.0 (magic: 12111):
+      risk_config.max_drawdown: {'enabled': True, 'limit': 14479.803000000044, 'p_amber': 85, 'p_red': 95, 'current': 1944.24}
+--------------------------------------------------

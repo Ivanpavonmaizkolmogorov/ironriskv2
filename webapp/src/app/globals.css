@@ -5,8 +5,32 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
 
 :root {
-  --background: #0d0f12;
-  --foreground: #e1e4e8;
+  --surface-primary: #0d0f12;
+  --surface-secondary: #161a1f;
+  --surface-tertiary: #1e2228;
+  --surface-elevated: #252a31;
+  --iron-50: #f6f7f8;
+  --iron-100: #e1e4e8;
+  --iron-200: #c3c9d1;
+  --iron-300: #9ea6b3;
+  --iron-400: #78828f;
+  --iron-500: #5d6774;
+  --iron-600: #4a5260;
+  --iron-700: #3e444f;
+  --iron-800: #363b44;
+  --iron-900: #30343b;
+  --iron-950: #1e2127;
+  --risk-green: #00e676;
+  --risk-yellow: #ffea00;
+  --risk-red: #ff1744;
+  --accent: #00e676;
+  --accent-hover: #00c853;
+  --accent-muted: rgba(0, 230, 118, 0.15);
+  --scrollbar-track: #161a1f;
+  --scrollbar-thumb: #3e444f;
+  --scrollbar-thumb-hover: #5d6774;
+  --selection-bg: rgba(0, 230, 118, 0.2);
+  --selection-fg: #00e676;
 }
 
 * {
@@ -16,8 +40,8 @@
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--surface-primary);
+  color: var(--iron-100);
   font-family: "Inter", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -28,18 +52,29 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #161a1f;
+  background: var(--scrollbar-track);
 }
 ::-webkit-scrollbar-thumb {
-  background: #3e444f;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #5d6774;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Selection */
 ::selection {
-  background-color: rgba(0, 230, 118, 0.2);
-  color: #00e676;
+  background-color: var(--selection-bg);
+  color: var(--selection-fg);
+}
+
+/* Bell shake animation for alert toggle */
+@keyframes bellShake {
+  0% { transform: rotate(0deg); }
+  15% { transform: rotate(14deg); }
+  30% { transform: rotate(-12deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-6deg); }
+  75% { transform: rotate(3deg); }
+  100% { transform: rotate(0deg); }
 }

@@ -48,30 +48,34 @@ class StagnationDaysMetric(RiskMetric):
     variable = "stagnation"
 
     def extract_series(self, trades: list[dict]) -> np.ndarray:
-        """Count unique trading days between consecutive equity highs."""
+        """Count unique calendar days between consecutive equity highs."""
         if not trades:
             return np.array([])
 
-        # Group by date, track equity
-        daily_profit: dict[str, float] = defaultdict(float)
-        for t in trades:
-            date_str = str(t.get("time", ""))[:10]
-            daily_profit[date_str] += t.get("profit", 0)
-
-        dates = sorted(daily_profit.keys())
+        from datetime import datetime
         equity = 0.0
         peak = 0.0
         lengths: list[int] = []
-        days_since_peak = 0
+        peak_date = None
 
-        for d in dates:
-            equity += daily_profit[d]
-            days_since_peak += 1
+        for t in trades:
+            profit = t.get("profit", 0)
+            
+            try:
+                time_str = str(t.get("time", "")).replace(".", "-")[:10]
+                current_date = datetime.strptime(time_str, "%Y-%m-%d")
+            except ValueError:
+                continue
+                
+            equity += profit
+            
             if equity > peak:
-                if days_since_peak > 1:
-                    lengths.append(days_since_peak)
+                if peak_date is not None:
+                    days_since = (current_date - peak_date).days
+                    if days_since > 0:
+                        lengths.append(days_since)
                 peak = equity
-                days_since_peak = 0
+                peak_date = current_date
 
         return np.array(lengths) if lengths else np.array([0])
 

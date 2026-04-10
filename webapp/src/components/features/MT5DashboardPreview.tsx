@@ -43,7 +43,7 @@ function SortablePreviewItem({ w, idx }: { w: DashboardWidget, idx: number }) {
   const mockLimitStr = isMoney ? mockLimit.toFixed(2) : Math.round(mockLimit).toString();
   const suffix = isMoney ? "$" : "";
 
-  if (w.style === "progress_bar") {
+
     return (
       <div
         ref={setNodeRef}
@@ -69,46 +69,15 @@ function SortablePreviewItem({ w, idx }: { w: DashboardWidget, idx: number }) {
               {suffix} <span className="ml-[2px] font-mono">40%</span>
             </p>
           </div>
-          <p className="text-[10px] text-[#22c55e] mb-1 truncate leading-tight">
-            Basic Rule: 40% usage
+          <p className="text-[10px] mb-1 truncate leading-tight text-[#A0A0A0]">
+            40%
           </p>
           <div className="w-full h-1 bg-[#333333] border border-[#555] mt-auto">
-            <div className="h-full bg-[#22c55e] w-[40%]" />
+            <div className="h-full w-[40%]" style={{ backgroundColor: "#9ca3af" }} />
           </div>
         </div>
       </div>
     );
-  }
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      className={`flex-1 min-w-[100px] max-w-[140px] rounded-sm overflow-hidden transition-opacity duration-200 cursor-grab active:cursor-grabbing ${isDragging ? "opacity-40 scale-[0.98] shadow-2xl" : "opacity-100"}`}
-      style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        ...style
-      }}
-    >
-      <div className="h-[3px]" style={{ background: w.accentHex }} />
-      <div className="px-3 py-2.5">
-        <p
-          className="text-[9px] uppercase tracking-widest font-semibold mb-1 truncate"
-          style={{ color: "rgba(255,255,255,0.45)" }}
-        >
-          {w.title || "Metric"}
-        </p>
-        <p
-          className="text-base font-mono font-bold tracking-tight"
-          style={{ color: w.accentHex }}
-        >
-          {w.exampleValue}
-        </p>
-      </div>
-    </div>
-  );
 }
 
 export default function MT5DashboardPreview({ widgets, setLayout }: MT5DashboardPreviewProps) {

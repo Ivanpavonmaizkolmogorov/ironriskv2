@@ -1,14 +1,14 @@
-//|                                    IronRisk_Dashboard_v55.mq5  |
+//|                                    IronRisk_Dashboard_v66.mq5  |
 //|                                  Copyright 2026, IronRisk System |
 //|                                             https://ironrisk.pro |
 //+------------------------------------------------------------------+
 #property copyright "IronRisk System"
 #property link      "https://ironrisk.pro"
-#property version   "56.00"
+#property version   "66.00"
 
-// HYBRID ARCHITECTURE - Option A:
-//   Phase 1 (Bootstrap): EA on any chart → creates IronRisk_PnL symbol
-//   Phase 2 (Dashboard): EA on IronRisk_PnL → panel overlay + native PnL chart
+// SINGLE-DRAG ARCHITECTURE (v66):
+//   The EA auto-creates IronRisk_PnL, saves itself as a template,
+//   applies it to the new chart, and self-destructs. One drag only.
 // v18: Persistent M1 bars via CustomRatesReplace (survives MT5 restarts)
 
 // --- External Dependencies (Wininet) ---
@@ -28,17 +28,18 @@ int InternetCloseHandle(int hInternet);
 string g_PnlSymbol = "IronRisk_PnL";
 
 // --- User Inputs ---
-input string   InpApiToken    = "PEGAR_TOKEN_AQUI"; // API Token de Trading Account
-input string   InpWebhookHost = "127.0.0.1";        // Servidor Backend (sin http://)
-input int      InpWebhookPort = 8000;               // Puerto (8000 dev, 443 prod)
-input string   InpWebhookPath = "/api/live/";       // Ruta API Base
-input bool     InpUseHTTPS    = false;              // Usar HTTPS
-input int      InpTimerSec    = 5;                  // Frecuencia Heartbeat (segundos)
+input string   InpApiToken    = "PASTE_TOKEN_HERE"; // Trading Account API Token
+input string   InpWebhookHost = "127.0.0.1";        // Backend Server (no http://)
+input int      InpWebhookPort = 8000;               // Port (8000 dev, 443 prod)
+const string   InpWebhookPath = "/api/live/";       // API Base Path (internal)
+input bool     InpUseHTTPS    = false;              // Use HTTPS
+input int      InpTimerSec    = 5;                  // Heartbeat Frequency (seconds)
 
 // --- Global Types ---
 struct SStrategyNode {
    long magic;
    string name;
+   long associated_magics[];
 };
 
 //+------------------------------------------------------------------+
@@ -222,6 +223,8 @@ CDashboardLayout *g_Layout;
 SStrategyNode g_Strategies[];
 int g_TotalStrategies = 0;
 long g_ActiveMagic = 0;
+long g_ActiveMagics[];
+bool IsActiveMagic(long m) { if(g_ActiveMagic == 0) return true; if(g_ActiveMagic > 0) return (m == g_ActiveMagic); for(int i=0; i<ArraySize(g_ActiveMagics); i++) { if(g_ActiveMagics[i] == m) return true; } return false; }
 string g_ActiveName = "Manual (0)";
 bool g_IsDashboardMode = false; // true when running ON IronRisk_PnL
 
@@ -241,18 +244,19 @@ struct SRiskVar {
    string ctx_label;
    color  ctx_color;
 };
-SRiskVar g_RiskVars[6];
+SRiskVar g_RiskVars[7];
 int      g_RiskVarCount = 0;
 
 void InitDefaultRiskVars()
   {
-   g_RiskVarCount = 6;
+   g_RiskVarCount = 7;
    g_RiskVars[0].key="expected_payoff";   g_RiskVars[0].label="Mean PnL";        g_RiskVars[0].enabled=true;  g_RiskVars[0].limit=0; g_RiskVars[0].current=0; g_RiskVars[0].ctx_percentile=-1; g_RiskVars[0].ctx_label=""; g_RiskVars[0].ctx_color=clrGray;
    g_RiskVars[1].key="max_drawdown";      g_RiskVars[1].label="Current DD";      g_RiskVars[1].enabled=true;  g_RiskVars[1].limit=0; g_RiskVars[1].current=0; g_RiskVars[1].ctx_percentile=-1; g_RiskVars[1].ctx_label=""; g_RiskVars[1].ctx_color=clrGray;
    g_RiskVars[2].key="daily_loss";        g_RiskVars[2].label="Daily Loss";      g_RiskVars[2].enabled=true;  g_RiskVars[2].limit=0; g_RiskVars[2].current=0; g_RiskVars[2].ctx_percentile=-1; g_RiskVars[2].ctx_label=""; g_RiskVars[2].ctx_color=clrGray;
    g_RiskVars[3].key="consecutive_losses";g_RiskVars[3].label="Consec. Losses";  g_RiskVars[3].enabled=false; g_RiskVars[3].limit=0; g_RiskVars[3].current=0; g_RiskVars[3].ctx_percentile=-1; g_RiskVars[3].ctx_label=""; g_RiskVars[3].ctx_color=clrGray;
    g_RiskVars[4].key="stagnation_days";   g_RiskVars[4].label="Stagn. Days";     g_RiskVars[4].enabled=false; g_RiskVars[4].limit=0; g_RiskVars[4].current=0; g_RiskVars[4].ctx_percentile=-1; g_RiskVars[4].ctx_label=""; g_RiskVars[4].ctx_color=clrGray;
    g_RiskVars[5].key="stagnation_trades"; g_RiskVars[5].label="Stagn. Trades";   g_RiskVars[5].enabled=false; g_RiskVars[5].limit=0; g_RiskVars[5].current=0; g_RiskVars[5].ctx_percentile=-1; g_RiskVars[5].ctx_label=""; g_RiskVars[5].ctx_color=clrGray;
+   g_RiskVars[6].key="bayes_p_positive";  g_RiskVars[6].label="P(Exp>0)";        g_RiskVars[6].enabled=false; g_RiskVars[6].limit=0; g_RiskVars[6].current=0; g_RiskVars[6].ctx_percentile=-1; g_RiskVars[6].ctx_label=""; g_RiskVars[6].ctx_color=clrGray;
   }
 
 // Local metrics
@@ -383,7 +387,8 @@ string CServerClient::DownloadRiskChart(long magic, string metric_name, double v
 bool CServerClient::SyncClosedDeals(long magic)
   {
    // Use MT5 GlobalVariable to remember the last sync time for this magic and token
-   string gvName = "IR_Sync_" + m_token + "_" + IntegerToString(magic);
+   // V64 forces a brand new cache variable to automatically pull full history (v64_b)
+   string gvName = "IR_Sync_v64_b_" + m_token + "_" + IntegerToString(magic);
    datetime lastSync = 0;
    if(GlobalVariableCheck(gvName)) lastSync = (datetime)GlobalVariableGet(gvName);
    
@@ -391,37 +396,120 @@ bool CServerClient::SyncClosedDeals(long magic)
    int total = HistoryDealsTotal();
    if(total == 0) return true;
    
+   ulong sync_tickets[];
+   int tCount = 0;
+   // Stage 1: Safely snapshot all relevant tickets so HistorySelectByPosition doesn't corrupt iteration
+   for(int d = 0; d < total; d++)
+     {
+      ulong tk = HistoryDealGetTicket(d);
+      if(tk > 0)
+        {
+         long entry = HistoryDealGetInteger(tk, DEAL_ENTRY);
+         if(entry == DEAL_ENTRY_OUT || entry == DEAL_ENTRY_INOUT)
+           {
+            long mag = HistoryDealGetInteger(tk, DEAL_MAGIC);
+            if(mag == magic || magic == 0)
+              {
+               ArrayResize(sync_tickets, tCount + 1, 100);
+               sync_tickets[tCount++] = tk;
+              }
+           }
+        }
+     }
+     
+   if(tCount == 0) return true;
+
    // Build JSON array of deals
    string jsonTrades = "";
    int count = 0;
    datetime maxTime = lastSync;
    
-   for(int d = 0; d < total; d++)
+   // Stage 2: Process snapshotted tickets. Can freely use HistorySelectByPosition here.
+   for(int i = 0; i < tCount; i++)
      {
-      ulong tk = HistoryDealGetTicket(d);
-      if(tk <= 0) continue;
+      ulong tk = sync_tickets[i];
+      // Note: We might need to ensure the deal is selected to query DEAL properties, 
+      // but since we will use HistoryDealGetInteger with the ticket directly, MT5 auto-loads it or it is in cache?
+      // Actually, HistoryDealSelect(tk) is safer:
+      HistoryDealSelect(tk);
+      
       long mag = HistoryDealGetInteger(tk, DEAL_MAGIC);
-      if(mag != magic && magic != 0) continue; 
-      
-      long entry = HistoryDealGetInteger(tk, DEAL_ENTRY);
-      if(entry != DEAL_ENTRY_OUT && entry != DEAL_ENTRY_INOUT) continue;
-      
       datetime dealTime = (datetime)HistoryDealGetInteger(tk, DEAL_TIME);
       if(dealTime < lastSync) continue;
       
-      double profit = HistoryDealGetDouble(tk, DEAL_PROFIT)
-                      + HistoryDealGetDouble(tk, DEAL_SWAP)
-                      + HistoryDealGetDouble(tk, DEAL_COMMISSION);
+      double d_profit = HistoryDealGetDouble(tk, DEAL_PROFIT);
+      double d_swap = HistoryDealGetDouble(tk, DEAL_SWAP);
+      double d_comm = HistoryDealGetDouble(tk, DEAL_COMMISSION);
       
       string sym = HistoryDealGetString(tk, DEAL_SYMBOL);
       double vol = HistoryDealGetDouble(tk, DEAL_VOLUME);
+      string cmt = HistoryDealGetString(tk, DEAL_COMMENT);
+      StringReplace(cmt, "\\", ""); StringReplace(cmt, "\"", "'");
+      
+      double close_pr = HistoryDealGetDouble(tk, DEAL_PRICE);
+      long deals_type = HistoryDealGetInteger(tk, DEAL_TYPE);
+      string dType = "OUT"; // Fallback
+      if(deals_type == DEAL_TYPE_BUY) dType = "SELL"; // Closing deal was BUY, so position was SELL
+      else if(deals_type == DEAL_TYPE_SELL) dType = "BUY"; // Closing deal was SELL, position was BUY
+      
+      long posId = HistoryDealGetInteger(tk, DEAL_POSITION_ID);
+      double open_pr = 0, sl = 0, tp = 0;
+      long open_time_val = 0;
+      
+      // Stage 3: Position Historical Lookup
+      if(posId > 0 && HistorySelectByPosition(posId))
+        {
+         int pdTotal = HistoryDealsTotal();
+         double pos_comm = 0;
+         double pos_swap = 0;
+         for(int pd=0; pd<pdTotal; pd++)
+           {
+            ulong pdtk = HistoryDealGetTicket(pd);
+            pos_comm += HistoryDealGetDouble(pdtk, DEAL_COMMISSION);
+            pos_swap += HistoryDealGetDouble(pdtk, DEAL_SWAP);
+            
+            long en = HistoryDealGetInteger(pdtk, DEAL_ENTRY);
+            if(en == DEAL_ENTRY_IN || en == DEAL_ENTRY_INOUT)
+              {
+               if(open_pr == 0)
+                 {
+                  open_pr = HistoryDealGetDouble(pdtk, DEAL_PRICE);
+                  open_time_val = HistoryDealGetInteger(pdtk, DEAL_TIME);
+                 }
+              }
+           }
+         d_comm = pos_comm;
+         d_swap = pos_swap;
+         
+         int poTotal = HistoryOrdersTotal();
+         for(int po=0; po<poTotal; po++)
+           {
+            ulong potk = HistoryOrderGetTicket(po);
+            double ord_sl = HistoryOrderGetDouble(potk, ORDER_SL);
+            double ord_tp = HistoryOrderGetDouble(potk, ORDER_TP);
+            if(ord_sl > 0) sl = ord_sl;
+            if(ord_tp > 0) tp = ord_tp;
+           }
+        }
+      
+      // Recalculate full absolute profit for the whole sequence of deals
+      double profit = d_profit + d_swap + d_comm;
       
       string tObj = "{\"ticket\":"+IntegerToString(tk)+
                     ",\"magic_number\":"+IntegerToString(mag)+
                     ",\"symbol\":\""+sym+"\""+
                     ",\"volume\":"+DoubleToString(vol,2)+
                     ",\"profit\":"+DoubleToString(profit,2)+
-                    ",\"close_time\":"+IntegerToString((int)dealTime)+"}";
+                    ",\"comment\":\""+cmt+"\""+ 
+                    ",\"close_time\":"+IntegerToString((int)dealTime)+
+                    ",\"open_time\":"+(open_time_val>0?IntegerToString((int)open_time_val):"null")+
+                    ",\"open_price\":"+(open_pr>0?DoubleToString(open_pr,5):"null")+
+                    ",\"close_price\":"+DoubleToString(close_pr,5)+
+                    ",\"sl\":"+(sl>0?DoubleToString(sl,5):"null")+
+                    ",\"tp\":"+(tp>0?DoubleToString(tp,5):"null")+
+                    ",\"deal_type\":\""+dType+"\""+
+                    ",\"commission\":"+DoubleToString(d_comm,2)+
+                    ",\"swap\":"+DoubleToString(d_swap,2)+"}";
                     
       if(count > 0) jsonTrades += ",";
       jsonTrades += tObj;
@@ -439,7 +527,7 @@ bool CServerClient::SyncClosedDeals(long magic)
      }
      
    // Send POST /api/live/sync-trades
-   string payload = "{\"api_token\":\""+m_token+"\",\"trades\":["+jsonTrades+"]}";
+   string payload = "{\"api_token\":\""+m_token+"\",\"account_number\":\""+IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN))+"\",\"trades\":["+jsonTrades+"]}";
    char post[]; StringToCharArray(payload, post, 0, WHOLE_ARRAY, CP_UTF8);
    int sz = ArraySize(post)-1;
    string hdr = "Content-Type: application/json\r\n";
@@ -473,7 +561,7 @@ bool CServerClient::SendHeartbeat(long magic, double pnl, double dd, int trades,
      }
    
    // Historic metrics (consec_losses, stagnation) are calculated server-side now (SSOT)
-   string json = "{\"api_token\":\""+m_token+"\",\"magic_number\":"+IntegerToString(magic)
+   string json = "{\"api_token\":\""+m_token+"\",\"account_number\":\""+IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN))+"\",\"magic_number\":"+IntegerToString(magic)
       +",\"current_pnl\":"+DoubleToString(pnl,2)+",\"current_drawdown\":"+DoubleToString(dd,2)
       +",\"open_trades\":"+IntegerToString(trades)
       +",\"consecutive_losses\":0,\"stagnation_days\":0,\"stagnation_trades\":0"
@@ -494,6 +582,31 @@ bool CServerClient::SendHeartbeat(long magic, double pnl, double dd, int trades,
      {
       string resp=""; char buf[1024]; int rd=0;
       while(InternetReadFile(hR,buf,1024,rd)&&rd>0) resp+=CharArrayToString(buf,0,rd,CP_UTF8);
+      // v57: Kill signal detection — account mismatch protection
+      if(StringFind(resp,"\"kill\":true")>=0 || StringFind(resp,"\"status\":\"KILL\"")>=0)
+        {
+         string reason = "Account mismatch detected. Remove the EA and reconfigure with the correct token.";
+         int krPos = StringFind(resp, "\"kill_reason\":\"");
+         if(krPos >= 0)
+           {
+            int krStart = krPos + 15;
+            int krEnd = StringFind(resp, "\"", krStart);
+            if(krEnd > krStart) reason = StringSubstr(resp, krStart, krEnd - krStart);
+           }
+         Alert("[IronRisk] KILL SIGNAL: ", reason);
+         InternetCloseHandle(hR); InternetCloseHandle(hC); InternetCloseHandle(hI);
+         ExpertRemove();
+         return false;
+        }
+      // v59: 401 Unauthorized handling (new workspace with old token)
+      if(StringFind(resp,"\"detail\":\"Invalid")>=0 || StringFind(resp,"\"detail\": \"Invalid")>=0)
+        {
+         string reason = "Revoked or Invalid API Token. Please paste the new workspace Token.";
+         Alert("[IronRisk] ERROR 401: ", reason);
+         InternetCloseHandle(hR); InternetCloseHandle(hC); InternetCloseHandle(hI);
+         ExpertRemove();
+         return false;
+        }
       if(StringFind(resp,"\"status\":\"NORMAL\"")>=0) g_ServerStatus="NORMAL";
       else if(StringFind(resp,"\"status\":\"WARNING\"")>=0) g_ServerStatus="WARNING";
       else if(StringFind(resp,"\"status\":\"CRITICAL\"")>=0) g_ServerStatus="CRITICAL";
@@ -838,7 +951,7 @@ void SeedHistoricalEquity()
         }
         
       long mag = HistoryDealGetInteger(tk, DEAL_MAGIC);
-      if(g_ActiveMagic != 0 && mag != g_ActiveMagic) continue;
+      if(!IsActiveMagic(mag)) continue;
       
       double deal_pnl = HistoryDealGetDouble(tk, DEAL_PROFIT)
                         + HistoryDealGetDouble(tk, DEAL_SWAP)
@@ -964,12 +1077,15 @@ void DrawDashboard()
    PNL("IR_BGLINE", 0, 200, chartW, 2, C'50,50,50');
    
    // Title + Status (row 1, y=12)
-   LB("IR_TITLE", 20, 12, "IRONRISK DASHBOARD  v56", 16, clrWhite);
+   LB("IR_TITLE", 20, 12, "IRONRISK DASHBOARD v64", 16, clrWhite);
+   
    color sc = clrGray;
-   if(g_ServerStatus=="NORMAL") sc=clrLimeGreen;
-   else if(g_ServerStatus=="WARNING") sc=clrOrange;
-   else if(g_ServerStatus=="CRITICAL") sc=clrCrimson;
-   LB("IR_STATUS", 380, 12, g_ServerStatus, 16, sc);
+   string dispStatus = g_ServerStatus;
+   if(g_ServerStatus=="NORMAL" || g_ServerStatus=="WARNING" || g_ServerStatus=="CRITICAL") { sc=clrLimeGreen; dispStatus="CONNECTED: IRONRISK CLOUD"; }
+   else if(g_ServerStatus=="KILL") { sc=clrRed; dispStatus="ERROR: INVALID TOKEN OR ACCOUNT"; }
+   else { dispStatus="WAITING CONNECTION..."; }
+   
+   LB("IR_STATUS", 380, 12, dispStatus, 16, sc);
 
    // Strategy (row 2, y=40)
    string _hdrN = g_ActiveName;
@@ -1120,40 +1236,23 @@ void DrawDashboard()
           else valStr = g_Formatter.FormatKey(w.value_key, current);
          }
        
-       // UI Draw Logic based on widget.style
-       if(w.style == "progress_bar")
-         {
           PNL(pfx+"_BG", rvX, 68, cardW_r, 70, C'34,34,34');
           PNL(pfx+"_TOP", rvX, 68, cardW_r, 3, w.accent); // The sombrero
           LB(pfx+"_LBL", rvX+8, 74, w.title, 8, C'160,160,160');
           LB(pfx+"_VAL", rvX+8, 88, valStr, 11, clrWhite);
           
-          string pTxt = "Usage: " + IntegerToString(pctUsage) + "%";
-          if(hasCtx && ctxTxt != "") pTxt = ctxTxt;
-          LB(pfx+"_CTX", rvX+8, 108, pTxt, 8, clrLimeGreen);
+          string pTxt = IntegerToString(pctUsage) + "%";
+          color ctxC = C'140,140,140';
+          if(lim == 0) { pTxt = "Falta pacto"; }
+          LB(pfx+"_CTX", rvX+8, 108, pTxt, 8, ctxC);
           
           // Progress bar fill algorithm
           double pct = (lim > 0) ? MathMin(current / lim, 1.0) : 0.0;
-          color barCol = clrLimeGreen;
-          if(pct > 0.5) barCol = clrGold;
-          if(pct > 0.8) barCol = clrOrangeRed;
-          if(pct >= 1.0) barCol = clrCrimson;
+          color barCol = clrSilver;
           
           PNL(pfx+"_BAR_BG", rvX+8, 122, cardW_r-16, 6, C'51,51,51');
           int fillW = (int)(pct * (cardW_r-16));
           if(fillW > 0) PNL(pfx+"_BAR_FILL", rvX+8, 122, fillW, 6, barCol);
-         }
-       else
-         {
-          // SIMPLE TEXT STYLE
-          // No context text, no limit, just pure huge value to match the Web Preview
-          PNL(pfx+"_BG", rvX, 68, cardW_r, 70, C'25,25,25');
-          PNL(pfx+"_TOP", rvX, 68, cardW_r, 3, w.accent);
-          LB(pfx+"_LBL", rvX+10, 72, w.title, 8, clrGray);
-          
-          string valOnly = g_Formatter.FormatKey(w.value_key, current);
-          LB(pfx+"_VAL", rvX+10, 95, valOnly, 15, w.accent);
-         }
          
        // Chart popup toggle — available on ALL metric cards
          {
@@ -1315,7 +1414,7 @@ void DrawButtons()
       ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);
       ObjectSetInteger(0,n,OBJPROP_XSIZE,w);
       ObjectSetInteger(0,n,OBJPROP_YSIZE,h);
-      string txt = i==0 ? "Global / Todos" : g_Strategies[i].name;
+      string txt = i==0 ? "Global / All" : g_Strategies[i].name;
       if(StringLen(txt) > 16) txt = StringSubstr(txt, 0, 14) + "..";
       ObjectSetString(0,n,OBJPROP_TOOLTIP, i==0 ? "All strategies" : IntegerToString(g_Strategies[i].magic)+"_"+g_Strategies[i].name);
       ObjectSetString(0,n,OBJPROP_TEXT,txt);
@@ -1411,7 +1510,7 @@ void DrawTradeLog()
       ulong tk=HistoryDealGetTicket(d);
       if(tk<=0) continue;
       long m=HistoryDealGetInteger(tk,DEAL_MAGIC);
-      if(g_ActiveMagic!=0 && m!=g_ActiveMagic) continue;
+      if(!IsActiveMagic(m)) continue;
       long entry=HistoryDealGetInteger(tk,DEAL_ENTRY);
       if(entry!=DEAL_ENTRY_OUT && entry!=DEAL_ENTRY_INOUT) continue;
       matchCount++;
@@ -1465,7 +1564,7 @@ void DrawTradeLog()
       ulong tk=HistoryDealGetTicket(d);
       if(tk<=0) continue;
       long m=HistoryDealGetInteger(tk,DEAL_MAGIC);
-      if(g_ActiveMagic!=0 && m!=g_ActiveMagic) continue;
+      if(!IsActiveMagic(m)) continue;
       long entry=HistoryDealGetInteger(tk,DEAL_ENTRY);
       if(entry!=DEAL_ENTRY_OUT && entry!=DEAL_ENTRY_INOUT) continue;
       
@@ -1546,11 +1645,11 @@ void DrawBootstrapScreen()
    ChartSetInteger(0, CHART_COLOR_FOREGROUND, clrDarkGray);
    
    PNL("IR_BOOT_BG", 50, 80, 700, 200, C'15,15,15');
-   LB("IR_BOOT_T1", 80, 100, "IRONRISK DASHBOARD v54", 20, clrWhite);
-   LB("IR_BOOT_T2", 80, 140, "Símbolo privado " + g_PnlSymbol + " creado correctamente.", 12, clrLimeGreen);
-   LB("IR_BOOT_T3", 80, 170, "Se ha abierto un grafico de " + g_PnlSymbol + " automaticamente.", 11, clrSilver);
-   LB("IR_BOOT_T4", 80, 195, ">>> Arrastra este EA a la pestaña '" + g_PnlSymbol + "' <<<", 13, clrGold);
-   LB("IR_BOOT_T5", 80, 225, "Cierra esta pestaña cuando el dashboard esté montado allí.", 10, clrGray);
+   LB("IR_BOOT_T1", 80, 100, "IRONRISK DASHBOARD v64", 20, clrWhite);
+   LB("IR_BOOT_T2", 80, 140, "Private symbol " + g_PnlSymbol + " created correctly.", 12, clrLimeGreen);
+   LB("IR_BOOT_T3", 80, 170, "A chart for " + g_PnlSymbol + " has been opened automatically.", 11, clrSilver);
+   LB("IR_BOOT_T4", 80, 195, ">>> Drag this EA to the '" + g_PnlSymbol + "' tab <<<", 13, clrGold);
+   LB("IR_BOOT_T5", 80, 225, "Close this tab when the dashboard is mounted there.", 10, clrGray);
    ChartRedraw();
   }
 
@@ -1645,7 +1744,7 @@ void CalculateLocalStats()
            }
          
          // Track active strategy stats as before
-         if(g_ActiveMagic==0 || g_ActiveMagic==mag)
+         if(IsActiveMagic(mag))
            { g_LocalOpenTrades++; g_LocalFloatingPnL += posFloat; }
         }
      }
@@ -1669,7 +1768,7 @@ void CalculateLocalStats()
          ulong tk=HistoryDealGetTicket(d);
          if(tk<=0) continue;
          long m=HistoryDealGetInteger(tk,DEAL_MAGIC);
-         if(g_ActiveMagic!=0 && m!=g_ActiveMagic) continue;
+         if(!IsActiveMagic(m)) continue;
          long entry=HistoryDealGetInteger(tk,DEAL_ENTRY);
          if(entry!=DEAL_ENTRY_OUT && entry!=DEAL_ENTRY_INOUT) continue;
          newClosed += HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
@@ -1696,10 +1795,32 @@ void RefreshStrategies()
      {
       string st[]; int cnt=StringSplit(resp,';',st);
       SStrategyNode ns[]; ArrayResize(ns,cnt+1);
-      ns[0].magic=0; ns[0].name="Manual / Todo"; int nt=1;
-      for(int i=0;i<cnt;i++) { if(st[i]=="") continue; string p[]; if(StringSplit(st[i],'|',p)==2) { ns[nt].magic=StringToInteger(p[0]); ns[nt].name=p[1]; nt++; } }
+      int nt=0;
+      for(int i=0;i<cnt;i++) { 
+         if(st[i]=="") continue; 
+         string p[]; 
+         int parts = StringSplit(st[i],'|',p);
+         if(parts >= 2) { 
+            ns[nt].magic = StringToInteger(p[0]); 
+            ns[nt].name = p[1]; 
+            if(parts >= 3 && p[2] != "") {
+               string subm[]; 
+               int scnt = StringSplit(p[2], ',', subm);
+               ArrayResize(ns[nt].associated_magics, scnt);
+               for(int m=0; m<scnt; m++) ns[nt].associated_magics[m] = StringToInteger(subm[m]);
+            } else {
+               ArrayResize(ns[nt].associated_magics, 1);
+               ns[nt].associated_magics[0] = ns[nt].magic;
+            }
+            nt++; 
+         } 
+      }
       if(nt != g_TotalStrategies)
-        { ArrayResize(g_Strategies,nt); g_TotalStrategies=nt; for(int i=0;i<nt;i++){g_Strategies[i].magic=ns[i].magic; g_Strategies[i].name=ns[i].name;} if(g_IsDashboardMode) DrawDashboard(); }
+        { ArrayResize(g_Strategies,nt); g_TotalStrategies=nt; for(int i=0;i<nt;i++){
+            g_Strategies[i].magic=ns[i].magic; 
+            g_Strategies[i].name=ns[i].name;
+            ArrayCopy(g_Strategies[i].associated_magics, ns[i].associated_magics);
+         } if(g_IsDashboardMode) DrawDashboard(); }
      }
    else if(g_TotalStrategies==0)
      { ArrayResize(g_Strategies,1); g_Strategies[0].magic=0; g_Strategies[0].name="Manual (Offline)"; g_TotalStrategies=1; if(g_IsDashboardMode) DrawDashboard(); }
@@ -1722,7 +1843,7 @@ void RefreshLayout()
 int OnInit()
   {
    if(!TerminalInfoInteger(TERMINAL_DLLS_ALLOWED) && !MQLInfoInteger(MQL_DLLS_ALLOWED))
-     { MessageBox("Debe permitir importacion de DLLs.", "IronRisk", MB_ICONWARNING|MB_OK); return(INIT_FAILED); }
+     { MessageBox("You must allow DLL imports.", "IronRisk", MB_ICONWARNING|MB_OK); return(INIT_FAILED); }
 
    AppServer = new CServerClient(InpWebhookHost, InpWebhookPort, InpWebhookPath, InpUseHTTPS, InpApiToken);
    g_Layout = new CDashboardLayout();
@@ -1730,7 +1851,7 @@ int OnInit()
     InitDefaultRiskVars();
    g_TotalStrategies = 0;
    RefreshStrategies();
-   if(g_TotalStrategies>0) { g_ActiveMagic=g_Strategies[0].magic; g_ActiveName=g_Strategies[0].name; }
+   if(g_TotalStrategies>0) { g_ActiveMagic=g_Strategies[0].magic; g_ActiveName=g_Strategies[0].name; ArrayCopy(g_ActiveMagics, g_Strategies[0].associated_magics); }
    RefreshLayout();
    
    // --- HYBRID DYNAMIC ISOLATION ---
@@ -1781,37 +1902,111 @@ int OnInit()
         }
         
       SeedHistoricalEquity();
-      FeedPnLUpdate(g_StrategyEquity);
+      FeedPnLUpdate(g_CumulativeClosedPnL + g_LocalFloatingPnL);
       DrawDashboard();
      }
    else
      {
-      // === BOOTSTRAP MODE: Create symbol, open chart, show instructions ===
+      // === SINGLE-DRAG BOOTSTRAP (v66): Create → Template → Auto-Launch → Self-Destruct ===
       Print("[IR] Bootstrap mode - creating ", g_PnlSymbol);
       if(!EnsurePnLSymbol())
         { Print("[IR] Failed to create symbol"); return(INIT_FAILED); }
       
-      // Open the PnL chart automatically (user picks timeframe)
+      // Step 1: Save current EA state as a temporary template (preserves all user inputs)
+      string tplName = "IronRisk_AutoBoot";
+      if(!ChartSaveTemplate(0, tplName))
+        {
+         Print("[IR] WARNING: ChartSaveTemplate failed. Falling back to manual mode.");
+         long cid = ChartOpen(g_PnlSymbol, PERIOD_M1);
+         if(cid > 0)
+           {
+            ChartSetInteger(cid, CHART_MODE, CHART_LINE);
+            ChartSetInteger(cid, CHART_COLOR_CHART_LINE, clrLimeGreen);
+            ChartSetInteger(cid, CHART_COLOR_BACKGROUND, C'10,10,10');
+            ChartSetInteger(cid, CHART_COLOR_FOREGROUND, clrSilver);
+            ChartSetInteger(cid, CHART_COLOR_GRID, C'25,25,25');
+            ChartSetInteger(cid, CHART_SHOW_GRID, true);
+            ChartSetInteger(cid, CHART_AUTOSCROLL, true);
+            ChartRedraw(cid);
+            MessageBox("The EA created '" + g_PnlSymbol + "'.\r\n\r\n" +
+                       "Please drag the IronRisk EA to the new black chart.",
+                       "IronRisk Bootstrap", MB_ICONINFORMATION|MB_OK);
+           }
+         DrawBootstrapScreen();
+         return(INIT_SUCCEEDED);
+        }
+
+      // Step 2: Open the PnL chart
       long cid = ChartOpen(g_PnlSymbol, PERIOD_M1);
       if(cid > 0)
         {
-         ChartSetInteger(cid, CHART_MODE, CHART_LINE);
-         ChartSetInteger(cid, CHART_COLOR_CHART_LINE, clrLimeGreen);
+         // Immediately style the chart dark + show loading message
          ChartSetInteger(cid, CHART_COLOR_BACKGROUND, C'10,10,10');
-         ChartSetInteger(cid, CHART_COLOR_FOREGROUND, clrSilver);
-         ChartSetInteger(cid, CHART_COLOR_GRID, C'25,25,25');
-         ChartSetInteger(cid, CHART_SHOW_GRID, true);
-         ChartSetInteger(cid, CHART_AUTOSCROLL, true);
+         ChartSetInteger(cid, CHART_COLOR_FOREGROUND, C'10,10,10'); // Hide axis text
+         ChartSetInteger(cid, CHART_SHOW_GRID, false);
+         ChartSetInteger(cid, CHART_SHOW_PRICE_SCALE, false);
+         ChartSetInteger(cid, CHART_SHOW_DATE_SCALE, false);
+         ChartSetInteger(cid, CHART_SHOW_VOLUMES, CHART_VOLUME_HIDE);
+         
+         // Loading splash labels
+         ObjectCreate(cid, "IR_BOOT_TITLE", OBJ_LABEL, 0, 0, 0);
+         ObjectSetInteger(cid, "IR_BOOT_TITLE", OBJPROP_CORNER, CORNER_LEFT_UPPER);
+         ObjectSetInteger(cid, "IR_BOOT_TITLE", OBJPROP_XDISTANCE, 30);
+         ObjectSetInteger(cid, "IR_BOOT_TITLE", OBJPROP_YDISTANCE, 60);
+         ObjectSetString(cid, "IR_BOOT_TITLE", OBJPROP_TEXT, "IRONRISK DASHBOARD");
+         ObjectSetString(cid, "IR_BOOT_TITLE", OBJPROP_FONT, "Consolas");
+         ObjectSetInteger(cid, "IR_BOOT_TITLE", OBJPROP_FONTSIZE, 18);
+         ObjectSetInteger(cid, "IR_BOOT_TITLE", OBJPROP_COLOR, clrLimeGreen);
+         
+         ObjectCreate(cid, "IR_BOOT_STATUS", OBJ_LABEL, 0, 0, 0);
+         ObjectSetInteger(cid, "IR_BOOT_STATUS", OBJPROP_CORNER, CORNER_LEFT_UPPER);
+         ObjectSetInteger(cid, "IR_BOOT_STATUS", OBJPROP_XDISTANCE, 30);
+         ObjectSetInteger(cid, "IR_BOOT_STATUS", OBJPROP_YDISTANCE, 90);
+         ObjectSetString(cid, "IR_BOOT_STATUS", OBJPROP_TEXT, "Launching dashboard... please wait");
+         ObjectSetString(cid, "IR_BOOT_STATUS", OBJPROP_FONT, "Consolas");
+         ObjectSetInteger(cid, "IR_BOOT_STATUS", OBJPROP_FONTSIZE, 10);
+         ObjectSetInteger(cid, "IR_BOOT_STATUS", OBJPROP_COLOR, C'120,120,120');
+         
+         ObjectCreate(cid, "IR_BOOT_BAR", OBJ_RECTANGLE_LABEL, 0, 0, 0);
+         ObjectSetInteger(cid, "IR_BOOT_BAR", OBJPROP_CORNER, CORNER_LEFT_UPPER);
+         ObjectSetInteger(cid, "IR_BOOT_BAR", OBJPROP_XDISTANCE, 30);
+         ObjectSetInteger(cid, "IR_BOOT_BAR", OBJPROP_YDISTANCE, 115);
+         ObjectSetInteger(cid, "IR_BOOT_BAR", OBJPROP_XSIZE, 200);
+         ObjectSetInteger(cid, "IR_BOOT_BAR", OBJPROP_YSIZE, 3);
+         ObjectSetInteger(cid, "IR_BOOT_BAR", OBJPROP_BGCOLOR, clrLimeGreen);
+         ObjectSetInteger(cid, "IR_BOOT_BAR", OBJPROP_BORDER_TYPE, BORDER_FLAT);
+         ObjectSetInteger(cid, "IR_BOOT_BAR", OBJPROP_COLOR, clrLimeGreen);
+         
          ChartRedraw(cid);
          
-         MessageBox("Paso 1 COMPLETADO:\r\n"+
-                    "El EA ha creado el entorno aislado '"+g_PnlSymbol+"'.\r\n\r\n"+
-                    "Paso 2 (FINAL):\r\n"+
-                    "Arrastra AHORA el EA de IronRisk desde la ventana del Navegador a la nueva pantalla negra para ver el Dashboard.", 
-                    "IronRisk Bootstrap", MB_ICONINFORMATION|MB_OK);
+         // Step 3: Apply saved template (clones this EA with all inputs to the new chart)
+         Sleep(300); // Give MT5 time to fully initialize the new chart window
+         if(!ChartApplyTemplate(cid, tplName))
+           {
+            Print("[IR] WARNING: ChartApplyTemplate failed. Manual drag required.");
+            // Update loading text to show error
+            ObjectSetString(cid, "IR_BOOT_STATUS", OBJPROP_TEXT, "Auto-launch failed. Please drag EA manually to this chart.");
+            ObjectSetInteger(cid, "IR_BOOT_STATUS", OBJPROP_COLOR, clrOrange);
+            ObjectSetInteger(cid, "IR_BOOT_BAR", OBJPROP_BGCOLOR, clrOrange);
+            ObjectSetInteger(cid, "IR_BOOT_BAR", OBJPROP_COLOR, clrOrange);
+            ChartRedraw(cid);
+           }
+         else
+           {
+            Print("[IR] Template applied successfully - Dashboard launching on ", g_PnlSymbol);
+           }
+         ChartRedraw(cid);
         }
-      
-      DrawBootstrapScreen();
+      else
+        {
+         Print("[IR] Failed to open chart for ", g_PnlSymbol);
+         return(INIT_FAILED);
+        }
+
+      // Step 4: Self-destruct from the original chart (the new chart has its own EA instance now)
+      Print("[IR] Bootstrap complete. Removing EA from source chart.");
+      ExpertRemove();
+      return(INIT_SUCCEEDED);
      }
    
    EventSetTimer(InpTimerSec > 0 ? InpTimerSec : 1);
@@ -1860,7 +2055,7 @@ void OnTimer()
       AppServer.SendHeartbeat(g_ActiveMagic, g_StrategyEquity, g_LocalDrawdown, g_LocalOpenTrades, g_FloatMagics, g_FloatValues, g_FloatCount);
      }
      
-   FeedPnLUpdate(g_StrategyEquity);
+   FeedPnLUpdate(g_CumulativeClosedPnL + g_LocalFloatingPnL);
    // Draw instantly after having all data
    DrawDashboard();
    
@@ -1985,6 +2180,7 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
         {
          g_ActiveMagic=g_Strategies[ci].magic;
          g_ActiveName=g_Strategies[ci].name;
+         ArrayCopy(g_ActiveMagics, g_Strategies[ci].associated_magics);
          g_PeakPnL=0.0;
          g_CumulativeClosedPnL=0.0;
          g_RealClosedTrades=0; // Added in v48 to unblock the new CalculateLocalStats safeguard
@@ -2009,7 +2205,7 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
            }
          
          SeedHistoricalEquity();
-         FeedPnLUpdate(g_StrategyEquity);
+         FeedPnLUpdate(g_CumulativeClosedPnL + g_LocalFloatingPnL);
          
          RefreshLayout();
          DrawDashboard();

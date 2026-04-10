@@ -10,7 +10,7 @@ import { useStrategyStore } from "@/store/useStrategyStore";
 
 export default function StepThree() {
   const router = useRouter();
-  const { stepThreeData, updateStepThree, setStep, submitStrategy, isSubmitting, error } =
+  const { stepOneData, stepThreeData, updateStepThree, setStep, submitStrategy, isSubmitting, error } =
     useWizardStore();
   const { fetchStrategies } = useStrategyStore();
 
@@ -20,7 +20,11 @@ export default function StepThree() {
     const strategyId = await submitStrategy();
     if (strategyId) {
       await fetchStrategies();
-      router.push("/dashboard");
+      if (stepOneData.tradingAccountId) {
+        router.push(`/dashboard/account/${stepOneData.tradingAccountId}`);
+      } else {
+        router.push("/dashboard");
+      }
     }
   };
 
@@ -54,6 +58,36 @@ export default function StepThree() {
               updateStepThree({ dailyLoss: parseFloat(e.target.value) || 0 })
             }
           />
+        </div>
+      </div>
+
+      {/* Factor de Escalado */}
+      <div className="bg-surface-tertiary border border-amber-500/20 rounded-lg p-4">
+        <p className="text-xs text-amber-400 uppercase tracking-wider mb-3">📐 Factor de Escalado</p>
+        <div className="flex items-start gap-4">
+          <div className="w-40">
+            <Input
+              type="number"
+              step="any"
+              min="0.01"
+              placeholder="1.0 (sin escalar)"
+              defaultValue={stepThreeData.riskMultiplier === 1 ? "" : stepThreeData.riskMultiplier}
+              onBlur={(e) => {
+                const v = parseFloat(e.target.value);
+                updateStepThree({ riskMultiplier: v > 0 ? v : 1 });
+              }}
+            />
+          </div>
+          <p className="text-[10px] text-iron-500 leading-relaxed flex-1">
+            Si tu BT fue hecho con un lote menor al que usas en live, introduce el multiplicador.
+            <br/>Ej: BT a <span className="text-iron-300">0.01</span> lotes, live a <span className="text-iron-300">1.0</span> lote → factor = <span className="text-amber-400 font-mono">100</span>
+            <br/>Escala métricas, distribuciones, equity curve y EA limits.
+            {stepThreeData.riskMultiplier !== 1 && (
+              <span className="ml-1 text-xs px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono">
+                ×{stepThreeData.riskMultiplier}
+              </span>
+            )}
+          </p>
         </div>
       </div>
 

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Button from "@/components/ui/Button";
 import MT5DashboardPreview from "@/components/features/MT5DashboardPreview";
+import TelegramLinker from "@/components/features/TelegramLinker";
 import { DashboardLayout, MetricCatalog, MT5ColorTheme } from "@/models/DashboardLayout";
 import { tradingAccountAPI } from "@/services/api";
 import type { TradingAccount } from "@/types/tradingAccount";
@@ -54,15 +55,7 @@ function SortableSlot({ widget, idx, tMetrics, setLayout, colorNames }: any) {
         {tMetrics(`${widget.valueKey}.label`)}
       </div>
 
-      <label className="block text-xs text-iron-400 mb-1">Widget Style</label>
-      <select
-        value={widget.style || "simple"}
-        onChange={(e) => setLayout((prev: any) => prev.changeStyle(idx, e.target.value))}
-        className="w-full bg-surface-tertiary border border-iron-700 text-iron-200 rounded px-2 py-1.5 text-sm outline-none focus:border-risk-blue appearance-none mb-2 hover:bg-surface-secondary"
-      >
-        <option value="simple">Simple Text</option>
-        <option value="progress_bar">Limit Progress Bar</option>
-      </select>
+
       
       <label className="block text-xs text-iron-400 mb-1">Color Accent</label>
       <select
@@ -162,7 +155,8 @@ export default function WorkspaceSettingsModal({
               "daily_loss",
               "consecutive_losses",
               "stagnation_days",
-              "stagnation_trades"
+              "stagnation_trades",
+              "bayes_p_positive"
             ].map((metricKey) => (
               <label key={metricKey} className="flex items-center gap-3 cursor-pointer group" title={tMetrics(`${metricKey}.tooltip`)}>
                 <div className="relative">
@@ -181,6 +175,14 @@ export default function WorkspaceSettingsModal({
               </label>
             ))}
           </div>
+        </div>
+
+        {/* Telegram Notifications Integration */}
+        <div className="border-t border-iron-700 pt-5 pb-5">
+           <p className="text-xs uppercase text-iron-500 tracking-wider font-semibold mb-4">
+            ✈️ Integración de Alertas Remotas
+          </p>
+          <TelegramLinker />
         </div>
 
         {/* MT5 Dashboard Layout Section — "El Padre" */}

@@ -9,6 +9,12 @@
 
 export type ChannelState = "online" | "offline" | "stale";
 
+/** Unified helper to check if a heartbeat is fresh (default 5 min). */
+export function isConnectionAlive(dateString: string | null | undefined, thresholdMs = 300_000): boolean {
+  if (!dateString) return false;
+  return Date.now() - new Date(dateString).getTime() < thresholdMs;
+}
+
 export interface DualSnapshot {
   server: ChannelState;
   ea: ChannelState;
@@ -71,6 +77,14 @@ export class ConnectionMonitor {
         ? Math.floor((Date.now() - this.eaLastHeartbeat.getTime()) / 1000)
         : -1,
     };
+  }
+
+  /** Called externally by TradingAccountManager when it sees a last_heartbeat_at update */
+  setManualHeartbeat(date: Date): void {
+    if (!this.eaLastHeartbeat || date > this.eaLastHeartbeat) {
+      this.eaLastHeartbeat = date;
+      this.evaluateEaState();
+    }
   }
 
   /** Called externally whenever strategies are fetched — extracts EA heartbeat timestamps. */

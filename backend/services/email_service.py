@@ -1,0 +1,211 @@
+import smtplib
+from email.message import EmailMessage
+import logging
+import os
+from dotenv import load_dotenv
+
+# Forced loading to capture changes immediately
+load_dotenv(override=True)
+
+logger = logging.getLogger(__name__)
+
+# Single source of truth for EA download — must match webapp/src/config/ea.ts
+EA_FILENAME = "IronRisk_Dashboard_v66.ex5"
+EA_DOWNLOAD_URL = f"https://ironrisk.pro/downloads/{EA_FILENAME}"
+
+class EmailService:
+    def __init__(self, 
+                 smtp_server: str = "smtp.gmail.com", 
+                 smtp_port: int = 587, 
+                 sender_email: str = None, 
+                 sender_password: str = None):
+        # We try to load from environment if not explicitly passed
+        self.smtp_server = smtp_server
+        self.smtp_port = smtp_port
+        self.sender_email = sender_email or os.getenv("SMTP_EMAIL", "ironrisk.shield@gmail.com")
+        self.sender_password = sender_password or os.getenv("SMTP_PASSWORD")
+
+    def is_configured(self) -> bool:
+        """Check if the SMTP credentials are fully provided."""
+        return bool(self.sender_email and self.sender_password)
+
+    def send_welcome_email(self, recipient_email: str, locale: str = "es") -> bool:
+        """
+        Sends an HTML welcome email with the EA download links to the registered user.
+        Executes synchronously (should be called in a background task or threaded).
+        """
+        print(f"\n📧 [EMAIL SERVICE] Intentando enviar email de bienvenida a: {recipient_email}")
+        
+        if not self.is_configured():
+            print(f"❌ [EMAIL SERVICE ERROR] Faltan credenciales! Revisa tu .env y reinicia el servidor. Email: {self.sender_email}, Password: {'[Configurado]' if self.sender_password else '[NO CONFIGURADO]'}")
+            logger.warning(f"EmailService not configured. Skipping welcome email to {recipient_email}.")
+            return False
+
+        if locale == "en":
+            subject = "Welcome to IronRisk - Project Your Statistical Edge"
+            html_content = f"""
+            <html>
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
+                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
+                    <h1 style="color: #00e676; margin-top: 0; font-size: 24px; font-weight: 800;">IronRisk</h1>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hello,</p>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                        Your lifetime account has been successfully provisioned for access with the email: <strong style="color: #c9d1d9;">{recipient_email}</strong>
+                    </p>
+                    
+                    <h3 style="font-size: 18px; color: #e6edf3; margin-top: 30px;">Next Step: Connect MetaTrader</h3>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                        You are one step away from projecting your statistical probability. To start computing Bayesian data in real-time, install our MQL5 engine on your chosen MetaTrader chart.
+                    </p>
+                    
+                    <div style="text-align: center; margin: 35px 0;">
+                        <a href="{EA_DOWNLOAD_URL}" 
+                           style="display: inline-block; padding: 14px 28px; background-color: #00e676; color: #000000; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                           Download MQL5 Engine
+                        </a>
+                    </div>
+    
+                    <div style="background-color: rgba(255, 235, 59, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #fbc02d; margin-bottom: 25px;">
+                        <p style="margin: 0; font-size: 14px; color: #fbc02d;">
+                            <strong>Important:</strong> The Workspace is cryptographically bound. You must paste the <em>API Token</em> and ensure your <em>MT5 Account Number</em> matches exactly the one configured on the web, otherwise the connection will be rejected.
+                        </p>
+                    </div>
+    
+                    <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
+                        Any doubts? Reply directly to this email.<br>
+                        <strong style="color: #8b949e;">The IronRisk Quant Team</strong>
+                    </p>
+                </div>
+              </body>
+            </html>
+            """
+        else:
+            subject = "Bienvenido a IronRisk - Proyecta tu Edge Matemático"
+            html_content = f"""
+            <html>
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
+                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
+                    <h1 style="color: #00e676; margin-top: 0; font-size: 24px; font-weight: 800;">IronRisk</h1>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hola,</p>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                        Tu cuenta vitalicia ha sido provisionada exitosamente para el acceso con el correo: <strong style="color: #c9d1d9;">{recipient_email}</strong>
+                    </p>
+                    
+                    <h3 style="font-size: 18px; color: #e6edf3; margin-top: 30px;">Próximo Paso: Conecta tu MetaTrader</h3>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                        Estás a un paso de proyectar tu probabilidad estadística. Para comenzar a ver datos Bayesianos en tiempo real, instala nuestro motor MQL5 en el gráfico de tu terminal MetaTrader que quieras vincular.
+                    </p>
+                    
+                    <div style="text-align: center; margin: 35px 0;">
+                        <a href="{EA_DOWNLOAD_URL}" 
+                           style="display: inline-block; padding: 14px 28px; background-color: #00e676; color: #000000; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                           Descargar MQL5 Engine
+                        </a>
+                    </div>
+    
+                    <div style="background-color: rgba(255, 235, 59, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #fbc02d; margin-bottom: 25px;">
+                        <p style="margin: 0; font-size: 14px; color: #fbc02d;">
+                            <strong>Importante:</strong> El Workspace está protegido gráficamente. Deberás pegar el <em>API Token</em> y asegurarte de que tu <em>Número de Cuenta de MT5</em> coincide exactamente con el que configuraste en la web, de lo contrario la conexión será rechazada.
+                        </p>
+                    </div>
+    
+                    <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
+                        ¿Tienes dudas? Responde directamente a este correo.<br>
+                        <strong style="color: #8b949e;">El Equipo de Cuantificación de IronRisk</strong>
+                    </p>
+                </div>
+              </body>
+            </html>
+            """
+        
+        msg = EmailMessage()
+        msg['Subject'] = subject
+        msg['From'] = f"IronRisk <{self.sender_email}>"
+        msg['To'] = recipient_email
+        msg.set_content("Abre este correo en un cliente que soporte renderizado HTML para ver las instrucciones.")
+        msg.add_alternative(html_content, subtype='html')
+
+        try:
+            print("⏳ [EMAIL SERVICE] Conectando a smtp.gmail.com:587...")
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+                server.set_debuglevel(1)
+                server.starttls()
+                server.login(self.sender_email, self.sender_password)
+                server.send_message(msg)
+            
+            print(f"✅ [EMAIL SERVICE SUCCESS] ¡Email inyectado en la bandeja de {recipient_email} exitosamente!")
+            logger.info(f"Welcome email successfully dispatched to {recipient_email}")
+            return True
+        except Exception as e:
+            print(f"🔥 [EMAIL SERVICE EXCEPTION] Error catastrófico enviando a {recipient_email}: {e}")
+            logger.error(f"Failed to transmit welcome email to {recipient_email}: {e}")
+            return False
+
+    def send_password_reset_email(self, recipient_email: str, token: str, locale: str = "es") -> bool:
+        """
+        Sends an HTML email with a secure link to reset the user's password.
+        """
+        if not self.is_configured():
+            logger.warning(f"EmailService not configured. Skipping reset email to {recipient_email}.")
+            return False
+
+        if locale == "en":
+            subject = "IronRisk - Password Reset Request"
+            lbl_title = "Password Recovery"
+            lbl_desc = f"We received a request to recover access for the account linked to <strong>{recipient_email}</strong>. If you didn't request this, you can safely ignore this email."
+            lbl_btn = "Reset My Password"
+            lbl_warn = "This secure link will expire in 30 minutes."
+            lbl_footer = "The IronRisk Quant Team"
+        else:
+            subject = "IronRisk - Solicitud de Recuperación de Contraseña"
+            lbl_title = "Recuperación de Acceso"
+            lbl_desc = f"Hemos recibido una solicitud para recuperar el acceso de la cuenta vinculada a <strong>{recipient_email}</strong>. Si no has sido tú, simplemente ignora este correo."
+            lbl_btn = "Restablecer Mi Contraseña"
+            lbl_warn = "Este enlace de seguridad caducará en 30 minutos."
+            lbl_footer = "El Equipo de Cuantificación de IronRisk"
+
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        reset_url = f"{frontend_url}/{locale}/reset-password?token={token}"
+
+        html_content = f"""
+        <html>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
+            <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #ff4d4d; border: 1px solid #30363d;">
+                <h1 style="color: #ff4d4d; margin-top: 0; font-size: 24px; font-weight: 800;">{lbl_title}</h1>
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">{lbl_desc}</p>
+                
+                <div style="text-align: center; margin: 35px 0;">
+                    <a href="{reset_url}" 
+                       style="display: inline-block; padding: 14px 28px; background-color: #ff4d4d; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                       {lbl_btn}
+                    </a>
+                </div>
+
+                <p style="font-size: 13px; color: #8b949e; text-align: center; margin-bottom: 25px;">
+                    {lbl_warn}
+                </p>
+
+                <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
+                    <strong style="color: #8b949e;">{lbl_footer}</strong>
+                </p>
+            </div>
+          </body>
+        </html>
+        """
+        
+        msg = EmailMessage()
+        msg['Subject'] = subject
+        msg['From'] = f"IronRisk Security <{self.sender_email}>"
+        msg['To'] = recipient_email
+        msg.set_content("Abre este correo en un cliente que soporte renderizado HTML.")
+        msg.add_alternative(html_content, subtype='html')
+
+        try:
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.sender_email, self.sender_password)
+                server.send_message(msg)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to transmit reset email to {recipient_email}: {e}")
+            return False

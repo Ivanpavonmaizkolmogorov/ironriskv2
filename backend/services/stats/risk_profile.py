@@ -59,13 +59,22 @@ class StatisticalMode:
 
         pct = self.fit.percentile(current)
         
+        p_red = limit_config.get("p_red", 95)
+        p_amber = limit_config.get("p_amber", 85)
         
-        if pct <= 50:
-            label, color = "Statistical Risk: Normal", "green"
-        elif pct <= 80:
+        # Check physical limit breach
+        limit = limit_config.get("limit", 0)
+        is_enabled = limit_config.get("enabled", False)
+        
+        if is_enabled and current >= limit and limit > 0:
+            return RiskContext(percentile=pct, label="Limit Breached: Fatal", color="fatal")
+        
+        if pct >= p_red:
+            label, color = "Statistical Risk: Extreme", "red"
+        elif pct >= p_amber:
             label, color = "Statistical Risk: Elevated", "yellow"
         else:
-            label, color = "Statistical Risk: Extreme", "red"
+            label, color = "Statistical Risk: Normal", "green"
             
         return RiskContext(percentile=pct, label=label, color=color)
 

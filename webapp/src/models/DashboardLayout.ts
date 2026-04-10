@@ -46,6 +46,8 @@ export class MetricCatalog {
     new MetricOption("daily_loss", "Daily Loss", "Daily Loss", "Silver", "$156.80"),
     new MetricOption("stagnation_days", "Stagnation Days", "Stagn. Days", "Iron", "12"),
     new MetricOption("stagnation_trades", "Stagnation Trades", "Stagn. Trades", "Iron", "8"),
+    new MetricOption("master_verdict", "Master Verdict", "Verdict", "Cobalt", "CONSISTENTE"),
+    new MetricOption("bayes_p_positive", "P(Expectancy>0)", "P(Exp>0)", "Slate", "98.5%"),
   ];
 
   static all(): MetricOption[] {
@@ -145,7 +147,9 @@ export class DashboardLayout {
       daily_loss: true,
       consecutive_losses: false,
       stagnation_days: false,
-      stagnation_trades: false
+      stagnation_trades: false,
+      master_verdict: true,
+      bayes_p_positive: false
     }
   ) {}
 
@@ -181,7 +185,9 @@ export class DashboardLayout {
         daily_loss: true,
         consecutive_losses: false,
         stagnation_days: false,
-        stagnation_trades: false
+        stagnation_trades: false,
+        master_verdict: true,
+        bayes_p_positive: false
       }
     );
   }

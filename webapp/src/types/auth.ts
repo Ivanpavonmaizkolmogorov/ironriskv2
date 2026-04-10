@@ -3,6 +3,7 @@
 export interface User {
   id: string;
   email: string;
+  is_admin?: boolean;
 }
 
 // APIToken removed (now TradingAccount)

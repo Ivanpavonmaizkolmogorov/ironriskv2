@@ -7,6 +7,10 @@ export interface TradingAccount {
   account_number?: string | null;
   api_token: string;
   is_active: boolean;
+  has_connected: boolean;
+  theme?: string | null;
+  default_dashboard_layout?: any;
+  last_heartbeat_at?: string | null;
   created_at: string;
 }
 

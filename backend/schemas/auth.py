@@ -6,6 +6,8 @@ from pydantic import BaseModel, EmailStr
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
+    locale: str = "es"
+    invite_code: str | None = None
 
 
 class LoginRequest(BaseModel):
@@ -16,15 +18,23 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    email_sent: bool | None = None
 
 
 class UserResponse(BaseModel):
     id: str
     email: str
+    is_admin: bool = False
 
     class Config:
         from_attributes = True
 
 
-# --- API Token Management ---
-# Deprecated in favor of TradingAccounts
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+    locale: str = "es"
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str

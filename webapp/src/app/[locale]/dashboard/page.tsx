@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
 import TradingAccountManager from "@/components/features/TradingAccountManager";
 import Button from "@/components/ui/Button";
+import ThemeSelector from "@/components/features/ThemeSelector";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname, useRouter as useI18nRouter } from "@/i18n/routing";
 
@@ -37,6 +38,7 @@ export default function TradingAccountsPage() {
             <span className="text-xs text-iron-600 ml-2">TOWER</span>
           </span>
           <div className="flex items-center gap-4">
+            <ThemeSelector mode="global" />
             <button
               onClick={() => i18nRouter.replace(pathname, { locale: locale === "en" ? "es" : "en" })}
               className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-semibold tracking-wider text-iron-400 border border-iron-800 rounded-md bg-surface-tertiary hover:text-iron-200 hover:border-iron-600 transition-colors disabled:opacity-50 shrink-0"
@@ -46,9 +48,11 @@ export default function TradingAccountsPage() {
               <span className="text-iron-700">/</span>
               <span className={locale === "es" ? "text-iron-100" : "text-iron-600"}>ES</span>
             </button>
-            <Button variant="ghost" size="sm" onClick={() => {
-              useAuthStore.getState().logout();
-              router.push("/login");
+            <Button variant="ghost" size="sm" className="min-w-[120px] text-center" onClick={() => {
+              router.push(`/${locale}`);
+              setTimeout(() => {
+                useAuthStore.getState().logout();
+              }, 200);
             }}>
               {t("logout")}
             </Button>

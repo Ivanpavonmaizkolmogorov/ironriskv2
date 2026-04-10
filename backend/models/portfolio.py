@@ -23,6 +23,9 @@ class Portfolio(Base):
     # Which strategies are included (list of strategy IDs)
     strategy_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
 
+    # Manual LIVE DESDE for the entire portfolio (overrides children)
+    start_date: Mapped[str] = mapped_column(String(50), nullable=True)
+
     # Auto-include newly created strategies
     auto_include_new: Mapped[bool] = mapped_column(Boolean, default=True)
 

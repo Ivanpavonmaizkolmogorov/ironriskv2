@@ -1,0 +1,7 @@
+('abf218a8-515c-4ecd-8328-0ba1d4d5a430', 'ea_disconnect_minutes', 'af164ea7-12e4-49d2-b2e4-c832b2539c23')
+('c9e33d75-ae0d-4f63-8b25-c6d34af3cb56', 'consecutive_losses', '693f5b21-8161-40b2-9073-ff7778ccce93')
+('3ac95553-1816-4e4d-b589-ec625cadb76c', 'stagnation_days', '693f5b21-8161-40b2-9073-ff7778ccce93')
+('3703582a-de33-47ae-80c9-3a04c551f82b', 'daily_loss', 'ab1d21b8-e083-4671-91ef-9f6414d5e8b8')
+('f65ac1fd-c425-464f-9a5d-74a6ccea401c', 'ea_disconnect_minutes', 'ab1d21b8-e083-4671-91ef-9f6414d5e8b8')
+('fb6ccc77-6828-4992-8c7f-87113617442a', 'ea_disconnect_minutes', '8705bcfd-c4a2-453c-bc8d-9a0875b68050')
+('bc59f1d4-9d4e-4498-9f17-1f341dc2a030', 'max_drawdown', '0f258ea0-2b82-44b5-84f6-40a80e86853a')

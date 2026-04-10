@@ -25,8 +25,22 @@ class RealTrade(Base):
     symbol: Mapped[str] = mapped_column(String(50), nullable=True)
     volume: Mapped[float] = mapped_column(Float, nullable=True, default=0.0)
     
+    # Advanced Trade Data (added in v64)
+    open_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    open_price: Mapped[float] = mapped_column(Float, nullable=True)
+    close_price: Mapped[float] = mapped_column(Float, nullable=True)
+    sl: Mapped[float] = mapped_column(Float, nullable=True)
+    tp: Mapped[float] = mapped_column(Float, nullable=True)
+    deal_type: Mapped[str] = mapped_column(String(10), nullable=True) # "Buy" or "Sell"
+    
+    commission: Mapped[float] = mapped_column(Float, nullable=True, default=0.0)
+    swap: Mapped[float] = mapped_column(Float, nullable=True, default=0.0)
+    
     # Profit encompasses deal profit + swap + commission
     profit: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    
+    # Trade comment (from DEAL_COMMENT, often contains strategy name)
+    comment: Mapped[str] = mapped_column(String(200), nullable=True, default=None)
     
     # Timestamps
     close_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
