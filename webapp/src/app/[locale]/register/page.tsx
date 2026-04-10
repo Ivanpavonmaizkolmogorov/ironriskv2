@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from "next-intl";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useAuthStore } from "@/store/useAuthStore";
+import { waitlistAPI } from "@/services/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -20,6 +21,8 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [localError, setLocalError] = useState("");
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) router.push(`/${locale}/dashboard`);
@@ -40,6 +43,22 @@ export default function RegisterPage() {
     }
     await register(email, password, inviteCode);
   };
+
+  const handleWaitlist = async () => {
+    if (!email.trim() || !email.includes("@")) return;
+    setWaitlistLoading(true);
+    try {
+      await waitlistAPI.submit(email, "register_no_code");
+      setWaitlistSubmitted(true);
+    } catch {
+      // Even if it fails, show success to not lose the impression
+      setWaitlistSubmitted(true);
+    } finally {
+      setWaitlistLoading(false);
+    }
+  };
+
+  const showInvalidCode = error?.toLowerCase().includes("invalid beta") || error?.toLowerCase().includes("invalid_invite");
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6 relative">
@@ -107,7 +126,7 @@ export default function RegisterPage() {
                   ? "text-amber-400"
                   : "text-risk-red"
               }`}>
-                {error?.toLowerCase().includes("invalid beta") || error?.toLowerCase().includes("invalid_invite") ? t("errorInvalidCode") : (error || localError)}
+                {showInvalidCode ? t("errorInvalidCode") : (error || localError)}
               </p>
               {error?.toLowerCase().includes("already registered") && (
                 <p className="text-sm text-iron-400 mt-2">
@@ -117,6 +136,49 @@ export default function RegisterPage() {
                   </Link>
                 </p>
               )}
+            </div>
+          )}
+
+          {/* Waitlist CTA when invalid code */}
+          {showInvalidCode && !waitlistSubmitted && email.trim() && (
+            <div className="bg-risk-green/5 border border-risk-green/20 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-500">
+              <p className="text-sm text-iron-300 mb-3">
+                {isEn
+                  ? "No code yet? Leave your email and we'll notify you when spots open up."
+                  : "¿Aún no tienes código? Deja tu email y te avisamos cuando haya plazas disponibles."}
+              </p>
+              <button
+                type="button"
+                onClick={handleWaitlist}
+                disabled={waitlistLoading}
+                className="w-full py-2.5 px-4 bg-risk-green/15 border border-risk-green/30 text-risk-green text-sm font-semibold rounded-lg hover:bg-risk-green/25 hover:border-risk-green/50 transition-all duration-300 disabled:opacity-50"
+              >
+                {waitlistLoading
+                  ? "..."
+                  : isEn
+                    ? `📩 Notify me at ${email}`
+                    : `📩 Avisarme a ${email}`}
+              </button>
+            </div>
+          )}
+
+          {/* Success state */}
+          {waitlistSubmitted && (
+            <div className="bg-risk-green/10 border border-risk-green/30 rounded-xl p-4 text-center animate-in fade-in duration-500">
+              <p className="text-risk-green font-semibold text-sm">
+                {isEn ? "🎉 You're on the list!" : "🎉 ¡Estás en la lista!"}
+              </p>
+              <p className="text-iron-400 text-xs mt-1">
+                {isEn
+                  ? "We'll email you when new spots open. Meanwhile, try the free simulator!"
+                  : "Te avisaremos cuando haya plazas. ¡Mientras, prueba el simulador gratis!"}
+              </p>
+              <Link
+                href={`/${locale}/simulate`}
+                className="inline-block mt-3 px-4 py-2 bg-risk-green text-surface-primary text-sm font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,230,118,0.3)] transition-all"
+              >
+                {isEn ? "Try Free Simulator →" : "Probar Simulador Gratis →"}
+              </Link>
             </div>
           )}
 

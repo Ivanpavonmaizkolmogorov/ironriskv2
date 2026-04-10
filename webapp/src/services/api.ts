@@ -187,3 +187,9 @@ export const adminAPI = {
   updateUser: (userId: string, data: { is_admin?: boolean, password?: string }) =>
     api.patch(`/api/admin/users/${userId}`, data),
 };
+
+// --- Waitlist (lead capture) ---
+export const waitlistAPI = {
+  submit: (email: string, source: string = "register") =>
+    api.post('/api/waitlist', { email, source }),
+};

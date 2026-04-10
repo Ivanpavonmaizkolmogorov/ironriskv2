@@ -91,15 +91,16 @@ app.include_router(simulate_router)
 app.include_router(admin_router)
 app.include_router(telegram_router)
 
-from api import alerts, metrics_schema
+from api import alerts, metrics_schema, waitlist
 app.include_router(alerts.router)
 app.include_router(metrics_schema.router)
+app.include_router(waitlist.router)
 
 
 @app.get("/")
 def root():
     return {
-        "name": "IronRisk V2",
+        "name": "IronRisk",
         "version": "2.0.0",
         "status": "operational",
         "docs": "/docs",

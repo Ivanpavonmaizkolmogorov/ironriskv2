@@ -8,6 +8,7 @@ from .real_trade import RealTrade
 from .user_preferences import UserPreferences
 from .user_theme import UserTheme
 from .user_alerts import UserAlertConfig, UserAlertHistory
+from .waitlist import WaitlistLead
 
 __all__ = [
     "Base",
@@ -24,4 +25,6 @@ __all__ = [
     "UserTheme",
     "UserAlertConfig",
     "UserAlertHistory",
+    "WaitlistLead",
 ]
+
