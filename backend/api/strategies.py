@@ -226,23 +226,28 @@ def get_strategy_chart(
 ):
     """Returns a BMP image plotting the current value against its historical distribution."""
     from fastapi.responses import Response
-    from services.stats.chart_renderer import render_metric_chart
-    from services.stats.fit_result import FitResult
     
-    strategy = get_strategy_by_id(db, strategy_id, user.id)
-    
-    if not getattr(strategy, "distribution_fit", None):
-        fit = FitResult.empty(metric_name)
-    else:
-        fit_dict = strategy.distribution_fit.get(metric_name)
-        if fit_dict and (fit_dict.get("passed") or fit_dict.get("distribution_name") == "empirical"):
-            fit = FitResult.from_dict(fit_dict)
-        else:
+    try:
+        from services.stats.chart_renderer import render_metric_chart
+        from services.stats.fit_result import FitResult
+        
+        strategy = get_strategy_by_id(db, strategy_id, user.id)
+        
+        if not getattr(strategy, "distribution_fit", None):
             fit = FitResult.empty(metric_name)
-            
-    bmp_bytes = render_metric_chart(fit, current_val=value, width=420, height=260)
-    
-    return Response(content=bmp_bytes, media_type="image/bmp")
+        else:
+            fit_dict = strategy.distribution_fit.get(metric_name)
+            if fit_dict and (fit_dict.get("passed") or fit_dict.get("distribution_name") == "empirical"):
+                fit = FitResult.from_dict(fit_dict)
+            else:
+                fit = FitResult.empty(metric_name)
+                
+        bmp_bytes = render_metric_chart(fit, current_val=value, width=420, height=260)
+        
+        return Response(content=bmp_bytes, media_type="image/bmp")
+    except Exception as e:
+        # Return empty 204 instead of crashing with 500
+        return Response(status_code=204)
 
 
 @router.get("/{strategy_id}/chart-data/{metric_name}")

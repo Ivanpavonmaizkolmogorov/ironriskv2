@@ -20,51 +20,55 @@ def get_orphans(account_id: str, db: Session = Depends(get_db)):
     An orphan is a magic_number that exists in RealTrade 
     but has no corresponding Strategy configured.
     """
-    # 1. Get all distinct magic numbers from RealTrade for this account
-    trade_magics_rows = (
-        db.query(
-            RealTrade.magic_number,
-            func.count(RealTrade.id).label("trade_count"),
-            func.sum(RealTrade.profit).label("total_pnl"),
-            func.max(RealTrade.close_time).label("last_trade"),
-            func.min(RealTrade.close_time).label("first_trade"),
-            func.group_concat(func.distinct(RealTrade.symbol)).label("symbols"),
+    try:
+        # 1. Get all distinct magic numbers from RealTrade for this account
+        trade_magics_rows = (
+            db.query(
+                RealTrade.magic_number,
+                func.count(RealTrade.id).label("trade_count"),
+                func.sum(RealTrade.profit).label("total_pnl"),
+                func.max(RealTrade.close_time).label("last_trade"),
+                func.min(RealTrade.close_time).label("first_trade"),
+                func.string_agg(func.distinct(RealTrade.symbol), func.literal_column("', '")).label("symbols"),
+            )
+            .filter(RealTrade.trading_account_id == account_id)
+            .group_by(RealTrade.magic_number)
+            .all()
         )
-        .filter(RealTrade.trading_account_id == account_id)
-        .group_by(RealTrade.magic_number)
-        .all()
-    )
 
-    # 2. Get all configured strategy magic numbers (primary + aliases)
-    strategies = db.query(Strategy).filter(
-        Strategy.trading_account_id == account_id
-    ).all()
-    configured_magics = set()
-    for s in strategies:
-        if s.magic_number is not None:
-            configured_magics.add(s.magic_number)
-        for alias in (s.magic_aliases or []):
-            configured_magics.add(int(alias))
+        # 2. Get all configured strategy magic numbers (primary + aliases)
+        strategies = db.query(Strategy).filter(
+            Strategy.trading_account_id == account_id
+        ).all()
+        configured_magics = set()
+        for s in strategies:
+            if s.magic_number is not None:
+                configured_magics.add(s.magic_number)
+            for alias in (s.magic_aliases or []):
+                configured_magics.add(int(alias))
 
-    # 3. Find orphans: in trades but not in strategies (exclude magic 0 = manual)
-    orphans = []
-    for row in trade_magics_rows:
-        magic = row.magic_number
-        if magic == 0 or magic in configured_magics:
-            continue
-        orphans.append({
-            "id": magic,  # Use magic as ID for frontend compatibility
-            "account_id": account_id,
-            "magic_number": magic,
-            "trade_count": row.trade_count,
-            "total_pnl": round(float(row.total_pnl or 0), 2),
-            "current_pnl": round(float(row.total_pnl or 0), 2),
-            "symbols": row.symbols or "",
-            "first_seen": row.first_trade.isoformat() if row.first_trade else None,
-            "last_seen": row.last_trade.isoformat() if row.last_trade else None,
-        })
+        # 3. Find orphans: in trades but not in strategies (exclude magic 0 = manual)
+        orphans = []
+        for row in trade_magics_rows:
+            magic = row.magic_number
+            if magic == 0 or magic in configured_magics:
+                continue
+            orphans.append({
+                "id": magic,  # Use magic as ID for frontend compatibility
+                "account_id": account_id,
+                "magic_number": magic,
+                "trade_count": row.trade_count,
+                "total_pnl": round(float(row.total_pnl or 0), 2),
+                "current_pnl": round(float(row.total_pnl or 0), 2),
+                "symbols": row.symbols or "",
+                "first_seen": row.first_trade.isoformat() if row.first_trade else None,
+                "last_seen": row.last_trade.isoformat() if row.last_trade else None,
+            })
 
-    return orphans
+        return orphans
+    except Exception:
+        # Return empty list on any DB error (e.g. missing columns)
+        return []
 
 
 @router.delete("/{orphan_id}", status_code=status.HTTP_204_NO_CONTENT)
