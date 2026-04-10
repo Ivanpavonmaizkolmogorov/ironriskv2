@@ -46,6 +46,7 @@ app = FastAPI(
 _cors_origins = [
     "http://localhost:3000", "http://127.0.0.1:3000",
     "http://localhost:3001", "http://127.0.0.1:3001",
+    "https://www.ironrisk.pro", "https://ironrisk.pro",
 ]
 if hasattr(settings, "FRONTEND_URL") and settings.FRONTEND_URL:
     _cors_origins.append(settings.FRONTEND_URL)
