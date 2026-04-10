@@ -15,14 +15,14 @@ const seoByLocale: Record<string, { title: string; description: string; keywords
     description:
       "¿Tu sistema es rentable pero el drawdown te destruye? IronRisk proyecta tu backtest sobre MetaTrader 5 para que tomes decisiones con datos, no con miedo. Análisis Bayesiano de tu estrategia de trading.",
     keywords:
-      "drawdown trading, gestión de riesgo trading, control drawdown metatrader, backtest metatrader 5, psicología trading, risk management, algo trading, trading algorítmico, análisis bayesiano trading",
+      "drawdown trading, gestión de riesgo trading, control drawdown metatrader, backtest metatrader 5, psicología trading, risk management, algo trading, trading algorítmico, análisis bayesiano trading, monitorizar VPS trading, alerta desconexión EA metatrader, vigilancia bot trading",
   },
   en: {
     title: "IronRisk — Drawdown Control with Real Data | Risk Management for Traders",
     description:
       "Your system is profitable but drawdown kills your discipline? IronRisk projects your backtest onto MetaTrader 5 so you make decisions with data, not fear. Bayesian analysis for your trading strategy.",
     keywords:
-      "drawdown management, trading risk control, metatrader risk management, backtest analysis, algo trading tools, trading psychology, bayesian trading analysis, drawdown control metatrader",
+      "drawdown management, trading risk control, metatrader risk management, backtest analysis, algo trading tools, trading psychology, bayesian trading analysis, drawdown control metatrader, VPS trading monitoring, EA disconnection alert, trading bot uptime",
   },
 };
 

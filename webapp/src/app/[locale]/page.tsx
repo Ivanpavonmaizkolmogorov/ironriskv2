@@ -257,10 +257,11 @@ export default function LandingPage() {
               <h3 className="ir-fade text-lg md:text-2xl font-bold text-iron-200 text-center mb-8 tracking-tight">
                 {t("featSectionTitle")}
               </h3>
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-3 gap-6">
                 {[
                   { icon: t("feat1Icon"), title: t("feat1Title"), desc: t("feat1Desc") },
                   { icon: t("feat2Icon"), title: t("feat2Title"), desc: t("feat2Desc") },
+                  { icon: t("feat3Icon"), title: t("feat3Title"), desc: t("feat3Desc") },
                 ].map((feat, i) => (
                   <div
                     key={i}
