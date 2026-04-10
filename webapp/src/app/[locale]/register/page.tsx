@@ -23,6 +23,7 @@ export default function RegisterPage() {
   const [localError, setLocalError] = useState("");
   const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
   const [waitlistLoading, setWaitlistLoading] = useState(false);
+  const [waitlistAlready, setWaitlistAlready] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) router.push(`/${locale}/dashboard`);
@@ -48,8 +49,9 @@ export default function RegisterPage() {
     if (!email.trim() || !email.includes("@")) return;
     setWaitlistLoading(true);
     try {
-      await waitlistAPI.submit(email, "register_no_code");
+      const res = await waitlistAPI.submit(email, "register_no_code");
       setWaitlistSubmitted(true);
+      setWaitlistAlready(res.data?.already_registered || false);
     } catch {
       // Even if it fails, show success to not lose the impression
       setWaitlistSubmitted(true);
@@ -166,7 +168,9 @@ export default function RegisterPage() {
           {waitlistSubmitted && (
             <div className="bg-risk-green/10 border border-risk-green/30 rounded-xl p-4 text-center animate-in fade-in duration-500">
               <p className="text-risk-green font-semibold text-sm">
-                {isEn ? "🎉 You're on the list!" : "🎉 ¡Estás en la lista!"}
+                {waitlistAlready
+                  ? (isEn ? "👋 You're already on the list!" : "👋 ¡Ya estás en la lista!")
+                  : (isEn ? "🎉 You're on the list!" : "🎉 ¡Estás en la lista!")}
               </p>
               <p className="text-iron-400 text-xs mt-1">
                 {isEn
