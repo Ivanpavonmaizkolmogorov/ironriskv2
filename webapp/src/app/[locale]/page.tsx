@@ -376,7 +376,7 @@ export default function LandingPage() {
         <footer className="relative z-10 border-t border-iron-800/40 py-8 px-6">
           <div className="max-w-6xl mx-auto flex items-center justify-between text-xs text-iron-600">
             <span>
-              IRON<span className="text-iron-400">RISK</span> V2 © {new Date().getFullYear()}
+              IRON<span className="text-iron-400">RISK</span> © {new Date().getFullYear()}
             </span>
             <span>{t("footerTagline")}</span>
           </div>

@@ -10,9 +10,9 @@ import AdminToolbar from "@/components/ui/AdminToolbar";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: "IronRisk V2 — Real-Time Risk Management",
+  title: "IronRisk — Real-Time Risk Management",
   description:
-    "Visual firewall for algorithmic traders. Translate your backtest variance into a live anchor on MetaTrader.",
+    "Visual risk firewall for algorithmic traders. Translate your backtest variance into a live risk anchor on MetaTrader 5.",
 };
 
 export default async function RootLayout({
