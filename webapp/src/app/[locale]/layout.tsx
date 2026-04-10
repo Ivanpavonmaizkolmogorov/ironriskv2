@@ -9,11 +9,62 @@ import { MetricsProvider } from "@/contexts/MetricsContext";
 import AdminToolbar from "@/components/ui/AdminToolbar";
 import "../globals.css";
 
-export const metadata: Metadata = {
-  title: "IronRisk — Real-Time Risk Management",
-  description:
-    "Visual risk firewall for algorithmic traders. Translate your backtest variance into a live risk anchor on MetaTrader 5.",
+const seoByLocale: Record<string, { title: string; description: string; keywords: string }> = {
+  es: {
+    title: "IronRisk — Controla tu Drawdown con Datos Reales | Gestión de Riesgo para Traders",
+    description:
+      "¿Tu sistema es rentable pero el drawdown te destruye? IronRisk proyecta tu backtest sobre MetaTrader 5 para que tomes decisiones con datos, no con miedo. Análisis Bayesiano de tu estrategia de trading.",
+    keywords:
+      "drawdown trading, gestión de riesgo trading, control drawdown metatrader, backtest metatrader 5, psicología trading, risk management, algo trading, trading algorítmico, análisis bayesiano trading",
+  },
+  en: {
+    title: "IronRisk — Drawdown Control with Real Data | Risk Management for Traders",
+    description:
+      "Your system is profitable but drawdown kills your discipline? IronRisk projects your backtest onto MetaTrader 5 so you make decisions with data, not fear. Bayesian analysis for your trading strategy.",
+    keywords:
+      "drawdown management, trading risk control, metatrader risk management, backtest analysis, algo trading tools, trading psychology, bayesian trading analysis, drawdown control metatrader",
+  },
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const seo = seoByLocale[locale] || seoByLocale.en;
+
+  return {
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
+    authors: [{ name: "IronRisk" }],
+    openGraph: {
+      title: seo.title,
+      description: seo.description,
+      url: "https://www.ironrisk.pro",
+      siteName: "IronRisk",
+      locale: locale === "es" ? "es_ES" : "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seo.title,
+      description: seo.description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    alternates: {
+      canonical: "https://www.ironrisk.pro",
+      languages: {
+        es: "https://www.ironrisk.pro/es",
+        en: "https://www.ironrisk.pro/en",
+      },
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -46,3 +97,4 @@ export default async function RootLayout({
     </html>
   );
 }
+
