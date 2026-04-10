@@ -39,6 +39,9 @@ export async function generateMetadata({
     description: seo.description,
     keywords: seo.keywords,
     authors: [{ name: "IronRisk" }],
+    icons: {
+      icon: "/favicon.svg",
+    },
     openGraph: {
       title: seo.title,
       description: seo.description,
