@@ -192,4 +192,6 @@ export const adminAPI = {
 export const waitlistAPI = {
   submit: (email: string, source: string = "register") =>
     api.post('/api/waitlist', { email, source }),
+  list: () => api.get('/api/waitlist'),
+  remove: (id: string) => api.delete(`/api/waitlist/${id}`),
 };

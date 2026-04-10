@@ -1,10 +1,10 @@
-//|                                    IronRisk_Dashboard_v66.mq5  |
+//|                                    IronRisk_Dashboard.mq5      |
 //|                                  Copyright 2026, IronRisk System |
 //|                                             https://ironrisk.pro |
 //+------------------------------------------------------------------+
 #property copyright "IronRisk System"
 #property link      "https://ironrisk.pro"
-#property version   "66.00"
+#property version   "1.00"
 
 // SINGLE-DRAG ARCHITECTURE (v66):
 //   The EA auto-creates IronRisk_PnL, saves itself as a template,
@@ -29,10 +29,10 @@ string g_PnlSymbol = "IronRisk_PnL";
 
 // --- User Inputs ---
 input string   InpApiToken    = "PASTE_TOKEN_HERE"; // Trading Account API Token
-input string   InpWebhookHost = "127.0.0.1";        // Backend Server (no http://)
-input int      InpWebhookPort = 8000;               // Port (8000 dev, 443 prod)
+input string   InpWebhookHost = "ironrisk-api-production.up.railway.app"; // Backend Server (no http://)
+input int      InpWebhookPort = 443;                // Port (8000 dev, 443 prod)
 const string   InpWebhookPath = "/api/live/";       // API Base Path (internal)
-input bool     InpUseHTTPS    = false;              // Use HTTPS
+input bool     InpUseHTTPS    = true;               // Use HTTPS
 input int      InpTimerSec    = 5;                  // Heartbeat Frequency (seconds)
 
 // --- Global Types ---

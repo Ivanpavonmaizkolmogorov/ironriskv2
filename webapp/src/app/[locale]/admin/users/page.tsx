@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useTranslations } from "next-intl";
 import UsersTable from "@/components/features/admin/UsersTable";
+import LeadsTable from "@/components/features/admin/LeadsTable";
 import { ArrowLeft } from "lucide-react";
 
 export default function AdminUsersPage() {
@@ -59,6 +60,10 @@ export default function AdminUsersPage() {
 
         <section className="w-full">
           <UsersTable />
+        </section>
+
+        <section className="w-full">
+          <LeadsTable />
         </section>
       </main>
     </div>

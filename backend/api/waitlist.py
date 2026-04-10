@@ -1,10 +1,14 @@
 """Waitlist API — capture leads from traders without VIP code."""
 
+from datetime import datetime
+from typing import List
+
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
-from models import get_db, WaitlistLead
+from models import get_db, WaitlistLead, User
+from api.auth import get_current_user
 
 router = APIRouter(prefix="/api/waitlist", tags=["Waitlist"])
 
@@ -17,6 +21,16 @@ class WaitlistRequest(BaseModel):
 class WaitlistResponse(BaseModel):
     message: str
     already_registered: bool = False
+
+
+class WaitlistLeadOut(BaseModel):
+    id: str
+    email: str
+    source: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 @router.post("", response_model=WaitlistResponse)
@@ -40,3 +54,24 @@ async def add_to_waitlist(body: WaitlistRequest, db: Session = Depends(get_db)):
         message="¡Registrado! Te avisaremos cuando haya plazas. 🚀",
         already_registered=False,
     )
+
+
+@router.get("", response_model=List[WaitlistLeadOut])
+async def list_leads(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not user.is_admin:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Admin only")
+    return db.query(WaitlistLead).order_by(WaitlistLead.created_at.desc()).all()
+
+
+@router.delete("/{lead_id}")
+async def delete_lead(lead_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not user.is_admin:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Admin only")
+    lead = db.query(WaitlistLead).filter(WaitlistLead.id == lead_id).first()
+    if lead:
+        db.delete(lead)
+        db.commit()
+    return {"ok": True}
+
