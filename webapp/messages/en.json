@@ -126,7 +126,7 @@
     "pageTitle": "Your Workspaces",
     "pageDesc": "Each trading account acts as an isolated workspace with its own API token and strategies.",
     "title": "Trading Accounts",
-    "downloadEA": "Download EA Dashboard (v66)",
+    "downloadEA": "Download EA Dashboard",
     "description": "Create a virtual container for each of your MetaTrader terminals (e.g., \"FTMO 100k\"). Each account gets its own unique connection API token.",
     "newAccount": "New Account",
     "placeholderName": "Account Name (e.g., My FTMO)",

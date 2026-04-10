@@ -126,7 +126,7 @@
     "pageTitle": "Tus Espacios de Trabajo",
     "pageDesc": "Cada cuenta de trading actúa como un entorno de trabajo aislado con su propio token de API y estrategias.",
     "title": "Cuentas de Trading",
-    "downloadEA": "Descargar EA Dashboard (v66)",
+    "downloadEA": "Descargar EA Dashboard",
     "description": "Crea un contenedor virtual para cada una de tus terminales MetaTrader (ej. \"Fondeada 100k\"). Cada cuenta recibe un token de conexión API exclusivo.",
     "newAccount": "Nueva Cuenta",
     "placeholderName": "Nombre de la Cuenta (ej. FTMO 100k)",
