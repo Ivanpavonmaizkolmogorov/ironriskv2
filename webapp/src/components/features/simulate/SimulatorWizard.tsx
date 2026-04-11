@@ -390,6 +390,17 @@ export default function SimulatorWizard() {
               >
                 {loading ? "..." : t('btnAnalyze')}
               </button>
+              <div className="flex items-center gap-3 mt-2">
+                <div className="h-px flex-1 bg-iron-800" />
+                <span className="text-[10px] text-iron-600 uppercase tracking-wider">{t('orDivider')}</span>
+                <div className="h-px flex-1 bg-iron-800" />
+              </div>
+              <button
+                onClick={() => setParams({ winRate: 45.5, avgWin: 142.25, avgLoss: 89.12, stdWin: 93.29, stdLoss: 31.0, nTrades: 200 })}
+                className="w-full px-4 py-2 bg-risk-blue/10 hover:bg-risk-blue/20 text-risk-blue text-sm font-medium rounded-md transition-colors border border-risk-blue/20 hover:border-risk-blue/40"
+              >
+                {t('btnDemo')}
+              </button>
             </div>
           ) : (
             <div className="flex flex-col gap-4 items-center justify-center p-8 border-2 border-dashed border-iron-800 rounded-xl bg-surface-primary text-center animate-in fade-in zoom-in-95 duration-300">
