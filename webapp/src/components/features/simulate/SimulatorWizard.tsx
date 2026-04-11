@@ -412,10 +412,10 @@ export default function SimulatorWizard() {
                       setLoading(true);
                       setError(null);
                       try {
-                        const res = await fetch('/data/demo_eurusd_h1.csv');
+                        const res = await fetch('/data/demo_backtest.csv');
                         if (!res.ok) throw new Error('Demo file not found');
                         const blob = await res.blob();
-                        const demoFile = new File([blob], 'DEMO_EURUSD_H1.csv', { type: 'text/csv' });
+                        const demoFile = new File([blob], 'DEMO_GBPJPY_H1.csv', { type: 'text/csv' });
                         setCsvHeaders([]);
                         setColumnMapping({});
                         setIsProfitMapped(false);
