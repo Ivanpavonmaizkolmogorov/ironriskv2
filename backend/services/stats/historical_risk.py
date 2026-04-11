@@ -91,7 +91,7 @@ class HistoricalRiskAnalyzer:
                 eval_time = t_time
                 # Si es el último trade, evaluamos el estancamiento hasta HOY para igualarlo al Gauge
                 if i == len(live_trades) - 1:
-                    eval_time = datetime.datetime.now()
+                    eval_time = datetime.datetime.now(datetime.timezone.utc)
                 stagnation_days = (eval_time - last_peak_time).days
 
             # 1. Empiricos
