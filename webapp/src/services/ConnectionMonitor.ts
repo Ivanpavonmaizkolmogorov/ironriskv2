@@ -52,7 +52,11 @@ export class ConnectionMonitor {
     serverFailThreshold?: number;
     eaStaleThresholdMs?: number;
   }) {
-    this.apiUrl              = config?.apiUrl              ?? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
+    let baseUrl = config?.apiUrl ?? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
+    if (typeof window !== "undefined" && window.location.protocol === "https:" && baseUrl.startsWith("http://")) {
+      baseUrl = baseUrl.replace("http://", "https://");
+    }
+    this.apiUrl              = baseUrl;
     this.pingIntervalMs      = config?.pingIntervalMs      ?? 10_000;
     this.pingTimeoutMs       = config?.pingTimeoutMs       ?? 4_000;
     this.serverFailThreshold = config?.serverFailThreshold ?? 2;
