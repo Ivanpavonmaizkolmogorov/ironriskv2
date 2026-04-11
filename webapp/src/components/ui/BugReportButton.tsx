@@ -63,7 +63,7 @@ Puedes adjuntar capturas de pantalla o grabaciones.
       href={mailto}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-surface-secondary border border-iron-700 hover:border-risk-blue/50 rounded-full shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-300 group"
+      className="fixed bottom-20 right-6 z-50 flex items-center gap-2 bg-surface-secondary border border-iron-700 hover:border-risk-blue/50 rounded-full shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-300 group"
       title={isEn ? "Report a bug" : "Reportar un problema"}
       style={{ padding: isHovered ? "10px 18px 10px 14px" : "10px" }}
     >
