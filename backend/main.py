@@ -97,12 +97,27 @@ app.include_router(alerts.router)
 app.include_router(metrics_schema.router)
 app.include_router(waitlist.router)
 
+import os, subprocess
+_build_sha = os.environ.get("RAILWAY_GIT_COMMIT_SHA", "")
+if not _build_sha:
+    try:
+        _build_sha = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"], text=True, stderr=subprocess.DEVNULL
+        ).strip()
+    except Exception:
+        _build_sha = "dev"
+else:
+    _build_sha = _build_sha[:7]  # short SHA
+
+_deploy_id = os.environ.get("RAILWAY_DEPLOYMENT_ID", "local")
+
 
 @app.get("/")
 def root():
     return {
         "name": "IronRisk",
-        "version": "2.0.0",
+        "version": _build_sha,
+        "deploy": _deploy_id,
         "status": "operational",
         "docs": "/docs",
     }
@@ -110,7 +125,7 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
+    return {"status": "healthy", "version": _build_sha}
 
 async def ea_connectivity_watchdog():
     """Periodically checks if any MT5 EA has disconnected (heartbeat staled)."""
