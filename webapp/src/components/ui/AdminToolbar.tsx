@@ -84,8 +84,8 @@ export default function AdminToolbar() {
         </button>
 
         {apiVersion && (
-          <span className="px-2.5 py-1 rounded-full bg-surface-elevated/80 border border-iron-700 font-mono text-[10px] text-iron-400 select-all" title="API deploy version (git SHA)">
-            API: {apiVersion}
+          <span className="px-4 py-2 rounded-full bg-surface-elevated border border-risk-green/40 font-mono text-sm font-bold text-risk-green shadow-lg shadow-risk-green/10 select-all" title="Versión desplegada en Railway">
+            🚀 {apiVersion}
           </span>
         )}
       </div>

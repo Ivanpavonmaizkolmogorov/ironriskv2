@@ -97,20 +97,12 @@ app.include_router(alerts.router)
 app.include_router(metrics_schema.router)
 app.include_router(waitlist.router)
 
-import os, subprocess
+import os
+from datetime import datetime, timezone
 
-def _get_build_number():
-    """Get a human-readable build number from git commit count."""
-    try:
-        count = subprocess.check_output(
-            ["git", "rev-list", "--count", "HEAD"], text=True, stderr=subprocess.DEVNULL
-        ).strip()
-        return f"v{count}"
-    except Exception:
-        return "dev"
-
-_build_version = _get_build_number()
+_deploy_time = datetime.now(timezone.utc).strftime("%d-%b %H:%M UTC")
 _deploy_id = os.environ.get("RAILWAY_DEPLOYMENT_ID", "local")
+_build_version = f"Build {_deploy_time}"
 
 
 @app.get("/")
