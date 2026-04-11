@@ -280,7 +280,7 @@
     "register": "Crear Cuenta",
     "betaCodeLabel": "Código de Acceso Beta",
     "betaCodePlaceholder": "Introduce tu código de invitación...",
-    "betaNoCodeMsg": "¿No tienes código? IronRisk está en Beta Privada por invitación. Pídeselo a @Ivan_IronRisk en Telegram o síguenos para aperturas de plazas.",
+    "betaNoCodeMsg": "¿No tienes código? IronRisk está en Beta Privada por invitación. Pídeselo a @IronRisk_Ivan en Telegram o síguenos para aperturas de plazas.",
     "errorInvalidCode": "Código de Beta incorrecto o caducado."
   },
   "themeSelector": {

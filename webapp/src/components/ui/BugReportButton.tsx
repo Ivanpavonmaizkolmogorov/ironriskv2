@@ -5,7 +5,7 @@ import { useLocale } from "next-intl";
 import { useState, useEffect } from "react";
 
 /**
- * Floating bug report button — opens Telegram DM with @Ivan_IronRisk
+ * Floating bug report button — opens Telegram DM with @IronRisk_Ivan
  * with a pre-filled message including page context.
  * Only visible when the user is authenticated.
  */
@@ -29,7 +29,7 @@ export default function BugReportButton() {
       : `🐛 Reporte — IronRisk\n\nPágina: ${currentPage}\nCuenta: ${userEmail}\n\nDescripción:\n`
   );
 
-  const telegramUrl = `https://t.me/Ivan_IronRisk?text=${message}`;
+  const telegramUrl = `https://t.me/IronRisk_Ivan?text=${message}`;
 
   return (
     <a
