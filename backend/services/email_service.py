@@ -213,3 +213,105 @@ class EmailService:
         except Exception as e:
             logger.error(f"Failed to transmit reset email to {recipient_email}: {e}")
             return False
+
+    def send_waitlist_confirmation(self, recipient_email: str, locale: str = "es") -> bool:
+        """Sends a confirmation email when someone joins the waitlist."""
+        if not self.is_configured():
+            logger.warning(f"EmailService not configured. Skipping waitlist email to {recipient_email}.")
+            return False
+
+        if locale == "en":
+            subject = "You're on the IronRisk Waitlist 🛡️"
+            html_content = f"""
+            <html>
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
+                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
+                    <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hello,</p>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                        You've been added to the <strong style="color: #c9d1d9;">IronRisk private waitlist</strong> with the email <strong style="color: #c9d1d9;">{recipient_email}</strong>.
+                    </p>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                        We're currently in <strong style="color: #00e676;">closed beta</strong> and onboarding traders in small batches to ensure quality and support.
+                    </p>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                        When your spot opens, you'll receive an invite code directly to this email. No action needed on your end — just sit tight.
+                    </p>
+
+                    <div style="text-align: center; margin: 35px 0;">
+                        <a href="https://www.ironrisk.pro/en/simulate" 
+                           style="display: inline-block; padding: 14px 28px; background-color: #00e676; color: #0d1117; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                           Try the Free Simulator →
+                        </a>
+                    </div>
+
+                    <p style="font-size: 13px; color: #484f58; text-align: center;">
+                        While you wait, you can already analyze your backtests for free.
+                    </p>
+    
+                    <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
+                        Any doubts? Reply directly to this email.<br>
+                        <strong style="color: #8b949e;">Iván P.</strong> <span style="color: #484f58;">— Founder & Lead Developer</span><br>
+                        <a href="https://www.ironrisk.pro" style="color: #00e676; text-decoration: none; font-size: 12px;">www.ironrisk.pro</a>
+                    </p>
+                </div>
+              </body>
+            </html>
+            """
+        else:
+            subject = "Estás en la Lista de Espera de IronRisk 🛡️"
+            html_content = f"""
+            <html>
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
+                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
+                    <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hola,</p>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                        Has sido añadido a la <strong style="color: #c9d1d9;">lista de espera privada de IronRisk</strong> con el correo <strong style="color: #c9d1d9;">{recipient_email}</strong>.
+                    </p>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                        Actualmente estamos en <strong style="color: #00e676;">beta cerrada</strong>, incorporando traders en grupos reducidos para garantizar calidad y soporte.
+                    </p>
+                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                        Cuando tu plaza esté lista, recibirás un código de invitación directamente en este correo. No necesitas hacer nada más — te avisamos nosotros.
+                    </p>
+
+                    <div style="text-align: center; margin: 35px 0;">
+                        <a href="https://www.ironrisk.pro/es/simulate" 
+                           style="display: inline-block; padding: 14px 28px; background-color: #00e676; color: #0d1117; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                           Prueba el Simulador Gratis →
+                        </a>
+                    </div>
+
+                    <p style="font-size: 13px; color: #484f58; text-align: center;">
+                        Mientras esperas, ya puedes analizar tus backtests gratuitamente.
+                    </p>
+    
+                    <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
+                        ¿Tienes dudas? Responde directamente a este correo.<br>
+                        <strong style="color: #8b949e;">Iván P.</strong> <span style="color: #484f58;">— Founder & Lead Developer</span><br>
+                        <a href="https://www.ironrisk.pro" style="color: #00e676; text-decoration: none; font-size: 12px;">www.ironrisk.pro</a>
+                    </p>
+                </div>
+              </body>
+            </html>
+            """
+
+        try:
+            msg = EmailMessage()
+            msg["Subject"] = subject
+            msg["From"] = self.sender_email
+            msg["To"] = recipient_email
+            msg.set_content("You've been added to the IronRisk waitlist.")
+            msg.add_alternative(html_content, subtype="html")
+
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.sender_email, self.sender_password)
+                server.send_message(msg)
+            logger.info(f"✅ Waitlist confirmation sent to {recipient_email}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send waitlist email to {recipient_email}: {e}")
+            return False
+

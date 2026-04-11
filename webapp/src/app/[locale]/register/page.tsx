@@ -49,7 +49,7 @@ export default function RegisterPage() {
     if (!email.trim() || !email.includes("@")) return;
     setWaitlistLoading(true);
     try {
-      const res = await waitlistAPI.submit(email, "register_no_code");
+      const res = await waitlistAPI.submit(email, "register_no_code", locale);
       setWaitlistSubmitted(true);
       setWaitlistAlready(res.data?.already_registered || false);
     } catch {

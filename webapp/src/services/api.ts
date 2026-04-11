@@ -202,8 +202,8 @@ export const adminAPI = {
 
 // --- Waitlist (lead capture) ---
 export const waitlistAPI = {
-  submit: (email: string, source: string = "register") =>
-    api.post('/api/waitlist', { email, source }),
+  submit: (email: string, source: string = "register", locale: string = "es") =>
+    api.post('/api/waitlist', { email, source, locale }),
   list: () => api.get('/api/waitlist'),
   remove: (id: string) => api.delete(`/api/waitlist/${id}`),
 };

@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import List
+import threading
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, EmailStr
@@ -9,13 +10,17 @@ from sqlalchemy.orm import Session
 
 from models import get_db, WaitlistLead, User
 from api.auth import get_current_user
+from services.email_service import EmailService
 
 router = APIRouter(prefix="/api/waitlist", tags=["Waitlist"])
+
+email_service = EmailService()
 
 
 class WaitlistRequest(BaseModel):
     email: EmailStr
     source: str = "register"
+    locale: str = "es"
 
 
 class WaitlistResponse(BaseModel):
@@ -41,7 +46,7 @@ async def add_to_waitlist(body: WaitlistRequest, db: Session = Depends(get_db)):
     existing = db.query(WaitlistLead).filter(WaitlistLead.email == email).first()
     if existing:
         return WaitlistResponse(
-            message="Ya estás en la lista! 🛡️",
+            message="Ya estás en la lista! 🛡️" if body.locale == "es" else "You're already on the list! 🛡️",
             already_registered=True,
         )
 
@@ -50,8 +55,15 @@ async def add_to_waitlist(body: WaitlistRequest, db: Session = Depends(get_db)):
     db.add(lead)
     db.commit()
 
+    # Send confirmation email in background (don't block the response)
+    threading.Thread(
+        target=email_service.send_waitlist_confirmation,
+        args=(email, body.locale),
+        daemon=True,
+    ).start()
+
     return WaitlistResponse(
-        message="¡Registrado! Te avisaremos cuando haya plazas. 🚀",
+        message="¡Registrado! Te avisaremos cuando haya plazas. 🚀" if body.locale == "es" else "Registered! We'll notify you when spots open. 🚀",
         already_registered=False,
     )
 
