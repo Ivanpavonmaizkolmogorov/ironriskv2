@@ -502,12 +502,12 @@ export default function SimulatorWizard() {
                     return (
                       <>
                         {activeTab === 'csv' && <span className="bg-risk-blue/10 px-2.5 py-1.5 rounded-lg border border-risk-blue/20 shadow-sm text-risk-blue font-semibold">📄 {csvFile ? csvFile.name : "Historial"}</span>}
-                        <span className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">WR: <span className="text-iron-300">{(stats.win_rate * (stats.win_rate < 1.01 ? 100 : 1)).toFixed(1)}%</span></span>
-                        <span className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">Win: <span className="text-risk-green">${stats.avg_win.toFixed(2)}</span></span>
-                        <span className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">Loss: <span className="text-risk-red">${stats.avg_loss.toFixed(2)}</span></span>
-                        {stats.std_win > 0 && <span className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">σW: <span className="text-iron-300">{Number(stats.std_win).toFixed(1)}</span></span>}
-                        {stats.std_loss > 0 && <span className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">σL: <span className="text-iron-300">{Number(stats.std_loss).toFixed(1)}</span></span>}
-                        <span className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">N: <span className="text-iron-300">{stats.n_trades}</span></span>
+                        <span title="Win Rate — % de trades ganadores" className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">WR: <span className="text-iron-300">{(stats.win_rate * (stats.win_rate < 1.01 ? 100 : 1)).toFixed(1)}%</span></span>
+                        <span title="Media de ganancia por trade ganador" className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">Win: <span className="text-risk-green">${stats.avg_win.toFixed(2)}</span></span>
+                        <span title="Media de pérdida por trade perdedor" className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">Loss: <span className="text-risk-red">${stats.avg_loss.toFixed(2)}</span></span>
+                        {stats.std_win > 0 && <span title="Desviación típica de las ganancias — cuánto varían tus wins" className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">σW: <span className="text-iron-300">{Number(stats.std_win).toFixed(1)}</span></span>}
+                        {stats.std_loss > 0 && <span title="Desviación típica de las pérdidas — cuánto varían tus losses" className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">σL: <span className="text-iron-300">{Number(stats.std_loss).toFixed(1)}</span></span>}
+                        <span title="Número total de trades en el backtest" className="bg-surface-primary px-2.5 py-1.5 rounded-lg border border-iron-800/50 shadow-sm">N: <span className="text-iron-300">{stats.n_trades}</span></span>
                       </>
                     );
                   }
@@ -561,8 +561,8 @@ export default function SimulatorWizard() {
                           </div>
                           <p className="text-[11px] text-iron-400 pl-7">
                             {activeTab === 'csv'
-                              ? (locale === 'es' ? 'Establece tus límites inviolables. Haz click sobre los valores para ajustarlos a lo que realmente estás dispuesto a tolerar. Deja el check (✅) activado en las métricas que deseas auditar. Desmarca únicamente los vectores donde asumes el riesgo de navegar a ciegas.' : 'Set your unbreakable limits. Click on the values to adjust them to what you are truly willing to tolerate. Leave the check (✅) enabled on the metrics you want to audit. Uncheck only the vectors where you assume the risk of flying blind.')
-                              : (locale === 'es' ? 'Establece tus límites teóricos. Haz click sobre los valores máximos proyectados para definirlos. Deja el check (✅) activado en los parámetros que deseas proteger. Desmarca únicamente aquellos donde prefieres no limitar el riesgo.' : 'Set your theoretical limits. Click on the projected maximum values to define them. Leave the check (✅) enabled on the parameters you want to protect. Uncheck only those where you prefer not to limit the risk.')}
+                              ? (locale === 'es' ? 'Establece tus límites inviolables. Haz click sobre los valores para ajustarlos a lo que realmente estás dispuesto a tolerar. Deja el check (✅) activado en las métricas que deseas auditar. Desmarca únicamente las métricas donde asumes el riesgo de navegar a ciegas.' : 'Set your unbreakable limits. Click on the values to adjust them to what you are truly willing to tolerate. Leave the check (✅) enabled on the metrics you want to audit. Uncheck only the metrics where you assume the risk of flying blind.')
+                              : (locale === 'es' ? 'Establece tus límites inviolables. Haz click sobre los valores máximos proyectados para ajustarlos. Deja el check (✅) activado en las métricas que deseas auditar. Desmarca únicamente aquellas donde asumes el riesgo de navegar a ciegas.' : 'Set your unbreakable limits. Click on the projected maximum values to adjust them. Leave the check (✅) enabled on the metrics you want to audit. Uncheck only those where you assume the risk of flying blind.')}
                           </p>
                         </div>
                         {suggestions.ev_per_trade !== 0 && (
