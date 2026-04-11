@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import api, { strategyAPI } from '@/services/api';
 import SimulateCharts from './SimulateCharts';
 import UlyssesMoment from './UlyssesMoment';
+import EquityCurve from '@/components/features/charts/EquityCurve';
 import { UploadCloud, CheckCircle2, Eye, EyeOff, Shield, ChevronDown, ChevronUp, Info } from 'lucide-react';
 
 import { useRouter } from '@/i18n/routing';
@@ -451,34 +452,27 @@ export default function SimulatorWizard() {
                       {/* Mini PnL curve */}
                       {demoPreview.pnlIndex >= 0 && (() => {
                         const pnlValues = demoPreview.rows.map(r => parseFloat(r[demoPreview.pnlIndex]?.replace(',', '.'))).filter(v => !isNaN(v));
-                        const equity: number[] = [];
-                        pnlValues.reduce((acc, v) => { const next = acc + v; equity.push(next); return next; }, 0);
-                        if (equity.length === 0) return null;
-                        const min = Math.min(...equity);
-                        const max = Math.max(...equity);
-                        const range = max - min || 1;
-                        const w = 100; // viewbox percent
-                        const h = 40;
-                        const step = w / (equity.length - 1 || 1);
-                        const points = equity.map((v, i) => `${(i * step).toFixed(2)},${(h - ((v - min) / range) * (h - 4) - 2).toFixed(2)}`).join(' ');
-                        const lastVal = equity[equity.length - 1];
+                        if (pnlValues.length === 0) return null;
+                        let cumulative = 0;
+                        const equityData = pnlValues.map((v, i) => {
+                          cumulative += v;
+                          return { trade: i + 1, equity: cumulative };
+                        });
+                        const lastVal = equityData[equityData.length - 1]?.equity ?? 0;
+                        const ddMax = Math.min(...equityData.map(d => d.equity));
                         return (
                           <div className="bg-surface-tertiary border border-iron-800 rounded-lg p-3">
-                            <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center justify-between mb-1">
                               <span className="text-[10px] uppercase tracking-wider text-iron-500 font-semibold">Equity Curve (P/L)</span>
-                              <span className={`text-xs font-bold font-mono ${lastVal >= 0 ? 'text-risk-green' : 'text-red-400'}`}>
-                                {lastVal >= 0 ? '+' : ''}{lastVal.toFixed(2)} $
-                              </span>
+                              <div className="flex items-center gap-3">
+                                <span className="text-[9px] text-iron-600">{pnlValues.length} trades</span>
+                                <span className="text-[9px] text-iron-600">DD max: {ddMax.toFixed(2)} $</span>
+                                <span className={`text-xs font-bold font-mono ${lastVal >= 0 ? 'text-risk-green' : 'text-red-400'}`}>
+                                  {lastVal >= 0 ? '+' : ''}{lastVal.toFixed(2)} $
+                                </span>
+                              </div>
                             </div>
-                            <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-16" preserveAspectRatio="none">
-                              <polyline points={points} fill="none" stroke={lastVal >= 0 ? '#00e676' : '#ff4d4d'} strokeWidth="0.8" vectorEffect="non-scaling-stroke" />
-                              {/* Zero line */}
-                              <line x1="0" y1={(h - ((0 - min) / range) * (h - 4) - 2).toFixed(2)} x2={w.toString()} y2={(h - ((0 - min) / range) * (h - 4) - 2).toFixed(2)} stroke="#6b7280" strokeWidth="0.3" strokeDasharray="2,2" vectorEffect="non-scaling-stroke" />
-                            </svg>
-                            <div className="flex justify-between text-[9px] text-iron-600 mt-1">
-                              <span>{demoPreview.rows.length} trades</span>
-                              <span>DD max: {Math.min(...equity).toFixed(2)} $</span>
-                            </div>
+                            <EquityCurve data={equityData} variant="backtest" />
                           </div>
                         );
                       })()}
