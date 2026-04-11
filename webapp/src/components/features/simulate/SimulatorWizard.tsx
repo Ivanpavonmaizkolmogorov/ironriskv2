@@ -60,6 +60,15 @@ export default function SimulatorWizard() {
   const [isProfitMapped, setIsProfitMapped] = useState(false);
   const [editingRiskKey, setEditingRiskKey] = useState<string | null>(null);
 
+  // Demo preview state
+  const [demoPreview, setDemoPreview] = useState<{
+    rows: string[][];
+    headers: string[];
+    pnlIndex: number;
+    file: File;
+    downloadUrl: string;
+  } | null>(null);
+
   // Fork is only used from workspace dropdown — public simulator goes straight to tabs
   const searchParams = useSearchParams();
   const urlMode = searchParams.get('mode'); // 'manual' | 'csv' | null
@@ -414,23 +423,143 @@ export default function SimulatorWizard() {
                       try {
                         const res = await fetch('/data/demo_backtest.csv');
                         if (!res.ok) throw new Error('Demo file not found');
-                        const blob = await res.blob();
+                        const text = await res.text();
+                        const lines = text.trim().split('\n').map(l => l.split(';'));
+                        const headers = lines[0] || [];
+                        const dataRows = lines.slice(1);
+                        // Find Profit/Loss column index
+                        const pnlIdx = headers.findIndex(h => /profit|loss|pnl|p\/l/i.test(h.trim()));
+                        const blob = new Blob([text], { type: 'text/csv' });
                         const demoFile = new File([blob], 'DEMO_GBPJPY_H1.csv', { type: 'text/csv' });
-                        setCsvHeaders([]);
-                        setColumnMapping({});
-                        setIsProfitMapped(false);
-                        setCsvData([1], demoFile);
+                        const downloadUrl = URL.createObjectURL(blob);
+                        setDemoPreview({ rows: dataRows, headers, pnlIndex: pnlIdx >= 0 ? pnlIdx : -1, file: demoFile, downloadUrl });
                       } catch (err: any) {
                         setError(err.message || 'Error loading demo dataset');
                       } finally {
                         setLoading(false);
                       }
                     }}
-                    disabled={loading}
+                    disabled={loading || !!demoPreview}
                     className="px-4 py-2 bg-risk-blue/10 hover:bg-risk-blue/20 text-risk-blue text-sm font-medium rounded-md transition-colors border border-risk-blue/20 hover:border-risk-blue/40 disabled:opacity-50"
                   >
                     {loading ? t('demoLoading') : t('btnDemo')}
                   </button>
+
+                  {/* ─── Demo Preview Panel ─── */}
+                  {demoPreview && (
+                    <div className="w-full mt-4 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                      {/* Mini PnL curve */}
+                      {demoPreview.pnlIndex >= 0 && (() => {
+                        const pnlValues = demoPreview.rows.map(r => parseFloat(r[demoPreview.pnlIndex]?.replace(',', '.'))).filter(v => !isNaN(v));
+                        const equity: number[] = [];
+                        pnlValues.reduce((acc, v) => { const next = acc + v; equity.push(next); return next; }, 0);
+                        if (equity.length === 0) return null;
+                        const min = Math.min(...equity);
+                        const max = Math.max(...equity);
+                        const range = max - min || 1;
+                        const w = 100; // viewbox percent
+                        const h = 40;
+                        const step = w / (equity.length - 1 || 1);
+                        const points = equity.map((v, i) => `${(i * step).toFixed(2)},${(h - ((v - min) / range) * (h - 4) - 2).toFixed(2)}`).join(' ');
+                        const lastVal = equity[equity.length - 1];
+                        return (
+                          <div className="bg-surface-tertiary border border-iron-800 rounded-lg p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-[10px] uppercase tracking-wider text-iron-500 font-semibold">Equity Curve (P/L)</span>
+                              <span className={`text-xs font-bold font-mono ${lastVal >= 0 ? 'text-risk-green' : 'text-red-400'}`}>
+                                {lastVal >= 0 ? '+' : ''}{lastVal.toFixed(2)} $
+                              </span>
+                            </div>
+                            <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-16" preserveAspectRatio="none">
+                              <polyline points={points} fill="none" stroke={lastVal >= 0 ? '#00e676' : '#ff4d4d'} strokeWidth="0.8" vectorEffect="non-scaling-stroke" />
+                              {/* Zero line */}
+                              <line x1="0" y1={(h - ((0 - min) / range) * (h - 4) - 2).toFixed(2)} x2={w.toString()} y2={(h - ((0 - min) / range) * (h - 4) - 2).toFixed(2)} stroke="#6b7280" strokeWidth="0.3" strokeDasharray="2,2" vectorEffect="non-scaling-stroke" />
+                            </svg>
+                            <div className="flex justify-between text-[9px] text-iron-600 mt-1">
+                              <span>{demoPreview.rows.length} trades</span>
+                              <span>DD max: {Math.min(...equity).toFixed(2)} $</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Spreadsheet table preview */}
+                      <div className="bg-surface-tertiary border border-iron-800 rounded-lg overflow-hidden">
+                        <div className="flex items-center justify-between px-3 py-2 border-b border-iron-800">
+                          <span className="text-[10px] uppercase tracking-wider text-iron-500 font-semibold">
+                            📋 Preview — {demoPreview.rows.length} filas × {demoPreview.headers.length} columnas
+                          </span>
+                          <a 
+                            href={demoPreview.downloadUrl} 
+                            download="DEMO_GBPJPY_H1.csv"
+                            className="text-[10px] text-risk-blue hover:text-risk-blue/80 underline transition-colors"
+                          >
+                            ⬇ Descargar CSV
+                          </a>
+                        </div>
+                        <div className="overflow-x-auto max-h-48 overflow-y-auto">
+                          <table className="w-full text-[11px] font-mono">
+                            <thead className="sticky top-0 bg-surface-secondary">
+                              <tr>
+                                <th className="px-2 py-1.5 text-left text-iron-500 font-semibold border-b border-iron-800">#</th>
+                                {demoPreview.headers.map((h, i) => (
+                                  <th key={i} className={`px-2 py-1.5 text-left font-semibold border-b border-iron-800 whitespace-nowrap ${i === demoPreview.pnlIndex ? 'text-risk-green' : 'text-iron-400'}`}>
+                                    {h.trim()}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {demoPreview.rows.slice(0, 15).map((row, ri) => {
+                                const pnl = demoPreview.pnlIndex >= 0 ? parseFloat(row[demoPreview.pnlIndex]?.replace(',', '.')) : NaN;
+                                return (
+                                  <tr key={ri} className="border-b border-iron-800/50 hover:bg-iron-800/30 transition-colors">
+                                    <td className="px-2 py-1 text-iron-600">{ri + 1}</td>
+                                    {row.map((cell, ci) => (
+                                      <td key={ci} className={`px-2 py-1 whitespace-nowrap ${ci === demoPreview.pnlIndex ? (pnl >= 0 ? 'text-risk-green font-semibold' : 'text-red-400 font-semibold') : 'text-iron-300'}`}>
+                                        {cell.trim()}
+                                      </td>
+                                    ))}
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                        {demoPreview.rows.length > 15 && (
+                          <div className="text-center text-[10px] text-iron-600 py-1.5 border-t border-iron-800">
+                            ... {demoPreview.rows.length - 15} filas más
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => {
+                            if (demoPreview.downloadUrl) URL.revokeObjectURL(demoPreview.downloadUrl);
+                            setDemoPreview(null);
+                          }}
+                          className="flex-1 py-2.5 text-sm font-medium text-iron-400 hover:text-iron-200 bg-surface-tertiary border border-iron-700 rounded-md hover:border-iron-500 transition-colors"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCsvHeaders([]);
+                            setColumnMapping({});
+                            setIsProfitMapped(false);
+                            setCsvData([1], demoPreview.file);
+                            if (demoPreview.downloadUrl) URL.revokeObjectURL(demoPreview.downloadUrl);
+                            setDemoPreview(null);
+                          }}
+                          className="flex-1 py-2.5 text-sm font-bold text-surface-primary bg-risk-green hover:bg-risk-green/90 rounded-md transition-colors"
+                        >
+                          ✓ Cargar estos datos
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
