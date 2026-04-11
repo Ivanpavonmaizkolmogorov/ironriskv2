@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import api, { strategyAPI } from '@/services/api';
+import api, { strategyAPI, waitlistAPI } from '@/services/api';
 import SimulateCharts from './SimulateCharts';
 import UlyssesMoment from './UlyssesMoment';
 import EquityCurve from '@/components/features/charts/EquityCurve';
@@ -60,6 +60,11 @@ export default function SimulatorWizard() {
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [isProfitMapped, setIsProfitMapped] = useState(false);
   const [editingRiskKey, setEditingRiskKey] = useState<string | null>(null);
+
+  // Waitlist state (for simulator onboarding modal)
+  const [simWaitlistSubmitted, setSimWaitlistSubmitted] = useState(false);
+  const [simWaitlistLoading, setSimWaitlistLoading] = useState(false);
+  const [simWaitlistAlready, setSimWaitlistAlready] = useState(false);
 
   // Demo preview state
   const [demoPreview, setDemoPreview] = useState<{
@@ -897,6 +902,55 @@ export default function SimulatorWizard() {
             {error && (
               <div className="bg-red-500/10 border border-red-500/50 text-red-400 text-sm font-medium px-4 py-3 rounded-lg">
                 {error}
+              </div>
+            )}
+
+            {/* Waitlist CTA when invalid beta code */}
+            {error && (error.toLowerCase().includes('invalid beta') || error.toLowerCase().includes('invalid_invite') || error.toLowerCase().includes('incorrecto') || error.toLowerCase().includes('caducado')) && !simWaitlistSubmitted && onboardData.email.trim() && (
+              <div className="bg-risk-green/5 border border-risk-green/20 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                <p className="text-sm text-iron-300 mb-3">
+                  {locale === 'en'
+                    ? "No code yet? Leave your email and we'll notify you when spots open up."
+                    : "¿Aún no tienes código? Deja tu email y te avisamos cuando haya plazas disponibles."}
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setSimWaitlistLoading(true);
+                    try {
+                      const res = await waitlistAPI.submit(onboardData.email, 'simulator_onboard', locale);
+                      setSimWaitlistSubmitted(true);
+                      setSimWaitlistAlready(res.data?.already_registered || false);
+                    } catch {
+                      setSimWaitlistSubmitted(true);
+                    } finally {
+                      setSimWaitlistLoading(false);
+                    }
+                  }}
+                  disabled={simWaitlistLoading}
+                  className="w-full py-2.5 px-4 bg-risk-green/15 border border-risk-green/30 text-risk-green text-sm font-semibold rounded-lg hover:bg-risk-green/25 hover:border-risk-green/50 transition-all duration-300 disabled:opacity-50"
+                >
+                  {simWaitlistLoading
+                    ? '...'
+                    : locale === 'en'
+                      ? `📩 Notify me at ${onboardData.email}`
+                      : `📩 Avisarme a ${onboardData.email}`}
+                </button>
+              </div>
+            )}
+
+            {simWaitlistSubmitted && (
+              <div className="bg-risk-green/10 border border-risk-green/30 rounded-xl p-4 text-center animate-in fade-in duration-500">
+                <p className="text-risk-green font-semibold text-sm">
+                  {simWaitlistAlready
+                    ? (locale === 'en' ? '👋 You\'re already on the list!' : '👋 ¡Ya estás en la lista!')
+                    : (locale === 'en' ? '🎉 You\'re on the list!' : '🎉 ¡Estás en la lista!')}
+                </p>
+                <p className="text-iron-400 text-xs mt-1">
+                  {locale === 'en'
+                    ? "We'll email you when new spots open. Check your inbox!"
+                    : "Te avisaremos por email cuando haya plazas. ¡Revisa tu bandeja!"}
+                </p>
               </div>
             )}
 
