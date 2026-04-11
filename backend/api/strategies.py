@@ -371,6 +371,9 @@ def get_strategy_bayes(
     Uses Beta(WinRate) + NIG(AvgWin) + NIG(AvgLoss) + Delta Method.
     BT trades = prior, Live trades = data.
     """
+    import logging, traceback
+    logger = logging.getLogger("ironrisk.bayes")
+    
     from services.stats.fit_result import FitResult
     from services.stats.bayes_engine import BayesEngine
     

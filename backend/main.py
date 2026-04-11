@@ -65,8 +65,9 @@ app.add_middleware(
 # Global exception handler — ensures CORS headers are sent even on 500 errors
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    tb = traceback.format_exc()
     logger.error(f"Unhandled exception on {request.method} {request.url}:")
-    logger.error(traceback.format_exc())
+    logger.error(tb)
     origin = request.headers.get("origin", "")
     headers = {}
     if origin in _cors_origins:
@@ -74,7 +75,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         headers["Access-Control-Allow-Credentials"] = "true"
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Internal server error: {str(exc)}"},
+        content={"detail": f"Internal server error: {str(exc)}", "traceback": tb},
         headers=headers,
     )
 
