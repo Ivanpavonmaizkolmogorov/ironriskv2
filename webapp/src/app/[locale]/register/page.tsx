@@ -24,6 +24,7 @@ export default function RegisterPage() {
   const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
   const [waitlistLoading, setWaitlistLoading] = useState(false);
   const [waitlistAlready, setWaitlistAlready] = useState(false);
+  const [motivation, setMotivation] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) router.push(`/${locale}/dashboard`);
@@ -49,7 +50,7 @@ export default function RegisterPage() {
     if (!email.trim() || !email.includes("@")) return;
     setWaitlistLoading(true);
     try {
-      const res = await waitlistAPI.submit(email, "register_no_code", locale);
+      const res = await waitlistAPI.submit(email, "register_no_code", locale, motivation);
       setWaitlistSubmitted(true);
       setWaitlistAlready(res.data?.already_registered || false);
     } catch {
@@ -149,6 +150,13 @@ export default function RegisterPage() {
                   ? "No code yet? Leave your email and we'll notify you when spots open up."
                   : "¿Aún no tienes código? Deja tu email y te avisamos cuando haya plazas disponibles."}
               </p>
+              <textarea
+                value={motivation}
+                onChange={(e) => setMotivation(e.target.value)}
+                placeholder={isEn ? "What brought you to IronRisk? What problem are you looking to solve? (optional)" : "¿Qué te ha traído a IronRisk? ¿Qué problema buscas resolver? (opcional)"}
+                rows={3}
+                className="w-full bg-surface-primary border border-iron-700 rounded-lg px-3 py-2 text-sm text-iron-200 placeholder:text-iron-600 focus:outline-none focus:border-risk-green/40 resize-none mb-3 transition-colors"
+              />
               <button
                 type="button"
                 onClick={handleWaitlist}

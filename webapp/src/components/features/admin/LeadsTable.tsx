@@ -8,6 +8,7 @@ interface Lead {
   id: string;
   email: string;
   source: string;
+  notes: string | null;
   created_at: string;
 }
 
@@ -67,6 +68,7 @@ export default function LeadsTable() {
               <tr className="border-b border-iron-700 text-iron-400">
                 <th className="text-left px-4 py-3 font-medium">Email</th>
                 <th className="text-left px-4 py-3 font-medium">Source</th>
+                <th className="text-left px-4 py-3 font-medium">Motivation</th>
                 <th className="text-left px-4 py-3 font-medium">Date</th>
                 <th className="text-right px-4 py-3 font-medium w-16"></th>
               </tr>
@@ -84,6 +86,15 @@ export default function LeadsTable() {
                     <span className="inline-block px-2 py-0.5 text-xs rounded-full bg-risk-blue/15 text-risk-blue border border-risk-blue/30">
                       {lead.source}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-iron-300 text-xs max-w-xs">
+                    {lead.notes ? (
+                      <span className="italic" title={lead.notes}>
+                        “{lead.notes.length > 80 ? lead.notes.slice(0, 80) + '...' : lead.notes}”
+                      </span>
+                    ) : (
+                      <span className="text-iron-600">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-iron-400 text-xs">
                     {new Date(lead.created_at).toLocaleDateString("es-ES", {

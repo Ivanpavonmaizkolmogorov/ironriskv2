@@ -65,6 +65,7 @@ export default function SimulatorWizard() {
   const [simWaitlistSubmitted, setSimWaitlistSubmitted] = useState(false);
   const [simWaitlistLoading, setSimWaitlistLoading] = useState(false);
   const [simWaitlistAlready, setSimWaitlistAlready] = useState(false);
+  const [simMotivation, setSimMotivation] = useState("");
 
   // Demo preview state
   const [demoPreview, setDemoPreview] = useState<{
@@ -913,12 +914,19 @@ export default function SimulatorWizard() {
                     ? "No code yet? Leave your email and we'll notify you when spots open up."
                     : "¿Aún no tienes código? Deja tu email y te avisamos cuando haya plazas disponibles."}
                 </p>
+                <textarea
+                  value={simMotivation}
+                  onChange={(e) => setSimMotivation(e.target.value)}
+                  placeholder={locale === 'en' ? "What brought you to IronRisk? What problem are you looking to solve? (optional)" : "¿Qué te ha traído a IronRisk? ¿Qué problema buscas resolver? (opcional)"}
+                  rows={3}
+                  className="w-full bg-surface-primary border border-iron-700 rounded-lg px-3 py-2 text-sm text-iron-200 placeholder:text-iron-600 focus:outline-none focus:border-risk-green/40 resize-none mb-3 transition-colors"
+                />
                 <button
                   type="button"
                   onClick={async () => {
                     setSimWaitlistLoading(true);
                     try {
-                      const res = await waitlistAPI.submit(onboardData.email, 'simulator_onboard', locale);
+                      const res = await waitlistAPI.submit(onboardData.email, 'simulator_onboard', locale, simMotivation);
                       setSimWaitlistSubmitted(true);
                       setSimWaitlistAlready(res.data?.already_registered || false);
                     } catch {

@@ -21,6 +21,7 @@ class WaitlistRequest(BaseModel):
     email: EmailStr
     source: str = "register"
     locale: str = "es"
+    motivation: str = ""
 
 
 class WaitlistResponse(BaseModel):
@@ -32,6 +33,7 @@ class WaitlistLeadOut(BaseModel):
     id: str
     email: str
     source: str
+    notes: str | None = None
     created_at: datetime
 
     class Config:
@@ -51,7 +53,7 @@ async def add_to_waitlist(body: WaitlistRequest, db: Session = Depends(get_db)):
         )
 
     # Insert new lead
-    lead = WaitlistLead(email=email, source=body.source)
+    lead = WaitlistLead(email=email, source=body.source, notes=body.motivation.strip() or None)
     db.add(lead)
     db.commit()
 
