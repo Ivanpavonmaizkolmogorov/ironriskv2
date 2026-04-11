@@ -225,9 +225,19 @@ export default function LandingPage() {
             <h2 className="ir-fade text-2xl md:text-4xl font-bold text-iron-100 text-center mb-4 tracking-tight">
               {t("diagTitle")}
             </h2>
-            <p className="ir-fade ir-delay-1 text-iron-500 text-center max-w-2xl mx-auto mb-16 text-lg leading-relaxed">
-              {t("diagDesc")}
+            <p className="ir-fade ir-delay-1 text-iron-500 text-center max-w-2xl mx-auto mb-6 text-lg leading-relaxed">
+              {t("diagLead")}
             </p>
+            <p className="ir-fade ir-delay-1 text-iron-300 text-center max-w-xl mx-auto mb-8 text-base font-medium italic">
+              {t("diagPunch")}
+            </p>
+            <div className="ir-fade ir-delay-2 flex flex-wrap justify-center gap-3 mb-16">
+              {[t("diagSymptom1"), t("diagSymptom2"), t("diagSymptom3")].map((s, i) => (
+                <span key={i} className="px-4 py-2 rounded-lg bg-risk-red/8 border border-risk-red/15 text-risk-red text-sm font-semibold tracking-wide">
+                  {s}
+                </span>
+              ))}
+            </div>
 
             <div className="grid md:grid-cols-3 gap-6">
               {[
