@@ -11,11 +11,13 @@ import StepTwo from "@/components/features/wizard/StepTwo";
 import StepThree from "@/components/features/wizard/StepThree";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useWizardStore } from "@/store/useWizardStore";
+import { useTranslations } from "next-intl";
 
 export default function WizardPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { currentStep, reset } = useWizardStore();
+  const t = useTranslations("wizard");
 
   const [mounted, setMounted] = useState(false);
 
@@ -38,9 +40,9 @@ export default function WizardPage() {
       <nav className="sticky top-0 z-50 bg-surface-primary/80 backdrop-blur-xl border-b border-iron-800">
         <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
           <button onClick={() => router.back()} className="text-sm text-iron-400 hover:text-iron-200 transition-colors bg-transparent border-none p-0 cursor-pointer">
-            ← Cancel & Go Back
+            {t("cancelBack")}
           </button>
-          <span className="text-sm font-semibold text-iron-100">Strategy Wizard</span>
+          <span className="text-sm font-semibold text-iron-100">{t("title")}</span>
         </div>
       </nav>
 
@@ -48,7 +50,7 @@ export default function WizardPage() {
         <StepIndicator
           currentStep={currentStep}
           totalSteps={3}
-          labels={["Identity", "Data", "Limits"]}
+          labels={[t("stepIdentity"), t("stepData"), t("stepLimits")]}
         />
 
         <Card>

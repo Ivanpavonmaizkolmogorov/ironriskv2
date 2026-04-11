@@ -1408,8 +1408,8 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
             </div>
           ) : (
             <div className="bg-surface-secondary border border-iron-700 rounded-xl p-8 text-center">
-              <span className="text-3xl">🤖</span>
-              <p className="text-iron-400 mt-2">Selecciona un elemento en la tabla inferior para analizar</p>
+              <span className="text-3xl">📊</span>
+              <p className="text-iron-400 mt-2">Selecciona una estrategia en la tabla inferior para analizar</p>
             </div>
           )}
         </div>

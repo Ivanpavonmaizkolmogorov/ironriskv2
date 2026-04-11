@@ -1,6 +1,6 @@
 # IronRisk V2 — Real-Time Risk Management Ecosystem
 
-> *"No es falta de disciplina. Es ceguera probabilística."*
+> *"No falla tu estrategia. Tú la rompes."*
 
 ## Architecture
 

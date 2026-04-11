@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import api, { strategyAPI } from '@/services/api';
 import SimulateCharts from './SimulateCharts';
 import UlyssesMoment from './UlyssesMoment';
-import { UploadCloud, CheckCircle2, Eye, EyeOff, Shield, ChevronDown, ChevronUp } from 'lucide-react';
+import { UploadCloud, CheckCircle2, Eye, EyeOff, Shield, ChevronDown, ChevronUp, Info } from 'lucide-react';
 
 import { useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
@@ -197,7 +197,7 @@ export default function SimulatorWizard() {
       return;
     }
     if (modalMode === 'register' && (!onboardData.workspace || !onboardData.accountNumber)) {
-      setError("Todos los campos obligatorios (*) deben ser rellenados.");
+      setError(t('requiredFields'));
       return;
     }
     
@@ -207,7 +207,7 @@ export default function SimulatorWizard() {
     try {
       if (modalMode === 'register') {
         // Phase 1: Register User
-        setOnboardPhase(locale === 'en' ? 'Creating your account...' : 'Creando tu cuenta...');
+        setOnboardPhase(t('phaseCreating'));
         await register(onboardData.email, onboardData.password, onboardData.inviteCode);
         const authError = useAuthStore.getState().error;
         if (authError) {
@@ -215,7 +215,7 @@ export default function SimulatorWizard() {
         }
         
         // Phase 2: Create Workspace
-        setOnboardPhase(locale === 'en' ? 'Building encrypted workspace...' : 'Construyendo workspace encriptado...');
+        setOnboardPhase(t('phaseWorkspace'));
         const accRes = await api.post('/api/trading-accounts/', {
           name: onboardData.workspace,
           account_number: onboardData.accountNumber,
@@ -226,7 +226,7 @@ export default function SimulatorWizard() {
         // Phase 3: Create strategy from simulation data (backpack)
         const onboarding = useOnboardingStore.getState();
         if (onboarding.hasData && onboarding.traderRiskConfig) {
-          setOnboardPhase(locale === 'en' ? 'Configuring risk profile...' : 'Configurando perfil de riesgo...');
+          setOnboardPhase(t('phaseRisk'));
           const strategyName = csvFile ? csvFile.name.replace(/\.[^.]+$/, '') : onboardData.workspace;
           await strategyAPI.createFromSimulation({
             trading_account_id: accountId,
@@ -241,7 +241,7 @@ export default function SimulatorWizard() {
           onboarding.clear();
         } else if (csvFile) {
           // Fallback: old CSV upload flow
-          setOnboardPhase(locale === 'en' ? 'Importing strategy data...' : 'Importando datos de estrategia...');
+          setOnboardPhase(t('phaseImporting'));
           const formData = new FormData();
           formData.append('trading_account_id', accountId);
           formData.append('name', csvFile.name.replace(/\.[^.]+$/, ''));
@@ -261,7 +261,7 @@ export default function SimulatorWizard() {
       }
 
       // Phase 4: Success — Transport to Dashboard
-      setOnboardPhase(locale === 'en' ? 'Entering your control tower...' : 'Entrando en tu torre de control...');
+      setOnboardPhase(t('phaseEntering'));
       const user = useAuthStore.getState().user;
       setIsEntering(true);
       setShowOnboarding(false);
@@ -285,13 +285,10 @@ export default function SimulatorWizard() {
       {isEntering && (
         <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-surface-primary/95 backdrop-blur-md animate-in fade-in duration-300">
           <div className="w-16 h-16 border-4 border-iron-800 border-t-risk-green rounded-full animate-spin mb-6 shadow-[0_0_15px_rgba(0,230,118,0.5)]"></div>
-          <h2 className="text-2xl font-bold text-iron-100 mb-2">{locale === 'en' ? 'Authenticating...' : 'Autenticando...'}</h2>
-          <p className="text-sm text-risk-green font-mono">{locale === 'en' ? 'Establishing Secure Session' : 'Estableciendo sesión segura'}</p>
+          <h2 className="text-2xl font-bold text-iron-100 mb-2">{t('enteringAuth')}</h2>
+          <p className="text-sm text-risk-green font-mono">{t('enteringSession')}</p>
           <p className="text-xs text-risk-yellow mt-4 bg-risk-yellow/10 border border-risk-yellow/20 px-4 py-2 rounded-lg animate-in fade-in duration-700 delay-500">
-            📧 {locale === 'en'
-              ? 'We sent you a welcome email — check your spam/junk folder if you don\'t see it!'
-              : 'Te hemos enviado un correo de bienvenida — ¡revisa tu carpeta de spam/no deseado si no lo ves!'
-            }
+            📧 {t('enteringEmail')}
           </p>
         </div>
       )}
@@ -348,12 +345,22 @@ export default function SimulatorWizard() {
                   stdLoss: t('stdLoss'),
                   nTrades: t('nTrades'),
                 };
+                const isStdField = key === 'stdWin' || key === 'stdLoss';
                 return (
                   <div key={key} className="flex flex-col gap-1">
-                    <label className="text-sm font-medium text-iron-400">
+                    <label className="text-sm font-medium text-iron-400 flex items-center gap-1.5">
                       <span className="border-b border-dashed border-iron-600/60 hover:border-iron-300 cursor-help transition-colors select-none" title={t(`${key}Tooltip`)}>
                         {labelMap[key]}
                       </span>
+                      {isStdField && (
+                        <span className="relative group">
+                          <Info className="w-3.5 h-3.5 text-iron-600 hover:text-risk-blue cursor-help transition-colors" />
+                          <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-72 p-3 bg-surface-secondary border border-iron-700 rounded-xl text-xs text-iron-300 leading-relaxed shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200 z-50">
+                            <span className="block font-semibold text-iron-100 mb-1.5">💡 {key === 'stdWin' ? t('stdWin') : t('stdLoss')}</span>
+                            {t(`${key}Tooltip`)}
+                          </span>
+                        </span>
+                      )}
                     </label>
                     <input 
                       type="number"
@@ -393,14 +400,43 @@ export default function SimulatorWizard() {
                     onClick={() => fileInputRef.current?.click()}
                     className="px-4 py-2 bg-iron-800 hover:bg-iron-700 text-iron-100 text-sm font-medium rounded-md transition-colors"
                   >
-                    Select File
+                    {t('selectFile')}
+                  </button>
+                  <div className="flex items-center gap-3 mt-3">
+                    <div className="h-px flex-1 bg-iron-800" />
+                    <span className="text-[10px] text-iron-600 uppercase tracking-wider">{t('orDivider')}</span>
+                    <div className="h-px flex-1 bg-iron-800" />
+                  </div>
+                  <button 
+                    onClick={async () => {
+                      setLoading(true);
+                      setError(null);
+                      try {
+                        const res = await fetch('/data/demo_eurusd_h1.csv');
+                        if (!res.ok) throw new Error('Demo file not found');
+                        const blob = await res.blob();
+                        const demoFile = new File([blob], 'DEMO_EURUSD_H1.csv', { type: 'text/csv' });
+                        setCsvHeaders([]);
+                        setColumnMapping({});
+                        setIsProfitMapped(false);
+                        setCsvData([1], demoFile);
+                      } catch (err: any) {
+                        setError(err.message || 'Error loading demo dataset');
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    disabled={loading}
+                    className="px-4 py-2 bg-risk-blue/10 hover:bg-risk-blue/20 text-risk-blue text-sm font-medium rounded-md transition-colors border border-risk-blue/20 hover:border-risk-blue/40 disabled:opacity-50"
+                  >
+                    {loading ? t('demoLoading') : t('btnDemo')}
                   </button>
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-12 h-12 text-risk-green mb-2" />
                   <p className="text-sm text-iron-200 mb-2">
-                    Ready to parse: <span className="font-mono text-iron-400">{csvFile.name}</span>
+                    {t('readyToParse')} <span className="font-mono text-iron-400">{csvFile.name}</span>
                   </p>
 
                   <CsvColumnMapper 
@@ -416,7 +452,7 @@ export default function SimulatorWizard() {
                     onClick={() => { setCsvData(null, null); setCsvHeaders([]); }}
                     className="text-xs text-iron-500 hover:text-iron-300 underline mb-4 mt-6"
                   >
-                    Remove File
+                    {t('removeFile')}
                   </button>
                   <button 
                     onClick={handleCsvSubmit}
@@ -442,7 +478,7 @@ export default function SimulatorWizard() {
         {/* Phase 1.5: Loading State */}
         {loading && (
           <div className="w-full h-[500px] flex items-center justify-center bg-surface-secondary/50 border border-iron-800/40 rounded-2xl animate-pulse">
-            <span className="text-iron-500 font-mono tracking-widest uppercase">Calculating Edge Matrix...</span>
+            <span className="text-iron-500 font-mono tracking-widest uppercase">{t('loadingMatrix')}</span>
           </div>
         )}
 
@@ -455,7 +491,7 @@ export default function SimulatorWizard() {
                 onClick={() => setResult(null)} 
                 className="text-iron-400 hover:text-white flex items-center gap-2 text-sm font-semibold transition-all bg-surface-primary px-5 py-2.5 rounded-xl border border-iron-800/50 hover:border-iron-600/50 hover:scale-[1.02] shadow-lg shrink-0"
               >
-                ← {locale === 'en' ? 'Edit Parameters' : 'Volver a Editar'}
+                {t('editParams')}
               </button>
 
               <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-mono text-iron-500">
@@ -765,7 +801,7 @@ export default function SimulatorWizard() {
                       }}
                       className="text-xs text-iron-500 hover:text-risk-green transition-colors mt-1"
                     >
-                      {locale === 'en' ? 'Forgot your password?' : '¿Olvidaste la contraseña?'}
+                      {t('forgotPassword')}
                     </button>
                   )}
                 </div>
@@ -775,14 +811,14 @@ export default function SimulatorWizard() {
                 <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-amber-400">
-                      🔑 {locale === 'es' ? 'Código de Acceso Beta' : 'Beta Access Code'} <span className="text-risk-red">*</span>
+                      {t('betaCodeLabel')} <span className="text-risk-red">*</span>
                     </label>
                     <input 
-                      type="text" required placeholder={locale === 'es' ? 'Introduce tu código' : 'Enter your code'}
+                      type="text" required placeholder={t('betaCodePlaceholder')}
                       value={onboardData.inviteCode} onChange={e => setOnboardData(p => ({...p, inviteCode: e.target.value.toUpperCase()}))}
                       className="bg-surface-primary border-2 border-amber-500/30 rounded-lg px-4 py-3 text-amber-300 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20 transition-all font-mono font-bold tracking-wider uppercase"
                     />
-                    <span className="text-[10px] text-iron-500">{locale === 'es' ? 'IronRisk está en fase beta privada. Introduce el código que recibiste.' : 'IronRisk is in private beta. Enter the code you received.'}</span>
+                    <span className="text-[10px] text-iron-500">{t('betaCodeHint')}</span>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-iron-400">{t('inlineOnboarding.workspaceLabel')} <span className="text-risk-red">*</span></label>
@@ -795,33 +831,33 @@ export default function SimulatorWizard() {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-iron-400">Número terminal MT4/MT5 <span className="text-risk-red">*</span></label>
+                      <label className="text-xs font-medium text-iron-400">{t('mtAccountLabel')} <span className="text-risk-red">*</span></label>
                       <input 
-                        type="text" required placeholder="Ej: 102456"
+                        type="text" required placeholder={t('mtAccountPlaceholder')}
                         value={onboardData.accountNumber} onChange={e => setOnboardData(p => ({...p, accountNumber: e.target.value}))}
                         className="bg-surface-primary border border-iron-800/50 rounded-lg px-3 py-2 text-iron-200 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 transition-all text-sm font-mono"
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-iron-400" title="Vital para que el EA diferencie las operaciones de esta estrategia.">Magic Number <span className="text-risk-red">*</span></label>
+                      <label className="text-xs font-medium text-iron-400" title={t('magicHint')}>{t('magicLabel')} <span className="text-risk-red">*</span></label>
                       <input 
-                        type="text" required placeholder="Ej: 999111"
+                        type="text" required placeholder={t('magicPlaceholder')}
                         value={onboardData.magicNumber} onChange={e => setOnboardData(p => ({...p, magicNumber: e.target.value}))}
                         className="bg-surface-primary border border-iron-800/50 rounded-lg px-3 py-2 text-iron-200 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 transition-all text-sm font-mono"
                       />
-                      <span className="text-[10px] text-iron-600">Deja 0 si no usas Robots o desconoces tu EA.</span>
+                      <span className="text-[10px] text-iron-600">{t('magicHint')}</span>
                     </div>
                   </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-iron-400">Broker (Opcional)</label>
+                      <label className="text-xs font-medium text-iron-400">{t('brokerLabel')}</label>
                       <input 
-                        type="text" placeholder="Ej: FTMO"
+                        type="text" placeholder={t('brokerPlaceholder')}
                         value={onboardData.broker} onChange={e => setOnboardData(p => ({...p, broker: e.target.value}))}
                         className="bg-surface-primary border border-iron-800/50 rounded-lg px-3 py-2 text-iron-200 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 transition-all text-sm"
                       />
                     </div>
                   <p className="text-xs text-iron-500 bg-iron-900/50 p-2 rounded-md border border-iron-800/30">
-                    <span className="text-risk-yellow">⚠</span> Enlazaremos estrictamente tu token a este número de cuenta para proteger la validez de tus datos de riesgo.
+                    <span className="text-risk-yellow">⚠</span> {t('bindWarning')}
                   </p>
                 </div>
               )}

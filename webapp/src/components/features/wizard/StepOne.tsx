@@ -9,9 +9,11 @@ import { useWizardStore } from "@/store/useWizardStore";
 import { tradingAccountAPI, strategyAPI, orphanAPI } from "@/services/api";
 import type { TradingAccount } from "@/types/tradingAccount";
 import BatchImportModal from "./BatchImportModal";
+import { useTranslations } from "next-intl";
 
 export default function StepOne() {
   const router = useRouter();
+  const t = useTranslations("wizard");
   const searchParams = useSearchParams();
   const urlAccountId = searchParams.get("accountId");
   const urlMagic = searchParams.get("magic");
@@ -126,8 +128,8 @@ export default function StepOne() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-iron-100 mb-1">Strategy Identity</h2>
-        <p className="text-sm text-iron-500">Define your strategy&apos;s core parameters.</p>
+        <h2 className="text-lg font-semibold text-iron-100 mb-1">{t("step1Title")}</h2>
+        <p className="text-sm text-iron-500">{t("step1Desc")}</p>
       </div>
 
       {/* Orphan context banner */}
@@ -135,8 +137,8 @@ export default function StepOne() {
         <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-amber-500 text-lg">🤖</span>
-              <span className="text-sm font-semibold text-amber-400">Configuring detected bot</span>
+              <span className="text-amber-500 text-lg">📊</span>
+              <span className="text-sm font-semibold text-amber-400">{t("configOrphan")}</span>
             </div>
             <button
               type="button"
@@ -146,7 +148,7 @@ export default function StepOne() {
               }}
               className="text-[10px] bg-red-500/10 hover:bg-red-500/20 text-red-400 px-2 py-1 rounded transition-colors"
             >
-              ✕ Deshacer
+              {t("undo")}
             </button>
           </div>
           <div className="grid grid-cols-3 gap-3">
@@ -183,12 +185,12 @@ export default function StepOne() {
             }}
             className="text-[10px] text-amber-500/70 hover:text-amber-400 transition-colors font-medium flex items-center gap-1"
           >
-            {showTrades ? '▾' : '▸'} Últimos trades detectados
+            {showTrades ? '▾' : '▸'} {t("recentTrades")}
           </button>
           {showTrades && (
             <div className="max-h-48 overflow-auto rounded-lg border border-iron-800">
               {orphanTradesList.length === 0 ? (
-                <p className="text-[10px] text-iron-500 p-3 text-center">Cargando...</p>
+                <p className="text-[10px] text-iron-500 p-3 text-center">{t("loading")}</p>
               ) : (
                 <table className="w-full text-[10px] font-mono">
                   <thead className="bg-surface-tertiary/80 sticky top-0">
@@ -231,12 +233,12 @@ export default function StepOne() {
       )}
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-iron-200">Trading Account <span className="text-risk-red">*</span></label>
+        <label className="text-sm font-medium text-iron-200">{t("tradingAccount")} <span className="text-risk-red">*</span></label>
         {accounts.length === 0 ? (
-          <p className="text-amber-400 text-sm py-2">No trading accounts. Please create one in Trading Accounts first.</p>
+          <p className="text-amber-400 text-sm py-2">{t("noAccounts")}</p>
         ) : urlAccountId ? (
           <div className="w-full bg-surface-tertiary/50 border border-iron-800 rounded-lg px-4 py-2.5 text-iron-400 cursor-not-allowed">
-            {accounts.find(a => a.id === urlAccountId)?.name || "Loading workspace..."} (Locked)
+            {accounts.find(a => a.id === urlAccountId)?.name || t("loadingWorkspace")} {t("locked")}
           </div>
         ) : (
           <select 
@@ -256,24 +258,24 @@ export default function StepOne() {
         <div className="bg-surface-secondary border border-iron-700 rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-iron-200">Multiple strategies?</p>
-              <p className="text-xs text-iron-500">Import several CSVs at once with auto-detected names and magic numbers.</p>
+              <p className="text-sm font-medium text-iron-200">{t("multipleStrategies")}</p>
+              <p className="text-xs text-iron-500">{t("multipleStrategiesDesc")}</p>
             </div>
             <div className="flex gap-2 shrink-0">
               <Button variant="danger" size="sm"
                 onClick={async () => {
-                  if (!confirm("⚠️ Delete ALL strategies? This cannot be undone.")) return;
+                  if (!confirm(t("deleteAllConfirm"))) return;
                   try {
                     const res = await strategyAPI.deleteAll();
                     alert(res.data.detail);
                     window.location.reload();
-                  } catch { alert("Delete failed"); }
+                  } catch { alert(t("deleteFailed")); }
                 }}>
-                🗑 Delete All
+                {t("deleteAll")}
               </Button>
               <Button variant="ghost" size="sm" onClick={() => setShowBatch(true)}
                 className="text-iron-300 border border-iron-600 hover:text-iron-100">
-                📦 Batch Import
+                {t("batchImport")}
               </Button>
             </div>
           </div>
@@ -289,15 +291,15 @@ export default function StepOne() {
       {/* ── Single strategy fields (below) ── */}
 
       <Input
-        label="Strategy Name"
-        placeholder={isOrphanMode ? `Strategy_${magicNum}` : "e.g. MeanReversion_EURUSD_H1"}
+        label={t("strategyName")}
+        placeholder={isOrphanMode ? `Strategy_${magicNum}` : t("strategyNamePlaceholder")}
         value={stepOneData.name}
         onChange={(e) => updateStepOne({ name: e.target.value })}
       />
 
       <Input
-        label="Description (optional)"
-        placeholder="Brief description of your strategy logic"
+        label={t("description")}
+        placeholder={t("descriptionPlaceholder")}
         value={stepOneData.description}
         onChange={(e) => updateStepOne({ description: e.target.value })}
       />
@@ -306,7 +308,7 @@ export default function StepOne() {
         {isOrphanMode ? (
           /* Magic Number — locked in orphan mode */
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-iron-200">Magic Number 🔒</label>
+            <label className="text-sm font-medium text-iron-200">{t("magicNumber")} 🔒</label>
             <div className="w-full bg-surface-tertiary/50 border border-iron-800 rounded-lg px-4 py-2.5 text-iron-400 font-mono cursor-not-allowed">
               {magicNum}
             </div>
@@ -314,15 +316,15 @@ export default function StepOne() {
         ) : (
           <div className="flex flex-col gap-2">
             <Input
-              label="Magic Number"
+              label={t("magicNumber")}
               type="number"
-              placeholder="0 = manual trading"
+              placeholder={t("magicNumberPlaceholder")}
               value={stepOneData.magicNumber || ""}
               onChange={(e) => updateStepOne({ magicNumber: parseInt(e.target.value) || 0 })}
             />
             {!isOrphanMode && orphanList.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-2 items-center">
-                <span className="text-xs text-iron-500">Detectados esperando configuración:</span>
+                <span className="text-xs text-iron-500">{t("detectedOrphans")}</span>
                 {orphanList.map(bot => (
                   <div key={bot.magic_number} className="relative flex rounded-md border border-amber-500/30 overflow-visible">
                     <button
@@ -447,10 +449,10 @@ export default function StepOne() {
           onClick={() => router.back()}
           className="text-sm font-medium text-iron-500 hover:text-iron-300 transition-colors"
         >
-          ← Cancelar y Volver
+          {t("cancelBack")}
         </button>
         <Button onClick={() => setStep(2)} disabled={!canProceed}>
-          Siguiente →
+          {t("next")}
         </Button>
       </div>
     </div>

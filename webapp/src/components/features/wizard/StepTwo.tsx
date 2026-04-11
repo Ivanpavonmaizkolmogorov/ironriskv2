@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { useWizardStore } from "@/store/useWizardStore";
 import { useStrategyStore } from "@/store/useStrategyStore";
+import { useTranslations } from "next-intl";
 
 import CsvColumnMapper, { autoDetectMapping } from "@/components/ui/CsvColumnMapper";
 
 export default function StepTwo() {
   const router = useRouter();
+  const t = useTranslations("wizard");
   const { fetchStrategies } = useStrategyStore();
   const {
     stepOneData, stepTwoData, updateStepTwo, setStep,
@@ -87,9 +89,9 @@ export default function StepTwo() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-iron-100 mb-1">Upload Backtest Data</h2>
+        <h2 className="text-lg font-semibold text-iron-100 mb-1">{t("step2Title")}</h2>
         <p className="text-sm text-iron-500">
-          Upload your Strategy Tester CSV. We&apos;ll detect the columns and let you map them.
+          {t("step2Desc")}
         </p>
       </div>
 
@@ -115,8 +117,8 @@ export default function StepTwo() {
             </>
           ) : (
             <>
-              <p className="text-iron-400 text-sm">📄 Drop your CSV here or click to browse</p>
-              <p className="text-iron-600 text-xs mt-1">Supports any CSV format (MT4/MT5, custom, etc.)</p>
+              <p className="text-iron-400 text-sm">📄 {t("dropCsv")}</p>
+              <p className="text-iron-600 text-xs mt-1">{t("dropCsvFormats")}</p>
             </>
           )}
         </div>
@@ -140,14 +142,14 @@ export default function StepTwo() {
 
       <div className="flex justify-between pt-4">
         <Button variant="ghost" onClick={() => setStep(1)} disabled={isSubmitting}>
-          ← Back
+          {t("back")}
         </Button>
         <Button
           onClick={handleSubmit}
           disabled={!stepTwoData.isValid || !isProfitMapped}
           isLoading={isSubmitting}
         >
-          🚀 Upload &amp; Create Strategy
+          {t("uploadCreate")}
         </Button>
       </div>
     </div>
