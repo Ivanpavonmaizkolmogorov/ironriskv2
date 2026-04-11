@@ -2,7 +2,7 @@
 
 import { useAuthStore } from "@/store/useAuthStore";
 import { useLocale } from "next-intl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 /**
  * Floating bug report button — opens Telegram DM with @Ivan_IronRisk
@@ -13,10 +13,13 @@ export default function BugReportButton() {
   const { isAuthenticated, user } = useAuthStore();
   const locale = useLocale();
   const [isHovered, setIsHovered] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isAuthenticated) return null;
+  useEffect(() => { setMounted(true); }, []);
 
-  const currentPage = typeof window !== "undefined" ? window.location.pathname : "/";
+  if (!mounted || !isAuthenticated) return null;
+
+  const currentPage = window.location.pathname;
   const userEmail = user?.email || "unknown";
   const isEn = locale === "en";
 
