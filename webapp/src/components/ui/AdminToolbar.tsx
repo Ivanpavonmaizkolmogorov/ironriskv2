@@ -8,7 +8,10 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Settings, Users } from 'lucide-react';
 import Link from 'next/link';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+let API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+if (typeof window !== "undefined" && window.location.protocol === "https:" && API_BASE.startsWith("http://")) {
+  API_BASE = API_BASE.replace("http://", "https://");
+}
 
 export default function AdminToolbar() {
   const t = useTranslations('admin');

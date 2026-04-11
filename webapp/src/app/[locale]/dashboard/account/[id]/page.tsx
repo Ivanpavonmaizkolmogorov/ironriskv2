@@ -211,7 +211,10 @@ export default function DashboardPage() {
       return;
     }
     const isPortfolio = "strategy_ids" in activeAsset;
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    let API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    if (typeof window !== "undefined" && window.location.protocol === "https:" && API_URL.startsWith("http://")) {
+      API_URL = API_URL.replace("http://", "https://");
+    }
     const encodedToken = encodeURIComponent(account.api_token);
     const ts = Date.now();
     const url = isPortfolio 

@@ -1,16 +1,24 @@
-/** Axios API client with JWT interceptor. */
+/** Axios API client with JWT interceptor. v3-https-interceptor */
 
 import axios from "axios";
 
-let API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-// Auto-upgrade to HTTPS when the page is served over HTTPS (prevents Mixed Content)
-if (typeof window !== "undefined" && window.location.protocol === "https:" && API_URL.startsWith("http://")) {
-  API_URL = API_URL.replace("http://", "https://");
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const api = axios.create({
   baseURL: API_URL,
   headers: { "Content-Type": "application/json" },
+});
+
+// HTTPS upgrade interceptor — runs on EVERY request at runtime in the browser
+// Fixes Mixed Content when NEXT_PUBLIC_API_URL was baked with http:// at build time
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined" && window.location.protocol === "https:") {
+    const url = config.baseURL || "";
+    if (url.startsWith("http://")) {
+      config.baseURL = url.replace("http://", "https://");
+    }
+  }
+  return config;
 });
 
 // JWT interceptor — reads token from localStorage
