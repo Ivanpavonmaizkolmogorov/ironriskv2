@@ -88,7 +88,7 @@ export default function SimulatorWizard() {
         try {
           const formData = new FormData();
           formData.append('file', csvFile);
-          const res = await api.post('/api/simulate/extract_headers/', formData, {
+          const res = await api.post('/api/simulate/extract_headers', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
           });
           
@@ -166,7 +166,7 @@ export default function SimulatorWizard() {
       formData.append('file', csvFile);
       formData.append('column_mapping', JSON.stringify(columnMapping));
       
-      const res = await api.post('/api/simulate/upload/', formData, {
+      const res = await api.post('/api/simulate/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setResult(res.data);
