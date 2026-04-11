@@ -258,7 +258,7 @@
     "without4": "You destroy your system's statistical edge",
     "withTitle": "✓ With IronRisk",
     "with1pre": "You see -$800 and IronRisk shows ",
-    "with1green": "percentile 33 — 1 out of 3 times your strategy does worse than this. It's normal.",
+    "with1green": "percentile 33 — 2 out of 3 times your strategy has been worse. This is not an anomaly.",
     "with2": "You see your backtest had drawdowns of -$2,400",
     "with3": "Your brain receives the signal: \"my data says this is expected\"",
     "with4": "You let the system work without intervention",
