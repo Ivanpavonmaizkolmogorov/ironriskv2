@@ -5,8 +5,8 @@ import { useLocale } from "next-intl";
 import { useState } from "react";
 
 /**
- * Floating bug report button — opens the user's email client
- * with a pre-filled template to ironrisk.shield@gmail.com.
+ * Floating bug report button — opens Telegram DM with @Ivan_IronRisk
+ * with a pre-filled message including page context.
  * Only visible when the user is authenticated.
  */
 export default function BugReportButton() {
@@ -20,47 +20,19 @@ export default function BugReportButton() {
   const userEmail = user?.email || "unknown";
   const isEn = locale === "en";
 
-  const subject = encodeURIComponent(
-    `[Bug] IronRisk — ${currentPage}`
-  );
-
-  const body = encodeURIComponent(
+  const message = encodeURIComponent(
     isEn
-      ? `Hi IronRisk team,
-
-I found an issue on the page: ${currentPage}
-My account: ${userEmail}
-
-Type: [ Bug / Suggestion / Question ]
-
-Description:
-(Describe what happened, what you expected, and what you see instead)
-
-
-
-Feel free to attach screenshots or screen recordings.
-`
-      : `Hola equipo IronRisk,
-
-He encontrado un problema en la página: ${currentPage}
-Mi cuenta: ${userEmail}
-
-Tipo: [ Bug / Sugerencia / Pregunta ]
-
-Descripción:
-(Describe qué ha ocurrido, qué esperabas y qué ves en su lugar)
-
-
-
-Puedes adjuntar capturas de pantalla o grabaciones.
-`
+      ? `🐛 Bug Report — IronRisk\n\nPage: ${currentPage}\nAccount: ${userEmail}\n\nDescription:\n`
+      : `🐛 Reporte — IronRisk\n\nPágina: ${currentPage}\nCuenta: ${userEmail}\n\nDescripción:\n`
   );
 
-  const mailto = `mailto:ironrisk.shield@gmail.com?subject=${subject}&body=${body}`;
+  const telegramUrl = `https://t.me/Ivan_IronRisk?text=${message}`;
 
   return (
     <a
-      href={mailto}
+      href={telegramUrl}
+      target="_blank"
+      rel="noopener noreferrer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="fixed bottom-20 right-6 z-50 flex items-center gap-2 bg-surface-secondary border border-iron-700 hover:border-risk-blue/50 rounded-full shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-300 group"
