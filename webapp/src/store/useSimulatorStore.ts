@@ -26,11 +26,11 @@ interface SimulatorState {
 }
 
 const defaultParams: SimulatorParams = {
-  winRate: 50.0,
-  avgWin: 100.0,
-  avgLoss: 80.0,
-  stdWin: 50.0,
-  stdLoss: 40.0,
+  winRate: 45.5,
+  avgWin: 142.25,
+  avgLoss: 89.12,
+  stdWin: 93.29,
+  stdLoss: 31.0,
   nTrades: 200,
 };
 
