@@ -47,7 +47,7 @@ class EmailService:
             <html>
               <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
                 <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
-                    <h1 style="color: #00e676; margin-top: 0; font-size: 24px; font-weight: 800;">IronRisk</h1>
+                    <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hello,</p>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
                         Your lifetime account has been successfully provisioned for access with the email: <strong style="color: #c9d1d9;">{recipient_email}</strong>
@@ -73,7 +73,8 @@ class EmailService:
     
                     <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
                         Any doubts? Reply directly to this email.<br>
-                        <strong style="color: #8b949e;">The IronRisk Quant Team</strong>
+                        <strong style="color: #8b949e;">Iván P.</strong> <span style="color: #484f58;">— Founder & Lead Developer</span><br>
+                        <a href="https://www.ironrisk.pro" style="color: #00e676; text-decoration: none; font-size: 12px;">www.ironrisk.pro</a>
                     </p>
                 </div>
               </body>
@@ -85,7 +86,7 @@ class EmailService:
             <html>
               <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
                 <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
-                    <h1 style="color: #00e676; margin-top: 0; font-size: 24px; font-weight: 800;">IronRisk</h1>
+                    <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hola,</p>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
                         Tu cuenta vitalicia ha sido provisionada exitosamente para el acceso con el correo: <strong style="color: #c9d1d9;">{recipient_email}</strong>
@@ -111,7 +112,8 @@ class EmailService:
     
                     <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
                         ¿Tienes dudas? Responde directamente a este correo.<br>
-                        <strong style="color: #8b949e;">El Equipo de Cuantificación de IronRisk</strong>
+                        <strong style="color: #8b949e;">Iván P.</strong> <span style="color: #484f58;">— Founder & Lead Developer</span><br>
+                        <a href="https://www.ironrisk.pro" style="color: #00e676; text-decoration: none; font-size: 12px;">www.ironrisk.pro</a>
                     </p>
                 </div>
               </body>
@@ -171,7 +173,8 @@ class EmailService:
         <html>
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
             <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #ff4d4d; border: 1px solid #30363d;">
-                <h1 style="color: #ff4d4d; margin-top: 0; font-size: 24px; font-weight: 800;">{lbl_title}</h1>
+                <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
+                <h2 style="color: #ff4d4d; margin-top: 10px; font-size: 20px; font-weight: 800;">{lbl_title}</h2>
                 <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">{lbl_desc}</p>
                 
                 <div style="text-align: center; margin: 35px 0;">
@@ -186,7 +189,8 @@ class EmailService:
                 </p>
 
                 <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
-                    <strong style="color: #8b949e;">{lbl_footer}</strong>
+                    <strong style="color: #8b949e;">{lbl_footer}</strong><br>
+                    <a href="https://www.ironrisk.pro" style="color: #00e676; text-decoration: none; font-size: 12px;">www.ironrisk.pro</a>
                 </p>
             </div>
           </body>
