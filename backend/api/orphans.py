@@ -3,7 +3,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, literal
 
 from models.database import get_db
 from models.real_trade import RealTrade
@@ -29,7 +29,7 @@ def get_orphans(account_id: str, db: Session = Depends(get_db)):
                 func.sum(RealTrade.profit).label("total_pnl"),
                 func.max(RealTrade.close_time).label("last_trade"),
                 func.min(RealTrade.close_time).label("first_trade"),
-                func.string_agg(func.distinct(RealTrade.symbol), func.literal_column("', '")).label("symbols"),
+                func.string_agg(RealTrade.symbol.distinct(), literal(', ')).label("symbols"),
             )
             .filter(RealTrade.trading_account_id == account_id)
             .group_by(RealTrade.magic_number)
