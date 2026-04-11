@@ -242,7 +242,7 @@
     "diagSymptom3": "Self-Sabotage",
     "step1Icon": "📊",
     "step1Title": "1. Upload Your Backtest",
-    "step1Desc": "Upload your Strategy Tester CSV. We automatically test which probability distribution fits your data — no assumptions, only verified math.",
+    "step1Desc": "Upload your Strategy Tester report — CSV, HTML or Excel. Or define your metrics manually in the simulator. We automatically verify which probability distribution fits your data.",
     "step2Icon": "🛡️",
     "step2Title": "2. Define Your Limits",
     "step2Desc": "Max Drawdown, daily loss. The thresholds your rational self sets when the market is closed.",

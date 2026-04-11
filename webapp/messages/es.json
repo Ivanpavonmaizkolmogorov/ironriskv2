@@ -234,7 +234,7 @@
     "diagSymptom3": "Sabotaje",
     "step1Icon": "📊",
     "step1Title": "1. Sube tu Backtest",
-    "step1Desc": "Carga el CSV de tu Strategy Tester. Verificamos automáticamente qué distribución de probabilidad se ajusta a tus datos — sin suposiciones, solo matemáticas contrastadas.",
+    "step1Desc": "Sube el reporte de tu Strategy Tester — CSV, HTML o Excel. O si prefieres, define tus métricas manualmente en el simulador. Verificamos automáticamente qué distribución de probabilidad se ajusta a tus datos.",
     "step2Icon": "🛡️",
     "step2Title": "2. Define tus Límites",
     "step2Desc": "Max Drawdown, pérdida diaria. Los umbrales que tu yo racional establece cuando el mercado está cerrado.",
