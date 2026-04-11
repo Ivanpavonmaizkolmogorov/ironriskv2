@@ -231,11 +231,16 @@ export default function LandingPage() {
             <p className="ir-fade ir-delay-1 text-iron-300 text-center max-w-xl mx-auto mb-8 text-base font-medium italic">
               {t("diagPunch")}
             </p>
-            <div className="ir-fade ir-delay-2 flex flex-wrap justify-center gap-3 mb-16">
-              {[t("diagSymptom1"), t("diagSymptom2"), t("diagSymptom3")].map((s, i) => (
-                <span key={i} className="px-4 py-2 rounded-lg bg-risk-red/8 border border-risk-red/15 text-risk-red text-sm font-semibold tracking-wide">
-                  {s}
-                </span>
+            <div className="ir-fade ir-delay-2 flex flex-wrap justify-center gap-4 mb-16">
+              {[
+                { icon: "🔁", label: t("diagSymptom1") },
+                { icon: "⚡", label: t("diagSymptom2") },
+                { icon: "💣", label: t("diagSymptom3") },
+              ].map((s, i) => (
+                <div key={i} className="flex items-center gap-2.5 px-5 py-3 rounded-xl bg-iron-900/80 border border-iron-700/50 backdrop-blur-sm">
+                  <span className="text-lg">{s.icon}</span>
+                  <span className="text-iron-300 text-sm font-semibold tracking-wide">{s.label}</span>
+                </div>
               ))}
             </div>
 
