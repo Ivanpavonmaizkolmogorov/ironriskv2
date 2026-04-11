@@ -355,7 +355,7 @@
     "blindRiskLow": "En esta fracción de universos simulados, tu estrategia te destruye si operas sin límites definidos.",
     "blindRiskMedium": "Demasiados escenarios acaban en rojo. Sin un cortafuegos, una racha normal de varianza puede barrer tu cuenta.",
     "blindRiskCritical": "Más de la mitad de los escenarios simulados terminan en pérdida total. Operar esto sin protección es ruleta rusa matemática.",
-    "evDistribution": "Distribución del Valor Esperado (EV)",
+    "evDistribution": "Distribución de Esperanza Matemática",
     "equitySimulation": "Equity Simulada (Monte Carlo)",
     "betaDistribution": "Win Rate (Beta IC)",
     "ctaLock": "🔒 Monitoriza tu Supervivencia en Tiempo Real",

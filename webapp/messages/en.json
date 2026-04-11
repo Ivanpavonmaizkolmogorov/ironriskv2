@@ -355,7 +355,7 @@
     "blindRiskLow": "In this fraction of simulated universes, your strategy destroys you if you trade without defined limits.",
     "blindRiskMedium": "Too many scenarios end in red. Without a firewall, a normal variance streak can wipe your account.",
     "blindRiskCritical": "More than half of simulated scenarios end in total loss. Trading this without protection is mathematical Russian roulette.",
-    "evDistribution": "Expected Value Distribution (EV)",
+    "evDistribution": "Expectancy Distribution",
     "equitySimulation": "Simulated Equity (Monte Carlo)",
     "betaDistribution": "Win Rate (Beta CI)",
     "ctaLock": "🔒 Monitor your Survival Probability Live",
