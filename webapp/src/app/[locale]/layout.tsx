@@ -7,6 +7,7 @@ import { routing } from "@/i18n/routing";
 import ThemeProvider from "@/components/ui/ThemeProvider";
 import { MetricsProvider } from "@/contexts/MetricsContext";
 import AdminToolbar from "@/components/ui/AdminToolbar";
+import BugReportButton from "@/components/ui/BugReportButton";
 import "../globals.css";
 
 const seoByLocale: Record<string, { title: string; description: string; keywords: string }> = {
@@ -101,6 +102,7 @@ export default async function RootLayout({
             <MetricsProvider>
               {children}
               <AdminToolbar />
+              <BugReportButton />
             </MetricsProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
