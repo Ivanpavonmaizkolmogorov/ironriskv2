@@ -475,24 +475,50 @@ function TelegramLinkSection({ onLinked }: { onLinked?: () => void }) {
         )}
       </div>
 
-      {status === "pending" && deepLink && (
-        <div className="mt-2 p-2.5 rounded-lg border border-amber-500/30 bg-amber-500/5">
-          <p className="text-[10px] text-iron-400 mb-1.5">
-            1. {t("step1")}:
-          </p>
-          <a href={deepLink} target="_blank" rel="noopener noreferrer"
-            className="block text-[11px] font-mono text-amber-400 hover:text-amber-300 underline truncate break-all">
-            {deepLink}
-          </a>
-          <p className="text-[10px] text-iron-400 mt-1.5">
-            2. {t("step2")}
-          </p>
-          <p className="text-[9px] text-iron-600 mt-1 flex items-center gap-1">
-            <span className="inline-block w-2.5 h-2.5 border-2 border-iron-600 border-t-amber-400 rounded-full animate-spin" />
-            {t("waiting")}
-          </p>
-        </div>
-      )}
+      {status === "pending" && deepLink && (() => {
+        const token = deepLink.split("start=")[1] || "";
+        const manualCmd = `/start ${token}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(deepLink)}&size=140x140&bgcolor=111827&color=34d399&format=png`;
+        return (
+          <div className="mt-2 p-3 rounded-lg border border-risk-blue/30 bg-surface-tertiary/60">
+            {/* QR + instruction */}
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 bg-iron-900 rounded-lg p-1.5 border border-iron-700">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={qrUrl} alt="QR" width={100} height={100} className="rounded" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-semibold text-risk-blue mb-0.5">📱 {t("scanQr") || "Scan with your phone"}</p>
+                <p className="text-[10px] text-iron-400 leading-relaxed">{t("scanQrDetail") || "Open Telegram on your phone, scan the QR, and tap Start."}</p>
+                <div className="flex items-center gap-1.5 mt-2">
+                  <span className="animate-pulse text-risk-blue text-[8px]">●</span>
+                  <span className="text-[9px] text-iron-600">{t("waiting")}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-2 my-2">
+              <div className="flex-1 h-px bg-iron-700/60" />
+              <span className="text-[9px] text-iron-600 uppercase tracking-wider">{t("orBrowser") || "or from this browser"}</span>
+              <div className="flex-1 h-px bg-iron-700/60" />
+            </div>
+
+            {/* Direct link + copy command */}
+            <a href={deepLink} target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 w-full px-3 py-1.5 rounded-md bg-[#0088cc] hover:bg-[#0077b3] text-white text-[11px] font-medium transition-colors">
+              ✈️ {t("openTelegramWeb") || "Open in Telegram Web"}
+            </a>
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <code className="flex-1 bg-iron-900 text-emerald-400 px-2 py-1 rounded text-[10px] font-mono select-all truncate">{manualCmd}</code>
+              <button
+                onClick={() => { navigator.clipboard.writeText(manualCmd); }}
+                className="px-2 py-1 rounded bg-iron-700 hover:bg-iron-600 text-iron-200 text-[10px] transition-colors"
+              >📋</button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

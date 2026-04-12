@@ -758,6 +758,10 @@
     "activeRulesTitle": "Active Rules",
     "loading": "Loading...",
     "deleteAllConfirm": "Are you sure you want to delete ALL active rules across all strategies and portfolios? This action cannot be undone.",
-    "deleteAllTitle": "Delete all alerts"
+    "deleteAllTitle": "Delete all alerts",
+    "scanQr": "Scan with your phone",
+    "scanQrDetail": "Open Telegram on your phone, scan the QR, and tap Start.",
+    "orBrowser": "or from this browser",
+    "openTelegramWeb": "Open in Telegram Web"
   }
 }

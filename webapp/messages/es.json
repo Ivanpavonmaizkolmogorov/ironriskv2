@@ -758,6 +758,10 @@
     "activeRulesTitle": "Reglas Activas",
     "loading": "Cargando...",
     "deleteAllConfirm": "¿Seguro que quieres borrar TODAS las reglas activas de todas las estrategias y portfolios? Esta acción no se puede deshacer.",
-    "deleteAllTitle": "Borrar todas las alertas"
+    "deleteAllTitle": "Borrar todas las alertas",
+    "scanQr": "Escanea con tu móvil",
+    "scanQrDetail": "Abre Telegram en tu móvil, escanea el QR y pulsa Iniciar.",
+    "orBrowser": "o desde este navegador",
+    "openTelegramWeb": "Abrir en Telegram Web"
   }
 }
