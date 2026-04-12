@@ -29,3 +29,11 @@ htmlcov/
 *.sln
 *.sw?
 .DS_Store
+
+# Dev artifacts
+*.log
+*.bin
+*.bak
+*.sqlite
+*_dump.txt
+*_dump.json
