@@ -96,52 +96,35 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
           {(() => {
             const isPortfolio = "strategy_ids" in activeAsset;
             const ec = (activeAsset as any).equity_curve || [];
-            const btEnd = ec.length > 0 ? ec[ec.length - 1]?.date : null;
 
-            // BT Peak: date where equity curve reaches its maximum equity
-            let btPeak: string | null = null;
+            // First trade date: use it as reference for min (1 day before)
+            let firstTradeDate: string | null = null;
             if (ec.length > 0) {
-              let maxEq = -Infinity;
-              for (const pt of ec) {
-                if ((pt.equity ?? 0) > maxEq) {
-                  maxEq = pt.equity ?? 0;
-                  btPeak = pt.date;
-                }
-              }
-              // Don't offer Peak if it equals btEnd (peak IS the last trade)
-              if (btPeak === btEnd) btPeak = null;
+              firstTradeDate = ec[0]?.date || null;
             }
 
             // Format converters: MT5 "YYYY.MM.DD HH:MM:SS" ↔ HTML "YYYY-MM-DDTHH:MM:SS"
             const toHtml = (mt5: string) => mt5?.replace(/\./g, '-').replace(' ', 'T').slice(0, 19) || '';
             const toMt5 = (html: string) => html?.replace(/-/g, '.').replace('T', ' ') || '';
 
+            // Min date: 1 day before first trade
+            let htmlMin: string | undefined;
+            if (firstTradeDate) {
+              const d = new Date(toHtml(firstTradeDate));
+              d.setDate(d.getDate() - 1);
+              htmlMin = d.toISOString().slice(0, 19);
+            }
+
             const currentSd = (activeAsset as any).start_date || '';
             const htmlValue = toHtml(currentSd);
-            const htmlMin = btEnd ? toHtml(btEnd) : undefined;
 
             const applyDate = async (mt5Date: string) => {
               if (!mt5Date || mt5Date === currentSd) return;
-              // Validate: reject dates before the last BT trade (unless it's the peak)
-              if (btEnd && mt5Date < btEnd) return;
               try {
                 if (isPortfolio) {
                   await portfolioAPI.update(activeAsset.id, { start_date: mt5Date });
                 } else {
                   await strategyAPI.update(activeAsset.id, { start_date: mt5Date });
-                }
-                fetchStrategies(accountId);
-                setLiveEquityVersion(v => v + 1);
-              } catch { /* silent */ }
-            };
-
-            const applyPeak = async () => {
-              if (!btPeak || btPeak === currentSd) return;
-              try {
-                if (isPortfolio) {
-                  await portfolioAPI.update(activeAsset.id, { start_date: btPeak });
-                } else {
-                  await strategyAPI.update(activeAsset.id, { start_date: btPeak });
                 }
                 fetchStrategies(accountId);
                 setLiveEquityVersion(v => v + 1);
@@ -176,26 +159,6 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
                     }
                   }}
                 />
-                {btPeak && (
-                  <button
-                    onClick={applyPeak}
-                    className="px-1.5 py-0.5 text-[9px] font-mono rounded bg-amber-900/20 text-amber-500/80
-                      hover:bg-amber-800/30 hover:text-amber-400 transition-colors border border-amber-700/30"
-                    title={`BT Peak: ${btPeak}`}
-                  >
-                    📈 Peak
-                  </button>
-                )}
-                {btEnd && (
-                  <button
-                    onClick={() => applyDate(btEnd)}
-                    className="px-1.5 py-0.5 text-[9px] font-mono rounded bg-iron-800/60 text-cyan-600/80
-                      hover:bg-iron-700 hover:text-cyan-400 transition-colors border border-iron-700/50"
-                    title={`Fin Backtest: ${btEnd}`}
-                  >
-                    ⏭ Fin Backtest
-                  </button>
-                )}
               </div>
             );
           })()}

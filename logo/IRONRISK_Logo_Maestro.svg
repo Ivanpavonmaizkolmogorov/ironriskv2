@@ -9,7 +9,7 @@
    viewBox="0 0 901 277"
    sodipodi:docname="IRONRISK_Logo_Maestro.svg"
    inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
-   inkscape:export-filename="Logo_Principal.png"
+   inkscape:export-filename="Logo_PrincipalFondoNegro.png"
    inkscape:export-xdpi="106.54828"
    inkscape:export-ydpi="106.54828"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -29,14 +29,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="1.8290788"
-     inkscape:cx="592.3747"
-     inkscape:cy="72.440837"
+     inkscape:cx="148.43538"
+     inkscape:cy="148.9821"
      inkscape:window-width="3440"
      inkscape:window-height="1369"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g35" />
+     inkscape:current-layer="g35"
+     inkscape:export-bgcolor="#000000ff" />
   <g
      inkscape:groupmode="layer"
      id="layer1"
@@ -47,7 +48,7 @@
        d="m 142.65236,13.14412 68.81333,23.775392 47.74408,49.677041 -22.42232,102.833407 -46.9709,43.49157 -46.58431,28.60779 L 95.101571,232.92153 48.130673,189.62326 25.901647,85.436778 73.259137,36.532921 Z"
        id="path16"
        inkscape:label="fondoEscudo"
-       inkscape:export-filename="Perfil_Redes_Margen.png"
+       inkscape:export-filename="Perfil_Redes_Margen_FondoNegro.png"
        inkscape:export-xdpi="609.06616"
        inkscape:export-ydpi="609.06616" />
     <g
