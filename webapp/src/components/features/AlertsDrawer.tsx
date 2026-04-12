@@ -202,7 +202,8 @@ function SliderCard({ metricKey, onAdd, alreadyExists, activeRule, onUpdate, onU
   const def = getDef(metricKey);
   const refValue = getBtMaxValue(metricKey, getDef, asset.data.metrics_snapshot, (asset.data as any).distribution_fit);
   const hasBtData = refValue !== undefined && refValue > 0;
-  const [rawValue, setRawValue] = useState(hasBtData ? refValue : (metricKey === "ea_disconnect_minutes" ? 1 : 0));
+  const fallbackValue = metricKey === "ea_disconnect_minutes" ? 1 : metricKey === "bayes_blind_risk" ? 50 : 0;
+  const [rawValue, setRawValue] = useState(hasBtData ? refValue : fallbackValue);
   const [cooldownValue, setCooldownValue] = useState(def.defaultCooldown);
   const [adding, setAdding] = useState(false);
   const pctLimit = hasBtData ? Math.round((rawValue / refValue!) * 100) : 0;
@@ -213,7 +214,7 @@ function SliderCard({ metricKey, onAdd, alreadyExists, activeRule, onUpdate, onU
   // Reset when asset changes
   useEffect(() => {
     const newRef = getBtMaxValue(metricKey, getDef, asset.data.metrics_snapshot, (asset.data as any).distribution_fit);
-    setRawValue(newRef && newRef > 0 ? newRef : (metricKey === "ea_disconnect_minutes" ? 1 : 0));
+    setRawValue(newRef && newRef > 0 ? newRef : fallbackValue);
     setCooldownValue(def.defaultCooldown);
   }, [asset.id, metricKey, def.defaultCooldown]);
 
