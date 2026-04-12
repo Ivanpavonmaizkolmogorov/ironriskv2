@@ -36,7 +36,7 @@ export default function TelegramLinker() {
         if (res.data.status === "linked") {
           setStatus("linked");
           setChatId(res.data.chat_id);
-          return; // stop polling
+          return;
         }
       } catch (e) {
         console.error(e);
@@ -48,10 +48,7 @@ export default function TelegramLinker() {
     };
 
     poll();
-
-    return () => {
-      isActive = false;
-    };
+    return () => { isActive = false; };
   }, [status]);
 
   const generateLink = async () => {
@@ -61,8 +58,6 @@ export default function TelegramLinker() {
       if (res.data.link) {
         setLink(res.data.link);
         setStatus("waiting");
-        // Open deep link in new tab or native app
-        window.open(res.data.link, "_blank");
       }
     } catch (e) {
       console.error(e);
@@ -82,8 +77,9 @@ export default function TelegramLinker() {
     );
   }
 
-  if (status === "waiting") {
-    const token = link?.split("start=")[1] || "";
+  if (status === "waiting" && link) {
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(link)}&size=200x200&bgcolor=111827&color=34d399&format=png`;
+    const token = link.split("start=")[1] || "";
     const manualCmd = `/start ${token}`;
 
     const copyCmd = () => {
@@ -93,28 +89,59 @@ export default function TelegramLinker() {
     };
 
     return (
-      <div className="flex flex-col gap-3 bg-surface-tertiary p-4 rounded-lg border border-risk-blue/30">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl animate-spin">⏳</span>
-          <div>
-            <p className="font-semibold text-sm text-risk-blue">Esperando confirmación...</p>
-            <p className="text-xs text-iron-400">Se ha abierto Telegram. Pulsa <b>INICIAR</b> en el bot y esta pantalla se actualizará sola.</p>
+      <div className="flex flex-col gap-4 bg-surface-tertiary p-5 rounded-lg border border-risk-blue/30">
+        {/* Main: QR scan */}
+        <div className="flex items-start gap-5">
+          <div className="flex-shrink-0 bg-iron-900 rounded-lg p-2 border border-iron-700">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={qrUrl}
+              alt="QR Telegram"
+              width={140}
+              height={140}
+              className="rounded"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm text-risk-blue mb-1">📱 Escanea con tu móvil</p>
+            <p className="text-xs text-iron-400 leading-relaxed">
+              Abre la cámara o la app de Telegram en tu móvil y escanea el QR. 
+              Se abrirá directamente el bot — pulsa <b>Iniciar</b> y listo.
+            </p>
+            <div className="flex items-center gap-2 mt-3">
+              <span className="animate-pulse text-risk-blue">●</span>
+              <span className="text-xs text-iron-500">Esperando confirmación automática...</span>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-iron-700 pt-3 mt-1">
-          <p className="text-xs text-iron-400 mb-2">
-            ¿No te aparece el botón? Abre <b>@IronRiskShield_bot</b> en cualquier Telegram y envía:
-          </p>
+        {/* Divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-iron-700" />
+          <span className="text-xs text-iron-600 uppercase tracking-wider">o desde este navegador</span>
+          <div className="flex-1 h-px bg-iron-700" />
+        </div>
+
+        {/* Fallback: direct link + manual command */}
+        <div className="flex flex-col gap-2">
+          <a
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-[#0088cc] hover:bg-[#0077b3] text-white text-sm font-medium transition-colors"
+          >
+            ✈️ Abrir en Telegram Web
+          </a>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-iron-900 text-emerald-400 px-3 py-2 rounded text-sm font-mono select-all">{manualCmd}</code>
+            <code className="flex-1 bg-iron-900 text-emerald-400 px-3 py-1.5 rounded text-xs font-mono select-all truncate">{manualCmd}</code>
             <button
               onClick={copyCmd}
-              className="px-3 py-2 rounded bg-iron-700 hover:bg-iron-600 text-iron-200 text-xs transition-colors whitespace-nowrap"
+              className="px-3 py-1.5 rounded bg-iron-700 hover:bg-iron-600 text-iron-200 text-xs transition-colors whitespace-nowrap"
             >
-              {copied ? "✅ Copiado" : "📋 Copiar"}
+              {copied ? "✅" : "📋"}
             </button>
           </div>
+          <p className="text-[10px] text-iron-600 text-center">Si el bot no arranca, pega el comando en el chat de @IronRiskShield_bot</p>
         </div>
       </div>
     );
