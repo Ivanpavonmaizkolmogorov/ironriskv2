@@ -107,33 +107,66 @@ export default function StrategyTable({
     }
   };
 
-  /* ─── Lazy Load Bayesian Data ─── */
+  /* ─── Lazy Load Bayesian Data (throttled queue) ─── */
   const [bayesCache, setBayesCache] = useState<Record<string, any>>({});
   const requestedBayes = React.useRef<Set<string>>(new Set());
+  const abortRef = React.useRef<AbortController | null>(null);
 
   React.useEffect(() => {
-    if (view.id === "bayesian") {
-      strategies.forEach(s => {
-        if (!requestedBayes.current.has(s.id)) {
-           requestedBayes.current.add(s.id);
-           const apiCaller = "strategy_ids" in s ? portfolioAPI : strategyAPI;
-           apiCaller.getBayes(s.id).then(res => {
-             setBayesCache(prev => ({...prev, [s.id]: res.data}));
-           }).catch(() => {});
+    if (view.id !== "bayesian") return;
+
+    // Abort previous queue if strategies changed
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    // Collect all IDs we haven't fetched yet
+    const pending: { id: string; isPortfolio: boolean }[] = [];
+    strategies.forEach(s => {
+      if (!requestedBayes.current.has(s.id)) {
+        pending.push({ id: s.id, isPortfolio: "strategy_ids" in s });
+        requestedBayes.current.add(s.id);
+      }
+      if ("strategy_ids" in s && s.strategy_ids) {
+        s.strategy_ids.forEach((childId: string) => {
+          if (!requestedBayes.current.has(childId)) {
+            pending.push({ id: childId, isPortfolio: false });
+            requestedBayes.current.add(childId);
+          }
+        });
+      }
+    });
+
+    if (pending.length === 0) return;
+
+    // Process in batches of 5
+    const BATCH_SIZE = 5;
+    (async () => {
+      for (let i = 0; i < pending.length; i += BATCH_SIZE) {
+        if (controller.signal.aborted) return;
+
+        const batch = pending.slice(i, i + BATCH_SIZE);
+        const results = await Promise.allSettled(
+          batch.map(({ id, isPortfolio }) => {
+            const api = isPortfolio ? portfolioAPI : strategyAPI;
+            return api.getBayes(id).then(res => ({ id, data: res.data }));
+          })
+        );
+
+        if (controller.signal.aborted) return;
+
+        // Merge successful results into cache
+        const newEntries: Record<string, any> = {};
+        results.forEach(r => {
+          if (r.status === "fulfilled") newEntries[r.value.id] = r.value.data;
+        });
+        if (Object.keys(newEntries).length > 0) {
+          setBayesCache(prev => ({ ...prev, ...newEntries }));
         }
-        
-        if ("strategy_ids" in s && s.strategy_ids) {
-            s.strategy_ids.forEach((childId: string) => {
-               if (!requestedBayes.current.has(childId)) {
-                 requestedBayes.current.add(childId);
-                 strategyAPI.getBayes(childId).then(res => {
-                   setBayesCache(prev => ({...prev, [childId]: res.data}));
-                 }).catch(() => {});
-               }
-            });
-        }
-      });
-    }
+      }
+    })();
+
+    return () => controller.abort();
   }, [view.id, strategies]);
 
   const strategiesWithCache = useMemo(() => {
