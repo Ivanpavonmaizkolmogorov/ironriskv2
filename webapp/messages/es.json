@@ -102,6 +102,11 @@
       "label": "Peso Empírico",
       "tableLabel": "Peso Empírico",
       "tooltip": "Proporción de credibilidad actual. Te indica si el motor estadístico confía más en las operaciones reales en Live o en el Backtest histórico para calcular tus probabilidades. Nota: Al Backtest se le otorga un peso máximo equivalente a 30 operaciones. Esto permite que el rendimiento en Live gane relevancia rápidamente, sirviendo de protección temprana ante drawdowns fuera de patrón cuando la estrategia está rota, sirviendo también como estandar asimétrico comparativo entre estrategias."
+    },
+    "bayes_p_positive": {
+      "label": "P(Expectancy>0)",
+      "tableLabel": "P(Exp>0)",
+      "tooltip": "Probabilidad bayesiana de que la estrategia tenga un valor esperado positivo (ventaja). Si este valor es alto (ej: 85%), significa que hay un 85% de probabilidad de que la estrategia genere dinero por operación a lo largo del tiempo. Es el complemento del Riesgo Ciego: P(EV>0) = 1 - Riesgo Ciego."
     }
   },
   "connection": {

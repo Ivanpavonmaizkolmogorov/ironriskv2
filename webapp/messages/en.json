@@ -102,6 +102,11 @@
       "label": "Empirical Weight",
       "tableLabel": "Empirical Weight",
       "tooltip": "Current credibility ratio. Indicates whether the statistical engine is trusting your actual Live trades or the original Backtest history more to calculate your probabilities. Note: The Backtest is capped at a maximum weight of 30 trades. This ensures that Live performance gains relevance rapidly, acting as an early protection mechanism before a broken strategy reaches historical drawdowns, and establishing a fair asymmetric standard to compare the degradation across all strategies."
+    },
+    "bayes_p_positive": {
+      "label": "P(Expectancy>0)",
+      "tableLabel": "P(Exp>0)",
+      "tooltip": "Bayesian probability that the strategy has a positive expected value (edge). If this value is high (e.g. 85%), it means there is an 85% probability that the strategy generates money per trade over time. It is the complement of Blind Risk: P(EV>0) = 1 - Blind Risk."
     }
   },
   "connection": {
