@@ -9,6 +9,7 @@ export default function TelegramLinker() {
   const [status, setStatus] = useState<"idle" | "loading" | "waiting" | "linked">("idle");
   const [link, setLink] = useState<string | null>(null);
   const [chatId, setChatId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const locale = useLocale();
 
   // Initial check
@@ -82,13 +83,37 @@ export default function TelegramLinker() {
   }
 
   if (status === "waiting") {
+    const token = link?.split("start=")[1] || "";
+    const manualCmd = `/start ${token}`;
+
+    const copyCmd = () => {
+      navigator.clipboard.writeText(manualCmd);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    };
+
     return (
       <div className="flex flex-col gap-3 bg-surface-tertiary p-4 rounded-lg border border-risk-blue/30">
         <div className="flex items-center gap-3">
           <span className="text-2xl animate-spin">⏳</span>
           <div>
             <p className="font-semibold text-sm text-risk-blue">Esperando confirmación...</p>
-            <p className="text-xs text-iron-400">Se ha abierto Telegram en tu dispositivo. Simplemente pusa el botón <b>INICIAR</b> o envía el mensanje generado, y esta pantalla se actualizará sola.</p>
+            <p className="text-xs text-iron-400">Se ha abierto Telegram. Pulsa <b>INICIAR</b> en el bot y esta pantalla se actualizará sola.</p>
+          </div>
+        </div>
+
+        <div className="border-t border-iron-700 pt-3 mt-1">
+          <p className="text-xs text-iron-400 mb-2">
+            ¿No te aparece el botón? Abre <b>@IronRiskShield_bot</b> en cualquier Telegram y envía:
+          </p>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 bg-iron-900 text-emerald-400 px-3 py-2 rounded text-sm font-mono select-all">{manualCmd}</code>
+            <button
+              onClick={copyCmd}
+              className="px-3 py-2 rounded bg-iron-700 hover:bg-iron-600 text-iron-200 text-xs transition-colors whitespace-nowrap"
+            >
+              {copied ? "✅ Copiado" : "📋 Copiar"}
+            </button>
           </div>
         </div>
       </div>
