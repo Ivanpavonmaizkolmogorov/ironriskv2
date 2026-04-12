@@ -383,7 +383,8 @@ def get_strategy_bayes(
 
         # ── Cache-first: try to read pre-computed result ──
         cached = (strategy.metrics_snapshot or {}).get("bayes_cache")
-        if cached:
+        if cached and "decomposition" in cached:
+            # Validate it's the NEW full format (not the old {info_report, p_positive} stub)
             logger.debug(f"[BayesCache] HIT for {strategy.name}")
             return cached
 

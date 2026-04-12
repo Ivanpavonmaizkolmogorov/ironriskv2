@@ -650,6 +650,7 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
       
       const isLive = s.bayesian_breakdown !== undefined && s.bayesian_breakdown.live_trades_total > 0;
 
+      if (s.bayesian_breakdown === undefined) return <div className="flex justify-end"><div className="h-3 w-14 bg-iron-700/60 rounded animate-pulse" /></div>;
       if (!isLive || postEv === undefined || priorEv === 0) {
          return <span className="text-iron-600 font-mono">—</span>;
       }
@@ -683,11 +684,22 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
     align: "right",
     sortValue: (s) => s.bayesian_breakdown?.decomposition?.ev_mean || 0,
     renderCell: (s, allAssets) => {
-      const isLive = s.bayesian_breakdown !== undefined && s.bayesian_breakdown.live_trades_total > 0;
-      
       const btTrades = s.total_trades || 0;
       const btEv = btTrades ? s.net_profit / btTrades : 0;
       
+      if (s.bayesian_breakdown === undefined) {
+         return (
+          <div className="flex flex-col items-end leading-tight gap-0.5 min-w-[60px]">
+             <div className="h-3.5 w-16 bg-iron-700/60 rounded animate-pulse" />
+             <div className="w-full h-1.5 bg-iron-800/60 rounded-full overflow-hidden">
+               <div className="h-full w-1/3 bg-iron-700/60 rounded-full animate-pulse" />
+             </div>
+             <span className="text-[9px] text-iron-500 font-mono tracking-tighter uppercase mt-0.5">PRIOR: {metricFormatter.format("net_profit", btEv)}</span>
+          </div>
+         );
+      }
+      
+      const isLive = s.bayesian_breakdown.live_trades_total > 0;
       const postEv = s.bayesian_breakdown?.decomposition?.ev_mean;
       
       if (!isLive || postEv === undefined) {
@@ -751,6 +763,7 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
       const d = s.bayesian_breakdown?.decomposition;
       const isLive = s.bayesian_breakdown !== undefined && s.bayesian_breakdown.live_trades_total > 0;
       
+      if (s.bayesian_breakdown === undefined) return <div className="flex justify-end"><div className="h-3 w-14 bg-iron-700/60 rounded animate-pulse" /></div>;
       if (!isLive) return <span className="text-iron-600 font-mono">—</span>;
       
       const bt = d ? (d.eff_bt_wins + d.eff_bt_losses) : (s.total_trades ?? 0);
@@ -783,7 +796,7 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
     renderCell: (s) => {
       const d = s.bayesian_breakdown?.decomposition;
       const p = d?.p_positive;
-      if (p === undefined) return <span className="text-iron-600 font-mono">—</span>;
+      if (p === undefined) return <div className="flex items-center justify-end gap-1.5"><div className="h-3 w-12 bg-iron-700/60 rounded animate-pulse" /></div>;
       
       const blind = 1 - p;
       const pct = (blind * 100).toFixed(1);

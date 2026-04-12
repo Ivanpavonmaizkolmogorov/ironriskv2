@@ -112,6 +112,7 @@ export default function StrategyTable({
   const requestedBayes = React.useRef<Set<string>>(new Set());
   const abortRef = React.useRef<AbortController | null>(null);
   const queueRunning = React.useRef(false);
+  const [bayesProgress, setBayesProgress] = useState<{ loaded: number; total: number } | null>(null);
 
   // Stable key: only changes when the set of IDs changes (not on poll refresh)
   const strategyIds = useMemo(() => strategies.map(s => s.id).sort().join(","), [strategies]);
@@ -157,6 +158,9 @@ export default function StrategyTable({
     };
 
     queueRunning.current = true;
+    setBayesProgress({ loaded: 0, total: pending.length });
+    let loadedCount = 0;
+
     (async () => {
       for (let i = 0; i < pending.length; i += BATCH_SIZE) {
         if (controller.signal.aborted) break;
@@ -173,14 +177,18 @@ export default function StrategyTable({
         results.forEach(r => {
           if (r.status === "fulfilled") newEntries[r.value.id] = r.value.data;
         });
+        loadedCount += batch.length;
+        setBayesProgress({ loaded: loadedCount, total: pending.length });
+
         if (Object.keys(newEntries).length > 0) {
           setBayesCache(prev => ({ ...prev, ...newEntries }));
         }
       }
       queueRunning.current = false;
+      setBayesProgress(null);
     })();
 
-    return () => { controller.abort(); queueRunning.current = false; };
+    return () => { controller.abort(); queueRunning.current = false; setBayesProgress(null); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view.id, strategyIds]);
 
@@ -280,6 +288,31 @@ export default function StrategyTable({
         <p className="text-xs text-iron-500 px-1">
           {processed.length} of {strategies.length} strategies
         </p>
+      )}
+
+      {/* Bayesian loading progress */}
+      {bayesProgress && view.id === "bayesian" && (
+        <div className="px-3 py-2 bg-iron-900/80 border border-iron-700/50 rounded-lg flex items-center gap-3">
+          <div className="relative w-4 h-4 flex-shrink-0">
+            <div className="absolute inset-0 border-2 border-iron-600 border-t-emerald-500 rounded-full animate-spin" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs text-iron-300 font-medium">
+                Analyzing {bayesProgress.loaded}/{bayesProgress.total} strategies…
+              </span>
+              <span className="text-xs text-iron-500 font-mono">
+                {Math.round((bayesProgress.loaded / bayesProgress.total) * 100)}%
+              </span>
+            </div>
+            <div className="w-full h-1 bg-iron-800 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${(bayesProgress.loaded / bayesProgress.total) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Table */}
