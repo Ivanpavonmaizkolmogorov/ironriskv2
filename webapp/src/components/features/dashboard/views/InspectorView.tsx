@@ -133,9 +133,14 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
 
             return (
               <div className="flex items-center gap-1.5 mb-2 -mt-1 flex-wrap">
-                <span className="text-[10px] text-iron-600 font-medium tracking-wider">
+                <span className="text-[10px] text-iron-600 font-medium tracking-wider group/sd relative flex items-center gap-1">
                   📅 {tWorkspace("liveSince")}
                   {isPortfolio && !currentSd && <span className="text-iron-500 font-normal italic ml-1">(Heredado)</span>}
+                  <span className="text-iron-600 cursor-help">ⓘ</span>
+                  <div className="opacity-0 group-hover/sd:opacity-100 absolute left-0 bottom-full mb-1.5 pointer-events-none transition-opacity duration-150
+                    text-[10px] bg-iron-800 text-iron-200 border border-iron-700 px-2.5 py-1.5 rounded-lg shadow-xl w-[220px] normal-case tracking-normal z-50 leading-relaxed">
+                    {tWorkspace("tooltipStartDate")}
+                  </div>
                 </span>
                 <input
                   type="datetime-local"
