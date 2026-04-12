@@ -3,18 +3,18 @@
 import React, { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
-const BETA_INVITE_TEXT = `🛡️ IronRisk — Beta Privada
+const BETA_INVITE_TEXT = `🛡️ IronRisk — Closed Beta
 
-Tu código de acceso:
+🌐 https://www.ironrisk.pro/en/register
+
+Your access code:
 🔑 IRONRISK-VIP-2026
 
-📺 Tutoriales:
+📺 Tutorials:
 1. https://youtu.be/H65NyD795bI
 2. https://youtu.be/yiCZE9IYgsA
 
-🌐 Registro: https://www.ironrisk.pro/es/register
-
-💬 Soporte directo: @IronRisk_Ivan
+💬 Direct support: @IronRisk_Ivan
 https://t.me/IronRisk_Ivan`;
 
 export default function BetaInviteButton() {
