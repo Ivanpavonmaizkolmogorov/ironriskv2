@@ -70,6 +70,10 @@ export default function TradingAccountManager() {
       setNewName("");
       setNewBroker("");
       setNewAccountNumber("");
+    } catch (err: any) {
+      if (err?.response?.status === 409) {
+        alert(err.response.data?.detail || t("duplicateAccount"));
+      }
     } finally {
       setIsCreating(false);
     }
