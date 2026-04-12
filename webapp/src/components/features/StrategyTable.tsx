@@ -111,12 +111,15 @@ export default function StrategyTable({
   const [bayesCache, setBayesCache] = useState<Record<string, any>>({});
   const requestedBayes = React.useRef<Set<string>>(new Set());
   const abortRef = React.useRef<AbortController | null>(null);
+  const queueRunning = React.useRef(false);
+
+  // Stable key: only changes when the set of IDs changes (not on poll refresh)
+  const strategyIds = useMemo(() => strategies.map(s => s.id).sort().join(","), [strategies]);
 
   React.useEffect(() => {
     if (view.id !== "bayesian") return;
+    if (queueRunning.current) return; // Queue already in progress, don't restart
 
-    // Abort previous queue if strategies changed
-    abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -153,16 +156,17 @@ export default function StrategyTable({
       ]);
     };
 
+    queueRunning.current = true;
     (async () => {
       for (let i = 0; i < pending.length; i += BATCH_SIZE) {
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted) break;
 
         const batch = pending.slice(i, i + BATCH_SIZE);
         const results = await Promise.allSettled(
           batch.map(({ id, isPortfolio }) => fetchWithTimeout(id, isPortfolio))
         );
 
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted) break;
 
         // Merge successful results into cache
         const newEntries: Record<string, any> = {};
@@ -173,10 +177,12 @@ export default function StrategyTable({
           setBayesCache(prev => ({ ...prev, ...newEntries }));
         }
       }
+      queueRunning.current = false;
     })();
 
-    return () => controller.abort();
-  }, [view.id, strategies]);
+    return () => { controller.abort(); queueRunning.current = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view.id, strategyIds]);
 
   const strategiesWithCache = useMemo(() => {
     if (view.id !== "bayesian") return strategies;
