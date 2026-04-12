@@ -28,21 +28,37 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="1.8290788"
-     inkscape:cx="148.43538"
-     inkscape:cy="148.9821"
+     inkscape:zoom="0.64667701"
+     inkscape:cx="534.2698"
+     inkscape:cy="368.80853"
      inkscape:window-width="3440"
      inkscape:window-height="1369"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g35"
-     inkscape:export-bgcolor="#000000ff" />
+     inkscape:current-layer="layer2"
+     inkscape:export-bgcolor="#00000000" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Fondo">
+    <rect
+       style="fill:#0d0f12;fill-opacity:1;stroke:#0d0f12;stroke-width:2.88091"
+       id="rect1"
+       width="1917.1191"
+       height="1077.1191"
+       x="0.39373246"
+       y="2.0339024"
+       inkscape:export-filename="FondoWallPapers_IronRisk_1920.png"
+       inkscape:export-xdpi="95.999992"
+       inkscape:export-ydpi="95.999992" />
+  </g>
   <g
      inkscape:groupmode="layer"
      id="layer1"
      inkscape:label="Vector"
-     style="display:inline">
+     style="display:inline"
+     transform="translate(548.96029,422.15819)">
     <path
        style="fill:#0d0f12;fill-opacity:1;stroke:#e1e4e8;stroke-opacity:1"
        d="m 142.65236,13.14412 68.81333,23.775392 47.74408,49.677041 -22.42232,102.833407 -46.9709,43.49157 -46.58431,28.60779 L 95.101571,232.92153 48.130673,189.62326 25.901647,85.436778 73.259137,36.532921 Z"
@@ -104,7 +120,7 @@
       </g>
     </g>
     <path
-       style="fill:none;stroke:#00e676;stroke-opacity:1;fill-opacity:1"
+       style="fill:none;fill-opacity:1;stroke:#00e676;stroke-opacity:1"
        d="m 71.326179,155.21659 2.706142,-2.12626 -11.597753,-51.03011 24.355281,-36.146326 55.862511,-18.363108 56.0558,18.169812 23.96869,35.953032 -11.40446,50.83682 2.31955,2.89943"
        id="path17"
        inkscape:label="linea verde superior escudo" />

@@ -31,15 +31,21 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=403, detail="Invalid Beta Access Code")
 
     user = register_user(db, req.email, req.password)
-
-    # Synchronous email dispatch — caller gets feedback on success/failure
-    email_svc = EmailService()
-    email_ok = email_svc.send_welcome_email(user.email, locale=req.locale)
-    if not email_ok:
-        logger.warning(f"Welcome email failed for {user.email}, but account was created successfully.")
-
     token = create_jwt(user.id, user.email)
-    return TokenResponse(access_token=token, email_sent=email_ok)
+
+    # Fire-and-forget email in background thread — NEVER block the response
+    import threading
+    def _send_email():
+        try:
+            email_svc = EmailService()
+            ok = email_svc.send_welcome_email(user.email, locale=req.locale)
+            if not ok:
+                logger.warning(f"Welcome email failed for {user.email}, account created OK.")
+        except Exception as e:
+            logger.error(f"Welcome email exception for {user.email}: {e}")
+    threading.Thread(target=_send_email, daemon=True).start()
+
+    return TokenResponse(access_token=token, email_sent=True)
 
 
 @router.post("/login", response_model=TokenResponse)
