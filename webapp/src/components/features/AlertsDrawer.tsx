@@ -279,20 +279,23 @@ function SliderCard({ metricKey, onAdd, alreadyExists, activeRule, onUpdate, onU
               </div>
             </>
           )}
-          {!hasBtData && metricKey === "bayes_blind_risk" && (
-            <>
-              <input type="range" min={0} max={100} step={1}
-                value={Math.round(rawValue)}
-                onChange={(e) => setRawValue(parseInt(e.target.value, 10))}
-                className="w-full accent-risk-red" />
-              <div className="flex justify-between text-[10px] text-iron-500 font-mono tracking-wider">
-                <span className={rawValue >= 50 ? "text-risk-red" : rawValue >= 30 ? "text-amber-400" : "text-risk-green"}>
-                  {rawValue >= 50 ? "⚠ Alto riesgo" : rawValue >= 30 ? "◉ Moderado" : "● Bajo"}
-                </span>
-                <span>0% — 100%</span>
-              </div>
-            </>
-          )}
+          {!hasBtData && metricKey === "bayes_blind_risk" && (() => {
+            const brVerdict = getVerdictStyleFromPercentile(Math.round(rawValue), false);
+            return (
+              <>
+                <input type="range" min={0} max={100} step={1}
+                  value={Math.round(rawValue)}
+                  onChange={(e) => setRawValue(parseInt(e.target.value, 10))}
+                  className="w-full accent-amber-500" />
+                <div className="flex justify-between text-[10px] text-iron-500 font-mono tracking-wider">
+                  <span className={`${brVerdict.textColor} flex items-center gap-1`}>
+                    {brVerdict.icon} {Math.round(rawValue) >= 95 ? "ANOMALY" : Math.round(rawValue) >= 85 ? (locale === 'es' ? "VIGILANCIA" : "WATCH") : "NORMAL"}
+                  </span>
+                  <span>0% — 100%</span>
+                </div>
+              </>
+            );
+          })()}
           <div className="flex items-center justify-between mt-2.5 mb-1 bg-iron-900/40 px-2 py-1.5 rounded border border-iron-800/40 overflow-visible">
             <span className="text-[9px] text-iron-500 font-mono tracking-wide uppercase group/label flex items-center gap-1 cursor-help relative">
               {t("cooldownLabel")}
