@@ -35,7 +35,6 @@ export default function TradingAccountsPage() {
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <span className="text-lg font-bold text-iron-100">
             IRON<span className="text-risk-green">RISK</span>
-            <span className="text-xs text-iron-600 ml-2">TOWER</span>
           </span>
           <div className="flex items-center gap-4">
             <ThemeSelector mode="global" />

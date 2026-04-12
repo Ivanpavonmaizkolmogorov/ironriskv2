@@ -77,7 +77,7 @@ export default function RegisterPage() {
             IRON<span className="text-risk-green">RISK</span>
           </h1>
           <p className="text-sm text-iron-500 mt-2">
-            {isEn ? "Create your control tower account" : "Crea tu torre de control"}
+            {isEn ? "Protect your trading" : "Protege tu operativa"}
           </p>
         </div>
 
@@ -199,7 +199,10 @@ export default function RegisterPage() {
           </Button>
 
           <p className="text-xs text-iron-400 mt-4 text-center leading-relaxed px-2">
-            {t("betaNoCodeMsg")}
+            {isEn
+              ? <> Don&apos;t have a code? IronRisk is in Closed Beta by invitation. Ask <a href="https://t.me/IronRisk_Ivan" target="_blank" rel="noopener noreferrer" className="text-risk-green hover:underline">@IronRisk_Ivan</a> on Telegram.</>
+              : <> ¿No tienes código? IronRisk está en Beta Privada por invitación. Pídeselo a <a href="https://t.me/IronRisk_Ivan" target="_blank" rel="noopener noreferrer" className="text-risk-green hover:underline">@IronRisk_Ivan</a> en Telegram.</>
+            }
           </p>
         </form>
 
