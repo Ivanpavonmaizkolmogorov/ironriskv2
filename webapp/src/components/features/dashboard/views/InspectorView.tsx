@@ -160,6 +160,14 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
                     }
                   }}
                 />
+                {htmlMin && (
+                  <button
+                    onClick={() => applyDate(toMt5(htmlMin))}
+                    className="px-1.5 py-0.5 text-[9px] font-mono rounded bg-iron-800/60 text-iron-500
+                      hover:bg-iron-700 hover:text-cyan-400 transition-colors border border-iron-700/50"
+                    title={tWorkspace("resetDefault")}
+                  >↺</button>
+                )}
               </div>
             );
           })()}
