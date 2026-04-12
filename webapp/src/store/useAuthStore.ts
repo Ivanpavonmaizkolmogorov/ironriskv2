@@ -44,7 +44,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     // Default locale to "es" or detect it from window, but for simplicity we keep backwards compat
     try {
-      const res = await authAPI.register(email, password, "es", inviteCode);
+      const browserLocale = typeof window !== "undefined" ? (window.location.pathname.split("/")[1] || "es") : "es";
+      const res = await authAPI.register(email, password, browserLocale, inviteCode);
       const token = res.data.access_token;
       localStorage.setItem("ironrisk_jwt", token);
       set({ jwt: token, isAuthenticated: true, isLoading: false });
