@@ -859,7 +859,7 @@ def get_status(api_token: str, magic_number: int, db: Session = Depends(get_db))
 
 
 @router.post("/sync-trades")
-def sync_trades(payload: SyncTradesPayload, db: Session = Depends(get_db)):
+def sync_trades(payload: SyncTradesPayload, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """Ingest real closed deals from the EA to use as Single Source of Truth."""
     account = validate_api_token(db, payload.api_token)
     
@@ -882,6 +882,7 @@ def sync_trades(payload: SyncTradesPayload, db: Session = Depends(get_db)):
     existing_set = {row[0] for row in existing}
     
     new_trades = []
+    affected_magics = set()
     for t in payload.trades:
         if t.ticket in existing_set:
             continue
@@ -906,10 +907,29 @@ def sync_trades(payload: SyncTradesPayload, db: Session = Depends(get_db)):
                 commission=t.commission
             )
         )
+        affected_magics.add(t.magic_number)
         
     if new_trades:
         db.add_all(new_trades)
         db.commit()
+        
+        # ── Trigger Bayesian cache refresh for affected strategies ──
+        if affected_magics:
+            from services.bayes_cache_service import refresh_bayes_cache
+            
+            # Find strategies that match the magic numbers of new trades
+            all_strategies = db.query(Strategy).filter(
+                Strategy.trading_account_id == account.id
+            ).all()
+            
+            refreshed = set()
+            for strategy in all_strategies:
+                if strategy.id in refreshed:
+                    continue
+                strategy_magics = set(strategy.all_magic_numbers)
+                if strategy_magics & affected_magics:
+                    background_tasks.add_task(refresh_bayes_cache, strategy.id)
+                    refreshed.add(strategy.id)
         
     return {"status": "ok", "inserted": len(new_trades)}
 

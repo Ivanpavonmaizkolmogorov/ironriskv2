@@ -417,6 +417,12 @@ def update_strategy(
     if "magic_aliases" in update_dict:
         flag_modified(strategy, "magic_aliases")
 
+    # Invalidate Bayesian cache if fields that affect computation changed
+    BAYES_FIELDS = {"risk_config", "bt_discount", "equity_curve", "magic_aliases", "start_date"}
+    if BAYES_FIELDS & set(update_dict.keys()):
+        from services.bayes_cache_service import invalidate_bayes_cache
+        invalidate_bayes_cache(db, strategy)
+
     db.commit()
     db.refresh(strategy)
     return strategy
@@ -529,6 +535,10 @@ def apply_risk_multiplier(
     flag_modified(strategy, "gauss_params")
     flag_modified(strategy, "distribution_fit")
     flag_modified(strategy, "risk_config")
+    
+    # Invalidate Bayesian cache (multiplier changes all BT PnL)
+    from services.bayes_cache_service import invalidate_bayes_cache
+    invalidate_bayes_cache(db, strategy)
     
     db.commit()
     db.refresh(strategy)
