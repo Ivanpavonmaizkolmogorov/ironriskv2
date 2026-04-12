@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import UsersTable from "@/components/features/admin/UsersTable";
 import LeadsTable from "@/components/features/admin/LeadsTable";
 import { ArrowLeft } from "lucide-react";
+import BetaInviteButton from "@/components/features/admin/BetaInviteButton";
 
 export default function AdminUsersPage() {
   const t = useTranslations("admin");
@@ -56,6 +57,7 @@ export default function AdminUsersPage() {
           <p className="text-iron-400 text-sm max-w-2xl">
             {t('adminWarning') || "Warning: Actions performed here execute raw SQLAlchemy cascade deletions. Proceed with extreme caution. Deleted workspaces and strategies cannot be recovered."}
           </p>
+          <BetaInviteButton />
         </header>
 
         <section className="w-full">
