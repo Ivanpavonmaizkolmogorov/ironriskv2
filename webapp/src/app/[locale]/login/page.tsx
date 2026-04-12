@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLocale } from "next-intl";
+import LocaleSwitcher from "@/components/ui/LocaleSwitcher";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -58,6 +59,9 @@ export default function LoginPage() {
       >
         <span>←</span> {isEn ? "Back to Home" : "Volver al inicio"}
       </Link>
+      <div className="absolute top-6 right-6 md:top-8 md:right-8">
+        <LocaleSwitcher />
+      </div>
       
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
@@ -65,7 +69,7 @@ export default function LoginPage() {
             IRON<span className="text-risk-green">RISK</span>
           </h1>
           <p className="text-sm text-iron-500 mt-2">
-            {isEn ? "Access your control tower" : "Accede a tu torre de control"}
+            {isEn ? "Access your risk dashboard" : "Accede a tu panel de riesgo"}
           </p>
         </div>
 

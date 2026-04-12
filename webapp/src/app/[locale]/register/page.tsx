@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import LocaleSwitcher from "@/components/ui/LocaleSwitcher";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -71,6 +72,9 @@ export default function RegisterPage() {
       >
         <span>←</span> {isEn ? "Back to Home" : "Volver al inicio"}
       </Link>
+      <div className="absolute top-6 right-6 md:top-8 md:right-8">
+        <LocaleSwitcher />
+      </div>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-iron-100">
