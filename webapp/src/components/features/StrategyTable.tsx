@@ -139,18 +139,27 @@ export default function StrategyTable({
 
     if (pending.length === 0) return;
 
-    // Process in batches of 5
+    // Process in batches of 5 with per-request timeout
     const BATCH_SIZE = 5;
+    const TIMEOUT_MS = 15000; // 15s max per request
+
+    const fetchWithTimeout = (id: string, isPortfolio: boolean) => {
+      const api = isPortfolio ? portfolioAPI : strategyAPI;
+      return Promise.race([
+        api.getBayes(id).then(res => ({ id, data: res.data })),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout: ${id}`)), TIMEOUT_MS)
+        ),
+      ]);
+    };
+
     (async () => {
       for (let i = 0; i < pending.length; i += BATCH_SIZE) {
         if (controller.signal.aborted) return;
 
         const batch = pending.slice(i, i + BATCH_SIZE);
         const results = await Promise.allSettled(
-          batch.map(({ id, isPortfolio }) => {
-            const api = isPortfolio ? portfolioAPI : strategyAPI;
-            return api.getBayes(id).then(res => ({ id, data: res.data }));
-          })
+          batch.map(({ id, isPortfolio }) => fetchWithTimeout(id, isPortfolio))
         );
 
         if (controller.signal.aborted) return;
