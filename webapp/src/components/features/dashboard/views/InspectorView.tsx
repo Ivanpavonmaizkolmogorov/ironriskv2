@@ -144,9 +144,8 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
                   min={htmlMin}
                   step="1"
                   className={`bg-iron-900/60 border border-iron-700 hover:border-iron-600 focus:border-cyan-600/50 text-xs font-mono text-iron-300 px-2 py-1 rounded-md
-                    cursor-pointer outline-none transition-colors
-                    [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-50
-                    [&::-webkit-calendar-picker-indicator]:hover:opacity-100 ${!currentSd && isPortfolio ? 'hidden' : ''}`}
+                    cursor-pointer outline-none transition-colors ${!currentSd && isPortfolio ? 'hidden' : ''}`}
+                  style={{ colorScheme: 'dark' }}
                   title={tWorkspace("tooltipStartDate")}
                   onChange={async (e) => {
                     const htmlVal = e.target.value;
