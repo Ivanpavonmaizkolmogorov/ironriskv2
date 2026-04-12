@@ -108,12 +108,12 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
             const toMt5 = (html: string) => html?.replace(/-/g, '.').replace('T', ' ') || '';
 
             // Min date: 1 day before first trade
-            let htmlMin: string | undefined;
+            let minDate: Date | undefined;
             if (firstTradeDate) {
-              const d = new Date(toHtml(firstTradeDate));
-              d.setDate(d.getDate() - 1);
-              htmlMin = d.toISOString().slice(0, 19);
+              minDate = new Date(toHtml(firstTradeDate));
+              minDate.setDate(minDate.getDate() - 1);
             }
+            const htmlMin = minDate ? minDate.toISOString().slice(0, 19) : undefined;
 
             const currentSd = (activeAsset as any).start_date || '';
             const htmlValue = toHtml(currentSd);
@@ -131,8 +131,27 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
               } catch { /* silent */ }
             };
 
+            // Step navigation: shift current date by delta days
+            const shiftDate = (deltaDays: number) => {
+              if (!currentSd) return;
+              const current = new Date(toHtml(currentSd));
+              current.setDate(current.getDate() + deltaDays);
+              // Clamp to min
+              if (minDate && current < minDate) current.setTime(minDate.getTime());
+              const mt5New = toMt5(current.toISOString().slice(0, 19));
+              applyDate(mt5New);
+            };
+
+            // Step options: days per step
+            const steps = [
+              { label: "1D", days: 1 },
+              { label: "1W", days: 7 },
+              { label: "1M", days: 30 },
+              { label: "3M", days: 90 },
+            ];
+
             return (
-              <div className="flex items-center gap-2 mb-2 -mt-1 flex-wrap">
+              <div className="flex items-center gap-1.5 mb-2 -mt-1 flex-wrap">
                 <span className="text-[10px] text-iron-600 font-medium tracking-wider">
                   📅 {tWorkspace("liveSince")}
                   {isPortfolio && !currentSd && <span className="text-iron-500 font-normal italic ml-1">(Heredado)</span>}
@@ -159,6 +178,31 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
                     }
                   }}
                 />
+                {currentSd && (
+                  <div className="flex items-center gap-0.5 ml-1">
+                    {steps.map((s) => (
+                      <button key={s.label}
+                        className="group relative flex items-center"
+                      >
+                        <span
+                          onClick={() => shiftDate(-s.days)}
+                          className="px-1 py-0.5 text-[9px] font-mono rounded-l bg-iron-800/60 text-iron-500
+                            hover:bg-iron-700 hover:text-cyan-400 transition-colors border border-iron-700/50 border-r-0 cursor-pointer"
+                          title={`← ${s.label}`}
+                        >◀</span>
+                        <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold bg-iron-800/80 text-iron-400
+                          border-t border-b border-iron-700/50 select-none"
+                        >{s.label}</span>
+                        <span
+                          onClick={() => shiftDate(s.days)}
+                          className="px-1 py-0.5 text-[9px] font-mono rounded-r bg-iron-800/60 text-iron-500
+                            hover:bg-iron-700 hover:text-cyan-400 transition-colors border border-iron-700/50 border-l-0 cursor-pointer"
+                          title={`${s.label} →`}
+                        >▶</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })()}
