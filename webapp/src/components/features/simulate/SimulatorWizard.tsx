@@ -956,20 +956,40 @@ export default function SimulatorWizard() {
               </div>
             )}
 
-            {/* Waitlist CTA when invalid beta code */}
+            {/* Waitlist + Telegram CTA when invalid beta code */}
             {error && (error.toLowerCase().includes('invalid beta') || error.toLowerCase().includes('invalid_invite') || error.toLowerCase().includes('incorrecto') || error.toLowerCase().includes('caducado')) && !simWaitlistSubmitted && onboardData.email.trim() && (
               <div className="bg-risk-green/5 border border-risk-green/20 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-500">
                 <p className="text-sm text-iron-300 mb-3">
                   {locale === 'en'
-                    ? "No code yet? Leave your email and we'll notify you when spots open up."
-                    : "¿Aún no tienes código? Deja tu email y te avisamos cuando haya plazas disponibles."}
+                    ? "No code yet? Get one instantly via Telegram or join the waitlist."
+                    : "¿Aún no tienes código? Consíguelo al instante por Telegram o apúntate a la lista."}
                 </p>
+
+                {/* Primary: Telegram direct — instant access */}
+                <a
+                  href="https://t.me/IronRisk_Ivan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-[#29B6F6]/15 border border-[#29B6F6]/30 text-[#29B6F6] text-sm font-semibold rounded-lg hover:bg-[#29B6F6]/25 hover:border-[#29B6F6]/50 transition-all duration-300 mb-2"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                  {locale === 'es' ? 'Pedir código por Telegram' : 'Request code via Telegram'}
+                </a>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3 my-2">
+                  <div className="flex-1 h-px bg-iron-800/50" />
+                  <span className="text-[10px] text-iron-600 uppercase">{locale === 'es' ? 'o bien' : 'or'}</span>
+                  <div className="flex-1 h-px bg-iron-800/50" />
+                </div>
+
+                {/* Secondary: waitlist email */}
                 <textarea
                   value={simMotivation}
                   onChange={(e) => setSimMotivation(e.target.value)}
-                  placeholder={locale === 'en' ? "What brought you to IronRisk? What problem are you looking to solve? (optional)" : "¿Qué te ha traído a IronRisk? ¿Qué problema buscas resolver? (opcional)"}
-                  rows={3}
-                  className="w-full bg-surface-primary border border-iron-700 rounded-lg px-3 py-2 text-sm text-iron-200 placeholder:text-iron-600 focus:outline-none focus:border-risk-green/40 resize-none mb-3 transition-colors"
+                  placeholder={locale === 'en' ? "What brought you to IronRisk? (optional)" : "¿Qué te ha traído a IronRisk? (opcional)"}
+                  rows={2}
+                  className="w-full bg-surface-primary border border-iron-700 rounded-lg px-3 py-2 text-sm text-iron-200 placeholder:text-iron-600 focus:outline-none focus:border-risk-green/40 resize-none mb-2 transition-colors"
                 />
                 <button
                   type="button"
@@ -986,13 +1006,13 @@ export default function SimulatorWizard() {
                     }
                   }}
                   disabled={simWaitlistLoading}
-                  className="w-full py-2.5 px-4 bg-risk-green/15 border border-risk-green/30 text-risk-green text-sm font-semibold rounded-lg hover:bg-risk-green/25 hover:border-risk-green/50 transition-all duration-300 disabled:opacity-50"
+                  className="w-full py-2 px-4 bg-surface-primary border border-iron-700 text-iron-400 text-xs font-medium rounded-lg hover:bg-surface-secondary hover:text-iron-200 transition-all duration-300 disabled:opacity-50"
                 >
                   {simWaitlistLoading
                     ? '...'
                     : locale === 'en'
-                      ? `📩 Notify me at ${onboardData.email}`
-                      : `📩 Avisarme a ${onboardData.email}`}
+                      ? `📩 Or just notify me at ${onboardData.email}`
+                      : `📩 O simplemente avisarme a ${onboardData.email}`}
                 </button>
               </div>
             )}
@@ -1064,7 +1084,16 @@ export default function SimulatorWizard() {
                       value={onboardData.inviteCode} onChange={e => setOnboardData(p => ({...p, inviteCode: e.target.value.toUpperCase()}))}
                       className="bg-surface-primary border-2 border-amber-500/30 rounded-lg px-4 py-3 text-amber-300 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20 transition-all font-mono font-bold tracking-wider uppercase"
                     />
-                    <span className="text-[10px] text-iron-500">{t('betaCodeHint')}</span>
+                    <span className="text-[10px] text-iron-500">{t('betaCodeHint')}{' '}
+                      <a 
+                        href="https://t.me/IronRisk_Ivan" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[#29B6F6] hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors"
+                      >
+                        {locale === 'es' ? '💬 Pedir código por Telegram' : '💬 Request code via Telegram'}
+                      </a>
+                    </span>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-iron-400">{t('inlineOnboarding.workspaceLabel')} <span className="text-risk-red">*</span></label>
