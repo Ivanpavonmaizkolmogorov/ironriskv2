@@ -805,7 +805,7 @@ export default function AlertsDrawer({
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-0 overflow-hidden">
 
             {/* ══ LEFT: All Active Rules + Telegram ══ */}
-            <div className="flex flex-col border-r border-iron-800/40 overflow-y-auto">
+            <div className="flex flex-col border-r border-iron-800/40 overflow-hidden">
               <div className="px-5 pt-4 pb-2 shrink-0 flex flex-col gap-3">
                 <h3 className="text-[11px] font-bold text-iron-400 uppercase tracking-[0.15em] flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-risk-green animate-pulse" /> {t("activeRulesTitle")}
@@ -823,7 +823,8 @@ export default function AlertsDrawer({
                 </div>
               </div>
 
-              <div className="px-5 pb-4 flex-1 space-y-1 mt-2">
+              {/* Scrollable strategies list */}
+              <div className="px-5 pb-4 flex-1 overflow-y-auto space-y-1 mt-2">
                 {assets.filter(a => a.name.toLowerCase().includes(leftSearch.toLowerCase())).map((asset) => {
                   const rules = alertsByTarget.get(asset.id) || [];
                   const isCollapsed = collapsedSections.has(asset.id);
@@ -878,15 +879,17 @@ export default function AlertsDrawer({
                 })}
               </div>
 
+              {/* ── PINNED BOTTOM: EA Monitor + Telegram (always visible) ── */}
+              <div className="shrink-0 border-t border-iron-800/40">
+                <div className="px-5 py-3">
+                  <h3 className="text-[11px] font-bold text-iron-400 uppercase tracking-[0.15em] flex items-center gap-2 mb-2">
+                    <span>🖥️</span> {t("monitorEa")}
+                  </h3>
+                  <AccountHealthCard allAlerts={allAlerts} onAdd={handleAdd} onDelete={handleDelete} onUpdate={handleUpdate} />
+                </div>
 
-              <div className="px-5 py-3 border-t border-iron-800/40 shrink-0">
-                <h3 className="text-[11px] font-bold text-iron-400 uppercase tracking-[0.15em] flex items-center gap-2 mb-2">
-                  <span>🖥️</span> {t("monitorEa")}
-                </h3>
-                <AccountHealthCard allAlerts={allAlerts} onAdd={handleAdd} onDelete={handleDelete} onUpdate={handleUpdate} />
+                <TelegramLinkSection onLinked={() => handleAdd("ea_disconnect_minutes", 5)} />
               </div>
-
-              <TelegramLinkSection onLinked={() => handleAdd("ea_disconnect_minutes", 5)} />
             </div>
 
             {/* ══ RIGHT: Strategy Navigator + Slider Cards ══ */}
