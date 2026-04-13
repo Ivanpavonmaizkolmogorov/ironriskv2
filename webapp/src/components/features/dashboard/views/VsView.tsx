@@ -14,6 +14,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { strategyAPI } from "@/services/api";
 import type { DashboardContext } from "../dashboardViewConfigs";
 import Card from "@/components/ui/Card";
+import InfoPopover from "@/components/ui/InfoPopover";
 
 
 // ═══════════════════════════════════════════════════════════
@@ -215,7 +216,10 @@ function VsLinkWizard({
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="text-center space-y-2">
         <span className="text-4xl">🔗</span>
-        <h3 className="text-base font-bold text-iron-100">{t("linkTitle")}</h3>
+        <div className="flex items-center justify-center gap-2">
+          <h3 className="text-base font-bold text-iron-100">{t("linkTitle")}</h3>
+          <InfoPopover content={t("tipLinkWizard")} position="bottom" width="w-72" />
+        </div>
         <p className="text-xs text-iron-500 max-w-md mx-auto">{t("linkDesc")}</p>
       </div>
 
@@ -384,6 +388,7 @@ function VsComparisonPanel({
           <div className="flex items-center gap-3">
             <span className="text-2xl">⚔️</span>
             <h3 className="text-sm font-bold text-iron-100 uppercase tracking-wider">{t("comparison")}</h3>
+            <InfoPopover content={t("tipComparison")} position="bottom" width="w-80" />
             {loading && <span className="inline-block w-3 h-3 border border-iron-600 border-t-risk-blue rounded-full animate-spin" />}
           </div>
           <div className="flex items-center gap-2">
@@ -402,7 +407,7 @@ function VsComparisonPanel({
 
         {/* Date filter bar */}
         <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <span className="text-[10px] text-iron-500 font-bold uppercase tracking-wider">📅 {t("dateFilter")}:</span>
+          <span className="text-[10px] text-iron-500 font-bold uppercase tracking-wider flex items-center gap-1">📅 {t("dateFilter")}: <InfoPopover content={t("tipDateFilter")} position="bottom" width="w-72" /></span>
           <button
             onClick={() => handleDateFilter(null)}
             className={`text-[10px] px-2.5 py-1 rounded-full font-bold transition-all ${
@@ -467,6 +472,10 @@ function VsComparisonPanel({
         </div>
 
         {/* Metrics comparison */}
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[10px] text-iron-500 font-bold uppercase tracking-wider">📊 {t("metricsLabel")}</span>
+          <InfoPopover content={t("tipMetrics")} position="bottom" width="w-72" />
+        </div>
         <div className="space-y-0.5 bg-surface-primary/30 rounded-lg border border-iron-800/30 divide-y divide-iron-800/30">
           <VsMetricRow label={t("winRate")} valueA={a.win_rate} valueB={b.win_rate} format="percent" higherIsBetter={true} />
           <VsMetricRow label={t("netProfit")} valueA={a.net_profit} valueB={b.net_profit} format="currency" higherIsBetter={true} />
@@ -478,7 +487,7 @@ function VsComparisonPanel({
       {/* Divergence Stats */}
       <div className="bg-surface-secondary border border-iron-800 rounded-xl p-5">
         <h4 className="text-xs font-bold text-iron-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-          <span>📊</span> {t("divergenceStats")}
+          <span>📊</span> {t("divergenceStats")} <InfoPopover content={t("tipDivergence")} position="bottom" width="w-80" />
         </h4>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatCard
@@ -532,7 +541,7 @@ function VsComparisonPanel({
             className="w-full flex items-center justify-between px-5 py-3 bg-surface-secondary hover:bg-surface-tertiary transition-colors"
           >
             <span className="text-xs font-bold text-iron-400 uppercase tracking-wider flex items-center gap-2">
-              <span>🔍</span> {t("matchedTrades")} ({data.matched_trades.length})
+              <span>🔍</span> {t("matchedTrades")} ({data.matched_trades.length}) <InfoPopover content={t("tipMatchedTrades")} position="bottom" width="w-72" />
             </span>
             <span className={`text-iron-500 text-xs transition-transform duration-200 ${showTrades ? "rotate-180" : ""}`}>▼</span>
           </button>
@@ -589,7 +598,7 @@ function VsComparisonPanel({
             className="w-full flex items-center justify-between px-5 py-3 bg-risk-yellow/5 hover:bg-risk-yellow/10 transition-colors"
           >
             <span className="text-xs font-bold text-risk-yellow uppercase tracking-wider flex items-center gap-2">
-              <span>⚠️</span> {t("orphanTrades")} ({data.orphan_trades_a.length + data.orphan_trades_b.length})
+              <span>⚠️</span> {t("orphanTrades")} ({data.orphan_trades_a.length + data.orphan_trades_b.length}) <InfoPopover content={t("tipOrphanTrades")} position="bottom" width="w-72" />
             </span>
             <span className={`text-iron-500 text-xs transition-transform duration-200 ${showOrphans ? "rotate-180" : ""}`}>▼</span>
           </button>
