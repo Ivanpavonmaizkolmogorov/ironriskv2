@@ -253,7 +253,7 @@ export default function TradingAccountManager() {
             key={a.id}
             style={getCardThemeStyles(a.theme)}
             className={`
-              flex flex-col p-4 rounded-lg border
+              flex flex-col p-3 sm:p-4 rounded-lg border
               ${a.is_active
                 ? "bg-surface-tertiary border-iron-700 text-iron-100"
                 : "bg-surface-primary border-iron-800 opacity-50 text-iron-100"
@@ -340,7 +340,7 @@ export default function TradingAccountManager() {
                 </span>
               </div>
             </div>
-            <div className="flex sm:flex-col justify-end gap-2 mt-4 sm:mt-0 sm:ml-4 shrink-0 w-full sm:w-auto">
+            <div className="flex flex-wrap sm:flex-col justify-end gap-2 mt-3 sm:mt-0 sm:ml-4 shrink-0">
               {a.is_active && (
                 <>
                   <Button

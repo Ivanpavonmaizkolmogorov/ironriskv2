@@ -419,21 +419,20 @@ export default function DashboardPage() {
 
       {/* Top bar */}
       <nav className="shrink-0 bg-surface-primary/80 backdrop-blur-xl border-b border-iron-800 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-sm text-iron-400 hover:text-iron-200 transition-colors">
-              {tWorkspace("navWorkspaces")}
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <Link href="/dashboard" className="text-xs sm:text-sm text-iron-400 hover:text-iron-200 transition-colors shrink-0">
+              ← {tWorkspace("navWorkspaces")}
             </Link>
-            <span className="text-iron-600">/</span>
-            <span className="text-sm font-semibold text-iron-100">
-              {account ? account.name : "Loading..."}
+            <span className="text-sm font-semibold text-iron-100 truncate">
+              {account ? account.name : "..."}
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <ThemeSelector mode="workspace" />
             <LanguageSwitcher />
             {account && (
-              <div className="flex items-center bg-risk-green/10 border border-risk-green/30 rounded-lg px-2 py-1 gap-2">
+              <div className="hidden md:flex items-center bg-risk-green/10 border border-risk-green/30 rounded-lg px-2 py-1 gap-2">
                 <span className="text-xs text-iron-400">{tWorkspace("tokenLabel")}</span>
                 <span className="text-xs font-mono text-risk-green">{account.api_token.substring(0, 12)}...</span>
                 <button onClick={copyToken} className="text-xs text-risk-green hover:text-risk-green/70">
@@ -575,7 +574,7 @@ export default function DashboardPage() {
         }}
       />
 
-      <div ref={splitterContainerRef} className="flex-1 min-h-0 max-w-7xl mx-auto w-full px-6 py-4 flex flex-col">
+      <div ref={splitterContainerRef} className="flex-1 min-h-0 max-w-7xl mx-auto w-full px-3 sm:px-6 py-3 sm:py-4 flex flex-col">
 
         {/* TOP: Terminal Analytics — scrollable panel */}
         <div className="overflow-auto" style={{ height: `calc(${splitRatio * 100}% - 20px)` }}>
@@ -583,7 +582,7 @@ export default function DashboardPage() {
             {/* === DASHBOARD TOP LAYER (VIEW CONTROLLER) === */}
             <div className="flex flex-col gap-4">
               {/* Toolbar */}
-              <div className="flex bg-surface-tertiary p-1 rounded-lg border border-iron-800 w-fit">
+              <div className="flex bg-surface-tertiary p-1 rounded-lg border border-iron-800 w-fit max-w-full overflow-x-auto">
                 {DASHBOARD_VIEWS.map((dv) => {
                   const isActive = activeDashboardView === dv.id;
                   const dvName = dv.id === "ml-bayes" ? tWorkspace("tabBayes") : dv.id === "inspector" ? tWorkspace("tabInspector") : dv.id === "macro" ? tWorkspace("tabMacro") : dv.id === "vs-mode" ? tWorkspace("tabVs") : dv.name;
@@ -592,7 +591,7 @@ export default function DashboardPage() {
                       key={dv.id}
                       onClick={() => setActiveDashboardView(dv.id)}
                       className={`
-                        px-3 py-1 text-[11px] uppercase tracking-wider font-bold rounded flex items-center gap-1.5 transition-all
+                        px-3 py-1 text-[11px] uppercase tracking-wider font-bold rounded flex items-center gap-1.5 transition-all shrink-0 whitespace-nowrap
                         ${isActive ? "bg-iron-700 text-iron-50 shadow-[0_2px_10px_rgba(0,0,0,0.5)] border border-iron-600/50" : "text-iron-500 border border-transparent hover:text-iron-300 hover:bg-iron-800/50"}
                       `}
                     >
