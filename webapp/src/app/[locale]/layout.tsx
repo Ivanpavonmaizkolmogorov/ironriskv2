@@ -96,7 +96,21 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className="dark">
-      <body className="min-h-screen bg-surface-primary text-iron-200 antialiased">
+      <head>
+        {/* PWA */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0d0f12" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+        {/* Apple PWA */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="IronRisk" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        {/* Mobile */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="format-detection" content="telephone=no" />
+      </head>
+      <body className="min-h-screen min-h-dvh bg-surface-primary text-iron-200 antialiased">
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider>
             <MetricsProvider>
@@ -107,6 +121,18 @@ export default async function RootLayout({
           </ThemeProvider>
         </NextIntlClientProvider>
         <Analytics />
+        {/* Service Worker Registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );
