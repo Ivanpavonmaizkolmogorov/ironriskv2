@@ -782,7 +782,7 @@
     "selectStrategyPlaceholder": "-- Choose a strategy --",
     "matchWindow": "Match window",
     "seconds": "seconds",
-    "matchWindowDesc": "Maximum tolerance between open_time of both trades to consider them the same. For bots, 60s is enough.",
+    "matchWindowDesc": "Maximum tolerance between open_time of both trades to consider them the same. For automated strategies, 60s is enough.",
     "linkBtn": "Link twin",
     "addAnother": "Add another twin",
     "noOtherWorkspaces": "No other workspaces available",
@@ -815,9 +815,9 @@
     "tipLinkWizard": "Link here the SAME strategy running in another workspace (different account, broker, or server). The goal is to detect execution differences across environments, NOT to compare different strategies.",
     "tipComparison": "This view compares the same strategy running in two different environments (e.g., incubator vs live, broker A vs broker B). It detects execution differences like slippage, delays, and missed trades so you can identify which environment executes better.",
     "tipDateFilter": "Filter the comparison from the first trade date of each workspace. Useful when one account started later and you only want to see the period where both coexisted.",
-    "tipMetrics": "Global metrics for each environment. If both are the same bot, these should be very similar. Differences reveal the real impact of the broker, server, or network conditions on your strategy's performance.",
+    "tipMetrics": "Global metrics for each environment. If both are the same strategy, these should be very similar. Differences reveal the real impact of the broker, server, or network conditions on your strategy's performance.",
     "tipDivergence": "Divergence statistics between environments. Match rate shows what percentage of trades were successfully paired. Slippage shows entry price differences between environments. Hidden cost is how much money you lose (or gain) by being in one environment vs another.",
     "tipMatchedTrades": "Trades that the matching engine identified as the same trade in both environments (same symbol, same direction, within the time window). The Δ columns show the difference between environments: ΔEntry = entry price difference, ΔP&L = profit difference.",
-    "tipOrphanTrades": "Trades that exist in one environment but were NOT found in the other. This means the bot executed a trade in one account but not the other. This can happen due to disconnections, server time differences, or broker filters."
+    "tipOrphanTrades": "Trades that exist in one environment but were NOT found in the other. This means the strategy executed a trade in one account but not the other. This can happen due to disconnections, server time differences, or broker filters."
   }
 }

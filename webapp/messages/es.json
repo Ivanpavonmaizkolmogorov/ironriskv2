@@ -782,7 +782,7 @@
     "selectStrategyPlaceholder": "-- Elige una estrategia --",
     "matchWindow": "Ventana de matching",
     "seconds": "segundos",
-    "matchWindowDesc": "Tolerancia máxima entre open_time de ambos trades para considerarlos el mismo. Para bots, 60s es suficiente.",
+    "matchWindowDesc": "Tolerancia máxima entre open_time de ambos trades para considerarlos el mismo. Para estrategias automatizadas, 60s es suficiente.",
     "linkBtn": "Vincular gemela",
     "addAnother": "Añadir otra gemela",
     "noOtherWorkspaces": "No hay otros workspaces disponibles",
@@ -815,9 +815,9 @@
     "tipLinkWizard": "Vincula aquí la MISMA estrategia que tengas corriendo en otro workspace (otra cuenta, otro broker, otro servidor). El objetivo es detectar diferencias de ejecución entre entornos, NO comparar estrategias distintas.",
     "tipComparison": "Esta vista compara la misma estrategia corriendo en dos entornos distintos (ej: incubadora vs real, broker A vs broker B). Detecta diferencias de ejecución como slippage, retrasos y trades perdidos para que identifiques qué entorno ejecuta mejor.",
     "tipDateFilter": "Filtra la comparación desde la fecha del primer trade de cada workspace. Útil si una cuenta empezó después que la otra y solo quieres ver el periodo donde ambas coexistieron.",
-    "tipMetrics": "Métricas globales de cada entorno. Si ambos son el mismo bot, deberían ser muy similares. Las diferencias revelan el impacto real del broker, servidor o condiciones de red en el rendimiento de tu estrategia.",
+    "tipMetrics": "Métricas globales de cada entorno. Si ambos son la misma estrategia, deberían ser muy similares. Las diferencias revelan el impacto real del broker, servidor o condiciones de red en el rendimiento de tu estrategia.",
     "tipDivergence": "Estadísticas de divergencia entre entornos. La tasa de match indica qué porcentaje de trades se emparejaron correctamente. El slippage muestra la diferencia de precio de entrada entre entornos. El coste oculto es cuánto dinero pierdes (o ganas) por estar en un entorno vs otro.",
     "tipMatchedTrades": "Trades que el motor de matching ha identificado como el mismo trade en ambos entornos (mismo símbolo, misma dirección, dentro de la ventana temporal). Las columnas Δ muestran la diferencia entre entornos: ΔEntry = diferencia en precio de entrada, ΔP&L = diferencia en beneficio.",
-    "tipOrphanTrades": "Trades que existen en un entorno pero NO se encontraron en el otro. Esto significa que el bot ejecutó un trade en una cuenta pero no en la otra. Puede ocurrir por desconexiones, diferencias de horario del servidor, o filtros del broker."
+    "tipOrphanTrades": "Trades que existen en un entorno pero NO se encontraron en el otro. Esto significa que la estrategia ejecutó un trade en una cuenta pero no en la otra. Puede ocurrir por desconexiones, diferencias de horario del servidor, o filtros del broker."
   }
 }
