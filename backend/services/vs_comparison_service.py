@@ -196,15 +196,47 @@ class TradeMatchingEngine:
     Pairs trades between two sets by symbol, direction, and open_time proximity.
     
     Algorithm:
-    1. Group trades_b by (symbol, deal_type) for O(1) lookup
-    2. For each trade in trades_a, find the closest match in trades_b
+    1. Normalize symbols (strip broker suffixes like .pro, .m, .ecn)
+    2. Group trades_b by (normalized_symbol, deal_type) for O(1) lookup
+    3. For each trade in trades_a, find the closest match in trades_b
        within the time window
-    3. A trade_b can only be matched to ONE trade_a (consumed on match)
-    4. Unmatched trades become orphans
+    4. A trade_b can only be matched to ONE trade_a (consumed on match)
+    5. Unmatched trades become orphans
     """
+    
+    # Common broker suffixes to strip for cross-broker matching
+    # Sorted longest-first at match time to prefer '.micro' over '.m'
+    BROKER_SUFFIXES = [
+        # Dot-separated (most common)
+        '.pro', '.ecn', '.raw', '.std', '.micro', '.mini',
+        '.i', '.e', '.z', '.c', '.b', '.s', '.x', '.m',
+        # Underscore-separated
+        '_m', '_i', '_sb',
+        # Bare suffixes (without separator) — only single chars commonly used
+        'm', 'c', 'i', 'e',
+    ]
     
     def __init__(self, window_seconds: float = 60.0):
         self.window = timedelta(seconds=window_seconds)
+    
+    @staticmethod
+    def _normalize_symbol(symbol: str) -> str:
+        """Strip broker-specific suffixes from symbol for cross-broker matching.
+        
+        Examples:
+            USDJPY.pro  -> USDJPY
+            EURUSDm     -> EURUSD (only if suffix matches known list)
+            XAUUSD.ecn  -> XAUUSD
+            BTCUSD      -> BTCUSD (no change)
+        """
+        s = symbol.strip()
+        s_lower = s.lower()
+        # Try to strip known suffixes (longest first for greedy match)
+        for suffix in sorted(TradeMatchingEngine.BROKER_SUFFIXES, key=len, reverse=True):
+            if s_lower.endswith(suffix):
+                s = s[:len(s) - len(suffix)]
+                break
+        return s.upper()
     
     def match(
         self,
@@ -215,10 +247,10 @@ class TradeMatchingEngine:
         Returns:
             (matched_pairs, orphans_a, orphans_b)
         """
-        # Build lookup: (symbol, deal_type) -> sorted list of (open_time, trade)
+        # Build lookup: (normalized_symbol, deal_type) -> sorted list of trades
         b_pool: dict[tuple[str, str], list[TradeSummary]] = {}
         for tb in trades_b:
-            key = (tb.symbol.upper(), tb.deal_type.upper())
+            key = (self._normalize_symbol(tb.symbol), tb.deal_type.upper())
             b_pool.setdefault(key, []).append(tb)
         
         # Sort each group by open_time for efficient nearest-match
@@ -234,7 +266,7 @@ class TradeMatchingEngine:
                 orphans_a.append(ta)
                 continue
             
-            key = (ta.symbol.upper(), ta.deal_type.upper())
+            key = (self._normalize_symbol(ta.symbol), ta.deal_type.upper())
             candidates = b_pool.get(key, [])
             
             best_match: Optional[TradeSummary] = None
