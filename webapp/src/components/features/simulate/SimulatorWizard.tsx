@@ -1114,15 +1114,40 @@ export default function SimulatorWizard() {
                       className="bg-surface-primary border-2 border-amber-500/30 rounded-lg px-4 py-3 text-amber-300 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20 transition-all font-mono font-bold tracking-wider uppercase"
                     />
                     <span className="text-[10px] text-iron-500">{t('betaCodeHint')}{' '}
-                      <a 
-                        href="https://t.me/IronRisk_Ivan" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
+                      <button 
+                        type="button"
+                        onClick={() => setShowTelegramQR(!showTelegramQR)}
                         className="text-[#29B6F6] hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors"
                       >
                         {locale === 'es' ? '💬 Pedir código por Telegram' : '💬 Request code via Telegram'}
-                      </a>
+                      </button>
                     </span>
+                    {showTelegramQR && (
+                      <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-xl mt-2 animate-in fade-in zoom-in-95 duration-300">
+                        <QRCodeSVG
+                          value="https://t.me/IronRisk_Ivan"
+                          size={140}
+                          bgColor="#ffffff"
+                          fgColor="#0a0a0a"
+                          level="M"
+                          includeMargin={false}
+                        />
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span className="text-xs font-bold text-neutral-800">@IronRisk_Ivan</span>
+                          <span className="text-[10px] text-neutral-500">
+                            {locale === 'es' ? 'Escanea con tu móvil para abrir Telegram' : 'Scan with your phone to open Telegram'}
+                          </span>
+                        </div>
+                        <a
+                          href="https://t.me/IronRisk_Ivan"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-[#29B6F6] underline underline-offset-2"
+                        >
+                          {locale === 'es' ? 'O abre directo desde aquí →' : 'Or open directly from here →'}
+                        </a>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-iron-400">{t('inlineOnboarding.workspaceLabel')} <span className="text-risk-red">*</span></label>
