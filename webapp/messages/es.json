@@ -818,6 +818,21 @@
     "tipMetrics": "Métricas globales de cada entorno. Si ambos son la misma estrategia, deberían ser muy similares. Las diferencias revelan el impacto real del broker, servidor o condiciones de red en el rendimiento de tu estrategia.",
     "tipDivergence": "Estadísticas de divergencia entre entornos. La tasa de match indica qué porcentaje de trades se emparejaron correctamente. El slippage muestra la diferencia de precio de entrada entre entornos. El coste oculto es cuánto dinero pierdes (o ganas) por estar en un entorno vs otro.",
     "tipMatchedTrades": "Trades que el motor de matching ha identificado como el mismo trade en ambos entornos (mismo símbolo, misma dirección, dentro de la ventana temporal). Las columnas Δ muestran la diferencia entre entornos: ΔEntry = diferencia en precio de entrada, ΔP&L = diferencia en beneficio.",
-    "tipOrphanTrades": "Trades que existen en un entorno pero NO se encontraron en el otro. Esto significa que la estrategia ejecutó un trade en una cuenta pero no en la otra. Puede ocurrir por desconexiones, diferencias de horario del servidor, o filtros del broker."
+    "tipOrphanTrades": "Trades que existen en un entorno pero NO se encontraron en el otro. Esto significa que la estrategia ejecutó un trade en una cuenta pero no en la otra. Puede ocurrir por desconexiones, diferencias de horario del servidor, o filtros del broker.",
+    "suggestionTitle": "Coincidencia detectada",
+    "suggestionDesc": "Hemos encontrado estrategias con el mismo nombre en otros workspaces. ¿Quieres vincularlas?",
+    "tipSuggestion": "Cuando una estrategia tiene exactamente el mismo nombre en otro workspace, es muy probable que sea la misma ejecutándose en otro entorno. Vincula para comparar su rendimiento.",
+    "quickLink": "Vincular",
+    "bulkMatchBtn": "Match masivo por nombre",
+    "bulkMatchTitle": "Match masivo",
+    "bulkMatchDesc": "Vincula automáticamente todas las estrategias que tienen el mismo nombre en diferentes workspaces.",
+    "bulkNoMatches": "Sin coincidencias",
+    "bulkNoMatchesDesc": "No se encontraron estrategias con el mismo nombre en diferentes workspaces.",
+    "bulkFound": "{count} coincidencias encontradas",
+    "selectAll": "Seleccionar todo",
+    "selectNone": "Ninguna",
+    "bulkSelected": "seleccionadas",
+    "bulkLinking": "Vinculando...",
+    "bulkLinkBtn": "Vincular {count} pares"
   }
 }

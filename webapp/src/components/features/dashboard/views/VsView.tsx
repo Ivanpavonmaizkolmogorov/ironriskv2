@@ -675,6 +675,276 @@ function StatCard({
 
 
 // ═══════════════════════════════════════════════════════════
+//  SUGGESTION BANNER — name-match auto-detection
+// ═══════════════════════════════════════════════════════════
+
+function VsSuggestionBanner({
+  strategyId,
+  strategyName,
+  accountId,
+  existingLinkIds,
+  onLinked,
+}: {
+  strategyId: string;
+  strategyName: string;
+  accountId: string;
+  existingLinkIds: string[];
+  onLinked: () => void;
+}) {
+  const t = useTranslations("vsMode");
+  const [candidates, setCandidates] = useState<CrossWorkspaceStrategy[]>([]);
+  const [linking, setLinking] = useState<string | null>(null);
+
+  useEffect(() => {
+    strategyAPI.listCrossWorkspace(accountId).then(res => {
+      const matches = (res.data as CrossWorkspaceStrategy[]).filter(
+        s => s.strategy_name.trim().toLowerCase() === strategyName.trim().toLowerCase()
+          && !existingLinkIds.includes(s.strategy_id)
+      );
+      setCandidates(matches);
+    }).catch(() => {});
+  }, [accountId, strategyName, existingLinkIds]);
+
+  const handleQuickLink = async (candidateId: string) => {
+    setLinking(candidateId);
+    try {
+      await strategyAPI.linkStrategy(strategyId, candidateId, 60);
+      onLinked();
+    } catch (err: any) {
+      alert(err?.response?.data?.detail || "Error");
+    } finally {
+      setLinking(null);
+    }
+  };
+
+  if (candidates.length === 0) return null;
+
+  return (
+    <div className="border border-risk-blue/30 bg-risk-blue/5 rounded-xl p-4 animate-in fade-in duration-300">
+      <h4 className="text-xs font-bold text-risk-blue uppercase tracking-wider mb-2 flex items-center gap-2">
+        <span>💡</span> {t("suggestionTitle")}
+        <InfoPopover content={t("tipSuggestion")} position="bottom" width="w-72" />
+      </h4>
+      <p className="text-[10px] text-iron-400 mb-3">{t("suggestionDesc")}</p>
+      <div className="space-y-2">
+        {candidates.map(c => (
+          <div key={c.strategy_id} className="flex items-center justify-between bg-surface-primary/60 rounded-lg p-3 border border-iron-800/50">
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-iron-100 truncate">{c.strategy_name}</p>
+              <p className="text-[10px] text-iron-500">{c.workspace_name} {c.broker ? `(${c.broker})` : ''} · {c.total_trades} trades</p>
+            </div>
+            <button
+              onClick={() => handleQuickLink(c.strategy_id)}
+              disabled={linking === c.strategy_id}
+              className="shrink-0 ml-3 px-3 py-1.5 text-[10px] font-bold rounded-lg 
+                bg-risk-green/15 border border-risk-green/30 text-risk-green
+                hover:bg-risk-green/25 hover:border-risk-green/50 transition-all
+                disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+            >
+              {linking === c.strategy_id ? (
+                <span className="inline-block w-3 h-3 border border-risk-green/30 border-t-risk-green rounded-full animate-spin" />
+              ) : (
+                <>🔗 {t("quickLink")}</>
+              )}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  BULK MATCH MODAL
+// ═══════════════════════════════════════════════════════════
+
+interface BulkCandidate {
+  localStrategy: CrossWorkspaceStrategy;
+  remoteStrategy: CrossWorkspaceStrategy;
+  selected: boolean;
+}
+
+function VsBulkMatchModal({
+  accountId,
+  onClose,
+  onLinked,
+}: {
+  accountId: string;
+  onClose: () => void;
+  onLinked: () => void;
+}) {
+  const t = useTranslations("vsMode");
+  const [candidates, setCandidates] = useState<BulkCandidate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [linking, setLinking] = useState(false);
+  const [progress, setProgress] = useState({ done: 0, total: 0 });
+
+  useEffect(() => {
+    // Load ALL strategies (no exclusion) to find cross-workspace name matches
+    Promise.all([
+      strategyAPI.listCrossWorkspace(), // all strategies across all workspaces
+    ]).then(([allRes]) => {
+      const all = allRes.data as CrossWorkspaceStrategy[];
+      const local = all.filter(s => s.workspace_id === accountId);
+      const remote = all.filter(s => s.workspace_id !== accountId);
+
+      const pairs: BulkCandidate[] = [];
+      for (const ls of local) {
+        for (const rs of remote) {
+          if (ls.strategy_name.trim().toLowerCase() === rs.strategy_name.trim().toLowerCase()) {
+            pairs.push({ localStrategy: ls, remoteStrategy: rs, selected: true });
+          }
+        }
+      }
+      setCandidates(pairs);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [accountId]);
+
+  const toggleCandidate = (idx: number) => {
+    setCandidates(prev => prev.map((c, i) => i === idx ? { ...c, selected: !c.selected } : c));
+  };
+
+  const toggleAll = (selected: boolean) => {
+    setCandidates(prev => prev.map(c => ({ ...c, selected })));
+  };
+
+  const handleBulkLink = async () => {
+    const selected = candidates.filter(c => c.selected);
+    if (selected.length === 0) return;
+    setLinking(true);
+    setProgress({ done: 0, total: selected.length });
+
+    let done = 0;
+    for (const c of selected) {
+      try {
+        await strategyAPI.linkStrategy(c.localStrategy.strategy_id, c.remoteStrategy.strategy_id, 60);
+      } catch {
+        // Skip duplicates / errors silently
+      }
+      done++;
+      setProgress({ done, total: selected.length });
+    }
+
+    setLinking(false);
+    onLinked();
+    onClose();
+  };
+
+  const selectedCount = candidates.filter(c => c.selected).length;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-surface-secondary border border-iron-700 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-iron-800">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">⚡</span>
+            <div>
+              <h3 className="text-sm font-bold text-iron-100">{t("bulkMatchTitle")}</h3>
+              <p className="text-[10px] text-iron-500">{t("bulkMatchDesc")}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-iron-500 hover:text-iron-200 text-lg transition-colors">✕</button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <span className="inline-block w-6 h-6 border-2 border-iron-700 border-t-risk-blue rounded-full animate-spin" />
+            </div>
+          ) : candidates.length === 0 ? (
+            <div className="text-center py-12 space-y-2">
+              <span className="text-3xl">🔍</span>
+              <p className="text-sm text-iron-400">{t("bulkNoMatches")}</p>
+              <p className="text-xs text-iron-600">{t("bulkNoMatchesDesc")}</p>
+            </div>
+          ) : (
+            <>
+              {/* Select all / none */}
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] text-iron-500">
+                  {t("bulkFound", { count: candidates.length })}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => toggleAll(true)} className="text-[10px] text-risk-blue hover:underline">{t("selectAll")}</button>
+                  <span className="text-iron-700">|</span>
+                  <button onClick={() => toggleAll(false)} className="text-[10px] text-iron-500 hover:underline">{t("selectNone")}</button>
+                </div>
+              </div>
+
+              {/* Candidate list */}
+              <div className="space-y-2">
+                {candidates.map((c, idx) => (
+                  <label
+                    key={`${c.localStrategy.strategy_id}-${c.remoteStrategy.strategy_id}`}
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                      c.selected
+                        ? "border-risk-green/30 bg-risk-green/5"
+                        : "border-iron-800 bg-surface-primary/30 opacity-60"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={c.selected}
+                      onChange={() => toggleCandidate(idx)}
+                      className="w-4 h-4 rounded accent-risk-green shrink-0"
+                    />
+                    <div className="flex-1 min-w-0 grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-iron-500 truncate">{c.localStrategy.workspace_name}</p>
+                        <p className="text-xs font-bold text-iron-100 truncate">{c.localStrategy.strategy_name}</p>
+                        <p className="text-[9px] text-iron-600">{c.localStrategy.total_trades} trades</p>
+                      </div>
+                      <span className="text-iron-600 text-xs font-bold">⚔️</span>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-iron-500 truncate">{c.remoteStrategy.workspace_name}</p>
+                        <p className="text-xs font-bold text-iron-100 truncate">{c.remoteStrategy.strategy_name}</p>
+                        <p className="text-[9px] text-iron-600">{c.remoteStrategy.total_trades} trades</p>
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        {candidates.length > 0 && (
+          <div className="px-6 py-4 border-t border-iron-800 flex items-center justify-between">
+            {linking ? (
+              <div className="flex items-center gap-3 text-sm text-iron-300">
+                <span className="inline-block w-4 h-4 border-2 border-iron-600 border-t-risk-green rounded-full animate-spin" />
+                {t("bulkLinking")} {progress.done}/{progress.total}
+              </div>
+            ) : (
+              <span className="text-[10px] text-iron-500">
+                {selectedCount} {t("bulkSelected")}
+              </span>
+            )}
+            <button
+              onClick={handleBulkLink}
+              disabled={linking || selectedCount === 0}
+              className="px-5 py-2 rounded-xl bg-risk-green/15 border border-risk-green/30 text-risk-green font-bold text-xs
+                hover:bg-risk-green/25 hover:border-risk-green/50 transition-all
+                disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {!linking && <>⚡ {t("bulkLinkBtn", { count: selectedCount })}</>}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════
 //  MAIN VS VIEW
 // ═══════════════════════════════════════════════════════════
 
@@ -683,6 +953,7 @@ export function VsView({ context }: { context: DashboardContext }) {
   const t = useTranslations("vsMode");
   const [links, setLinks] = useState<VsLink[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showBulkModal, setShowBulkModal] = useState(false);
 
   const isStrategy = activeAsset && !("strategy_ids" in activeAsset);
 
@@ -735,9 +1006,33 @@ export function VsView({ context }: { context: DashboardContext }) {
     );
   }
 
+  const existingLinkIds = links.map(l => l.strategy_id);
+
   return (
     <Card>
       <div className="space-y-6">
+        {/* Bulk match button */}
+        <div className="flex items-center justify-end">
+          <button
+            onClick={() => setShowBulkModal(true)}
+            className="px-3 py-1.5 text-[10px] font-bold rounded-lg
+              bg-iron-900 border border-iron-700 text-iron-300
+              hover:border-risk-blue/50 hover:text-risk-blue transition-all
+              flex items-center gap-1.5"
+          >
+            ⚡ {t("bulkMatchBtn")}
+          </button>
+        </div>
+
+        {/* Name-match suggestion banner */}
+        <VsSuggestionBanner
+          strategyId={activeAsset.id}
+          strategyName={activeAsset.name}
+          accountId={accountId}
+          existingLinkIds={existingLinkIds}
+          onLinked={loadLinks}
+        />
+
         {/* Existing comparisons */}
         {links.map(link => (
           <VsComparisonPanel
@@ -764,6 +1059,15 @@ export function VsView({ context }: { context: DashboardContext }) {
           />
         </div>
       </div>
+
+      {/* Bulk match modal */}
+      {showBulkModal && (
+        <VsBulkMatchModal
+          accountId={accountId}
+          onClose={() => setShowBulkModal(false)}
+          onLinked={loadLinks}
+        />
+      )}
     </Card>
   );
 }

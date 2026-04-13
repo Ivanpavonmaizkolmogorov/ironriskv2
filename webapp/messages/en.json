@@ -818,6 +818,21 @@
     "tipMetrics": "Global metrics for each environment. If both are the same strategy, these should be very similar. Differences reveal the real impact of the broker, server, or network conditions on your strategy's performance.",
     "tipDivergence": "Divergence statistics between environments. Match rate shows what percentage of trades were successfully paired. Slippage shows entry price differences between environments. Hidden cost is how much money you lose (or gain) by being in one environment vs another.",
     "tipMatchedTrades": "Trades that the matching engine identified as the same trade in both environments (same symbol, same direction, within the time window). The Δ columns show the difference between environments: ΔEntry = entry price difference, ΔP&L = profit difference.",
-    "tipOrphanTrades": "Trades that exist in one environment but were NOT found in the other. This means the strategy executed a trade in one account but not the other. This can happen due to disconnections, server time differences, or broker filters."
+    "tipOrphanTrades": "Trades that exist in one environment but were NOT found in the other. This means the strategy executed a trade in one account but not the other. This can happen due to disconnections, server time differences, or broker filters.",
+    "suggestionTitle": "Match detected",
+    "suggestionDesc": "We found strategies with the same name in other workspaces. Want to link them?",
+    "tipSuggestion": "When a strategy has exactly the same name in another workspace, it's very likely the same strategy running in a different environment. Link to compare performance.",
+    "quickLink": "Link",
+    "bulkMatchBtn": "Bulk match by name",
+    "bulkMatchTitle": "Bulk match",
+    "bulkMatchDesc": "Automatically link all strategies that share the same name across different workspaces.",
+    "bulkNoMatches": "No matches found",
+    "bulkNoMatchesDesc": "No strategies with the same name were found across different workspaces.",
+    "bulkFound": "{count} matches found",
+    "selectAll": "Select all",
+    "selectNone": "None",
+    "bulkSelected": "selected",
+    "bulkLinking": "Linking...",
+    "bulkLinkBtn": "Link {count} pairs"
   }
 }
