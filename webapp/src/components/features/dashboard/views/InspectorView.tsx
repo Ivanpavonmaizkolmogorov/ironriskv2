@@ -287,7 +287,7 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
                 })()}
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
               {Object.entries(activeAsset.metrics_snapshot)
                 .filter(([key]) => key !== "PnlMetric" && key !== "PnlPerTradeMetric" && key !== "combined_strategies" && key !== "strategy_names" && key !== "SimulationParameters" && key !== "bayes_cache")
                 .sort(([keyA], [keyB]) => {
