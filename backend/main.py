@@ -24,6 +24,8 @@ from api.preferences import router as preferences_router
 from api.simulate import router as simulate_router
 from api.admin import router as admin_router
 from api.telegram import router as telegram_router
+from api.settings import router as settings_router
+from services.settings_service import init_default_settings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -93,6 +95,7 @@ app.include_router(preferences_router)
 app.include_router(simulate_router)
 app.include_router(admin_router)
 app.include_router(telegram_router)
+app.include_router(settings_router, prefix="/api/settings", tags=["System Settings"])
 
 from api import alerts, metrics_schema, waitlist
 app.include_router(alerts.router)
@@ -155,6 +158,9 @@ from services.telegram_bot import telegram_bot_poller
 
 @app.on_event("startup")
 async def startup_event():
+    with SessionLocal() as db:
+        init_default_settings(db)
+        
     loop = asyncio.get_running_loop()
     loop.create_task(ea_connectivity_watchdog())
     loop.create_task(telegram_bot_poller())

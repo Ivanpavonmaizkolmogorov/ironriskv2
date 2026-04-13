@@ -10,6 +10,7 @@ import LocaleSwitcher from "@/components/ui/LocaleSwitcher";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import { waitlistAPI } from "@/services/api";
 
 export default function RegisterPage() {
@@ -18,6 +19,7 @@ export default function RegisterPage() {
   const t = useTranslations("landing");
   const isEn = locale === "en";
   const { register, isAuthenticated, isLoading, error, clearError } = useAuthStore();
+  const { adminTelegramHandle, fetchSettings } = useSettingsStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,6 +30,10 @@ export default function RegisterPage() {
   const [waitlistAlready, setWaitlistAlready] = useState(false);
   const [motivation, setMotivation] = useState("");
   const [showTelegramQR, setShowTelegramQR] = useState(false);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   useEffect(() => {
     if (isAuthenticated) router.push(`/${locale}/dashboard`);
@@ -222,7 +228,7 @@ export default function RegisterPage() {
             {showTelegramQR && (
               <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-xl mt-3 animate-in fade-in zoom-in-95 duration-300">
                 <QRCodeSVG
-                  value="https://t.me/IronRisk_Ivan"
+                  value={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
                   size={140}
                   bgColor="#ffffff"
                   fgColor="#0a0a0a"
@@ -230,13 +236,13 @@ export default function RegisterPage() {
                   includeMargin={false}
                 />
                 <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-xs font-bold text-neutral-800">@IronRisk_Ivan</span>
+                  <span className="text-xs font-bold text-neutral-800">{adminTelegramHandle}</span>
                   <span className="text-[10px] text-neutral-500">
                     {isEn ? 'Scan with your phone to open Telegram' : 'Escanea con tu móvil para abrir Telegram'}
                   </span>
                 </div>
                 <a
-                  href="https://t.me/IronRisk_Ivan"
+                  href={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[10px] text-[#29B6F6] underline underline-offset-2"

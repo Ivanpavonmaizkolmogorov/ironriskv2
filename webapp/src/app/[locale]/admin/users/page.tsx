@@ -9,6 +9,7 @@ import UsersTable from "@/components/features/admin/UsersTable";
 import LeadsTable from "@/components/features/admin/LeadsTable";
 import { ArrowLeft } from "lucide-react";
 import BetaInviteButton from "@/components/features/admin/BetaInviteButton";
+import SystemSettingsPanel from "@/components/features/admin/SystemSettingsPanel";
 
 export default function AdminUsersPage() {
   const t = useTranslations("admin");
@@ -59,6 +60,10 @@ export default function AdminUsersPage() {
           </p>
           <BetaInviteButton />
         </header>
+
+        <section className="w-full">
+          <SystemSettingsPanel />
+        </section>
 
         <section className="w-full">
           <UsersTable />

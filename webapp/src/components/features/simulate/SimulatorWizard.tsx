@@ -13,6 +13,7 @@ import { useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSimulatorStore } from '@/store/useSimulatorStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { useOnboardingStore, type TraderRiskConfig } from '@/store/useOnboardingStore';
 import MetricTooltip from '@/components/ui/MetricTooltip';
 import { metricFormatter } from '@/utils/MetricFormatter';
@@ -52,6 +53,7 @@ export default function SimulatorWizard() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [onboardingLoading, setOnboardingLoading] = useState(false);
+  const { adminTelegramHandle, fetchSettings } = useSettingsStore();
   const [onboardPhase, setOnboardPhase] = useState<string | null>(null);
   const [modalMode, setModalMode] = useState<'register' | 'login'>('register');
   const [isEntering, setIsEntering] = useState(false);
@@ -85,6 +87,10 @@ export default function SimulatorWizard() {
 
   // bt_discount: real account (1) vs backtest (20)
 
+
+  React.useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   // Auto-set tab from URL mode (workspace links)
   React.useEffect(() => {
@@ -981,7 +987,7 @@ export default function SimulatorWizard() {
                 {showTelegramQR && (
                   <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-xl mb-2 animate-in fade-in zoom-in-95 duration-300">
                     <QRCodeSVG
-                      value="https://t.me/IronRisk_Ivan"
+                      value={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
                       size={160}
                       bgColor="#ffffff"
                       fgColor="#0a0a0a"
@@ -989,13 +995,13 @@ export default function SimulatorWizard() {
                       includeMargin={false}
                     />
                     <div className="flex flex-col items-center gap-0.5">
-                      <span className="text-xs font-bold text-neutral-800">@IronRisk_Ivan</span>
+                      <span className="text-xs font-bold text-neutral-800">{adminTelegramHandle}</span>
                       <span className="text-[10px] text-neutral-500">
                         {locale === 'es' ? 'Escanea con tu móvil para abrir Telegram' : 'Scan with your phone to open Telegram'}
                       </span>
                     </div>
                     <a
-                      href="https://t.me/IronRisk_Ivan"
+                      href={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[10px] text-[#29B6F6] underline underline-offset-2"
@@ -1125,7 +1131,7 @@ export default function SimulatorWizard() {
                     {showTelegramQR && (
                       <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-xl mt-2 animate-in fade-in zoom-in-95 duration-300">
                         <QRCodeSVG
-                          value="https://t.me/IronRisk_Ivan"
+                          value={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
                           size={140}
                           bgColor="#ffffff"
                           fgColor="#0a0a0a"
@@ -1133,13 +1139,13 @@ export default function SimulatorWizard() {
                           includeMargin={false}
                         />
                         <div className="flex flex-col items-center gap-0.5">
-                          <span className="text-xs font-bold text-neutral-800">@IronRisk_Ivan</span>
+                          <span className="text-xs font-bold text-neutral-800">{adminTelegramHandle}</span>
                           <span className="text-[10px] text-neutral-500">
                             {locale === 'es' ? 'Escanea con tu móvil para abrir Telegram' : 'Scan with your phone to open Telegram'}
                           </span>
                         </div>
                         <a
-                          href="https://t.me/IronRisk_Ivan"
+                          href={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-[10px] text-[#29B6F6] underline underline-offset-2"

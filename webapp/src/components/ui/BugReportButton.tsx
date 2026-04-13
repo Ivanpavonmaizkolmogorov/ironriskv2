@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/store/useAuthStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import { useLocale } from "next-intl";
 import { useState, useEffect } from "react";
 
@@ -11,11 +12,15 @@ import { useState, useEffect } from "react";
  */
 export default function BugReportButton() {
   const { isAuthenticated, user } = useAuthStore();
+  const { adminTelegramHandle, fetchSettings } = useSettingsStore();
   const locale = useLocale();
   const [isHovered, setIsHovered] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { 
+    setMounted(true); 
+    fetchSettings();
+  }, [fetchSettings]);
 
   if (!mounted || !isAuthenticated) return null;
 
@@ -29,7 +34,7 @@ export default function BugReportButton() {
       : `🐛 Reporte — IronRisk\n\nPágina: ${currentPage}\nCuenta: ${userEmail}\n\nDescripción:\n`
   );
 
-  const telegramUrl = `https://t.me/IronRisk_Ivan?text=${message}`;
+  const telegramUrl = `https://t.me/${adminTelegramHandle.replace('@', '')}?text=${message}`;
 
   return (
     <a

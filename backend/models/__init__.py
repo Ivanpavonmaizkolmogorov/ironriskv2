@@ -9,6 +9,7 @@ from .user_preferences import UserPreferences
 from .user_theme import UserTheme
 from .user_alerts import UserAlertConfig, UserAlertHistory
 from .waitlist import WaitlistLead
+from .system_setting import SystemSetting
 
 __all__ = [
     "Base",

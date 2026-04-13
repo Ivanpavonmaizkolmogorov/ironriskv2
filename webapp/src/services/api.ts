@@ -207,3 +207,12 @@ export const waitlistAPI = {
   list: () => api.get('/api/waitlist'),
   remove: (id: string) => api.delete(`/api/waitlist/${id}`),
 };
+
+// --- System Settings endpoints ---
+export const settingsAPI = {
+  getPublic: () => api.get('/api/settings/public'),
+  get: (key: string) => api.get(`/api/settings/${key}`),
+  update: (key: string, value: string, description?: string) =>
+    api.put(`/api/settings/${key}`, { value, description }),
+};
+

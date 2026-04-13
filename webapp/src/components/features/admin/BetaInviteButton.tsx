@@ -3,7 +3,18 @@
 import React, { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
-const INVITE_EN = `🛡️ IronRisk — Closed Beta
+import { useSettingsStore } from "@/store/useSettingsStore";
+
+export default function BetaInviteButton() {
+  const [copiedLang, setCopiedLang] = useState<string | null>(null);
+  const { adminTelegramHandle } = useSettingsStore();
+
+  const getInvite = (lang: "en" | "es") => {
+    const handle = adminTelegramHandle;
+    const url = `https://t.me/${handle.replace('@', '')}`;
+    
+    if (lang === "en") {
+      return `🛡️ IronRisk — Closed Beta
 
 🌐 https://www.ironrisk.pro/en/register
 
@@ -14,10 +25,10 @@ Your access code:
 1. https://youtu.be/H65NyD795bI
 2. https://youtu.be/yiCZE9IYgsA
 
-💬 Direct support: @IronRisk_Ivan
-https://t.me/IronRisk_Ivan`;
-
-const INVITE_ES = `🛡️ IronRisk — Beta Privada
+💬 Direct support: ${handle}
+${url}`;
+    } else {
+      return `🛡️ IronRisk — Beta Privada
 
 🌐 https://www.ironrisk.pro/es/register
 
@@ -28,14 +39,14 @@ Tu código de acceso:
 1. https://youtu.be/H65NyD795bI
 2. https://youtu.be/yiCZE9IYgsA
 
-💬 Soporte directo: @IronRisk_Ivan
-https://t.me/IronRisk_Ivan`;
+💬 Soporte directo: ${handle}
+${url}`;
+    }
+  };
 
-export default function BetaInviteButton() {
-  const [copiedLang, setCopiedLang] = useState<string | null>(null);
 
   const handleCopy = async (lang: "en" | "es") => {
-    await navigator.clipboard.writeText(lang === "en" ? INVITE_EN : INVITE_ES);
+    await navigator.clipboard.writeText(getInvite(lang));
     setCopiedLang(lang);
     setTimeout(() => setCopiedLang(null), 2500);
   };
