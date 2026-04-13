@@ -771,29 +771,64 @@ export default function SimulatorWizard() {
                     {/* Integrated CTA or Casino Gate */}
                     {(() => {
                       const pPositive = result?.decomposition?.p_positive ?? 1;
+                      const pPositivePct = (pPositive * 100).toFixed(1) + '%';
+                      const blindRiskPct = ((1 - pPositive) * 100).toFixed(1) + '%';
+                      const evPerTrade = result?.decomposition?.ev_mean ?? riskSuggestions?.ev_per_trade ?? 0;
+                      
                       if (pPositive < 0.50) {
                         return (
                           <div className="mt-4 pt-4 border-t border-red-500/20 relative z-10">
                             <div className="p-5 bg-red-500/5 border-2 border-red-500/30 rounded-xl flex items-start gap-4">
                               <span className="text-3xl">🎰</span>
-                              <div>
+                              <div className="flex-1">
                                 <h4 className="text-sm font-bold text-red-400">{t('casinoGateTitle')}</h4>
                                 <p className="text-xs text-iron-400 mt-2 leading-relaxed">{t('casinoGateDesc')}</p>
                                 <p className="text-[10px] text-iron-600 mt-3 italic">{t('casinoGateAdvice')}</p>
+                                <button
+                                  onClick={() => { setResult(null); useSimulatorStore.getState().reset(); }}
+                                  className="mt-4 text-xs text-iron-400 hover:text-iron-200 transition-colors underline underline-offset-2"
+                                >
+                                  {t('casinoGateRetry')}
+                                </button>
                               </div>
                             </div>
                           </div>
                         );
                       }
                       return (
-                        <div className="flex flex-col md:flex-row md:items-center justify-between mt-4 pt-4 border-t border-iron-800/30 relative z-10 gap-4">
-                          <div className="flex flex-col gap-1 pr-4">
-                            <h4 className="text-sm font-bold text-iron-200">{t('ctaLock')}</h4>
-                            <p className="text-[11px] text-iron-500">{t('ctaDesc')}</p>
+                        <div className="mt-4 pt-4 border-t border-iron-800/30 relative z-10">
+                          {/* Dynamic headline with user's numbers */}
+                          <div className="flex flex-col gap-3 mb-4">
+                            <h4 className="text-base font-bold text-iron-100 tracking-tight">
+                              {t('ctaLock', { pPositive: pPositivePct })}
+                            </h4>
+                            
+                            {/* Mini stat summary — user's own numbers */}
+                            <div className="grid grid-cols-3 gap-2">
+                              <div className="flex flex-col items-center p-2.5 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
+                                <span className="text-lg font-bold font-mono text-risk-green tracking-tight">{pPositivePct}</span>
+                                <span className="text-[9px] text-iron-500 uppercase tracking-wider mt-0.5">{t('ctaSurvival')}</span>
+                              </div>
+                              <div className="flex flex-col items-center p-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                                <span className="text-lg font-bold font-mono text-amber-400 tracking-tight">{blindRiskPct}</span>
+                                <span className="text-[9px] text-iron-500 uppercase tracking-wider mt-0.5">{t('ctaBlindRisk')}</span>
+                              </div>
+                              <div className="flex flex-col items-center p-2.5 bg-surface-primary/50 border border-iron-800/30 rounded-lg">
+                                <span className={`text-lg font-bold font-mono tracking-tight ${evPerTrade >= 0 ? 'text-risk-green' : 'text-risk-red'}`}>
+                                  ${evPerTrade.toFixed(2)}
+                                </span>
+                                <span className="text-[9px] text-iron-500 uppercase tracking-wider mt-0.5">{t('ctaEvTrade')}</span>
+                              </div>
+                            </div>
+
+                            <p className="text-[11px] text-iron-400 leading-relaxed">
+                              {t('ctaDesc', { blindRisk: blindRiskPct })}
+                            </p>
                           </div>
-                          <button 
+                          
+                          <button
                             onClick={() => setShowOnboarding(true)}
-                            className="shrink-0 whitespace-nowrap bg-risk-green text-surface-primary font-bold px-6 py-3 rounded-xl hover:brightness-110 hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(0,230,118,0.2)] text-sm"
+                            className="w-full bg-risk-green text-surface-primary font-bold px-6 py-3.5 rounded-xl hover:brightness-110 hover:scale-[1.01] transition-all shadow-[0_0_25px_rgba(0,230,118,0.25)] text-sm tracking-wide"
                           >
                             {t('btnCreateWorkspace')}
                           </button>
@@ -805,33 +840,48 @@ export default function SimulatorWizard() {
               })()}
               
               {/* Fallback CTA if no risk panel (shouldn't happen, but safe) */}
-              {!hasRiskData && (result?.decomposition?.p_positive ?? 1) >= 0.50 && (
-                <div className="w-full mt-4 p-6 bg-gradient-to-r from-surface-secondary to-surface-primary border border-iron-800/50 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xl relative overflow-hidden">
+              {!hasRiskData && (result?.decomposition?.p_positive ?? 1) >= 0.50 && (() => {
+                const pPos = result?.decomposition?.p_positive ?? 1;
+                const pPosPct = (pPos * 100).toFixed(1) + '%';
+                const blindPct = ((1 - pPos) * 100).toFixed(1) + '%';
+                return (
+                <div className="w-full mt-4 p-6 bg-gradient-to-r from-surface-secondary to-surface-primary border border-iron-800/50 rounded-2xl flex flex-col gap-4 shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-risk-green/5 blur-[100px] rounded-full pointer-events-none" />
                   <div className="flex flex-col gap-1 z-10 w-full">
-                    <h3 className="text-xl font-bold text-iron-100 tracking-tight">{t('ctaLock')}</h3>
-                    <p className="text-iron-400 text-sm max-w-lg">{t('ctaDesc')}</p>
+                    <h3 className="text-xl font-bold text-iron-100 tracking-tight">
+                      {t('ctaLock', { pPositive: pPosPct })}
+                    </h3>
+                    <p className="text-iron-400 text-sm max-w-lg">
+                      {t('ctaDesc', { blindRisk: blindPct })}
+                    </p>
                   </div>
-                  <div className="z-10 w-full md:w-auto">
+                  <div className="z-10 w-full">
                     <button 
                       onClick={() => setShowOnboarding(true)}
-                      className="block w-full text-center whitespace-nowrap bg-iron-200 text-surface-primary font-bold px-8 py-4 rounded-xl hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                      className="w-full text-center bg-risk-green text-surface-primary font-bold px-8 py-4 rounded-xl hover:brightness-110 hover:scale-[1.01] transition-all shadow-[0_0_25px_rgba(0,230,118,0.25)]"
                     >
                       {t('btnCreateWorkspace')}
                     </button>
                   </div>
                 </div>
-              )}
+                );
+              })()}
 
               {/* Casino gate fallback (no risk panel + bad survival) */}
               {!hasRiskData && (result?.decomposition?.p_positive ?? 1) < 0.50 && (
                 <div className="w-full mt-4 p-6 bg-red-500/5 border-2 border-red-500/30 rounded-2xl">
                   <div className="flex items-start gap-4">
                     <span className="text-4xl">🎰</span>
-                    <div>
+                    <div className="flex-1">
                       <h3 className="text-lg font-bold text-red-400">{t('casinoGateTitle')}</h3>
                       <p className="text-sm text-iron-400 mt-2">{t('casinoGateDesc')}</p>
                       <p className="text-xs text-iron-600 mt-3 italic">{t('casinoGateAdvice')}</p>
+                      <button
+                        onClick={() => { setResult(null); useSimulatorStore.getState().reset(); }}
+                        className="mt-4 text-xs text-iron-400 hover:text-iron-200 transition-colors underline underline-offset-2"
+                      >
+                        {t('casinoGateRetry')}
+                      </button>
                     </div>
                   </div>
                 </div>
