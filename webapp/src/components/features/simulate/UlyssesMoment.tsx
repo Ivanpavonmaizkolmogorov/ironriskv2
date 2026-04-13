@@ -28,35 +28,30 @@ interface UlyssesMetricDescriptor {
 const ULYSSES_METRIC_REGISTRY: UlyssesMetricDescriptor[] = [
   {
     key: "max_drawdown",
-
     questionKeyBt: "ddQuestionBt",
     questionKeyMc: "ddQuestionMc",
     formatKey: "max_drawdown",
   },
   {
     key: "daily_loss",
-
     questionKeyBt: "dailyQuestionBt",
     questionKeyMc: "dailyQuestionMc",
     formatKey: "daily_loss",
   },
   {
     key: "consecutive_losses",
-
     questionKeyBt: "consecQuestionBt",
     questionKeyMc: "consecQuestionMc",
     formatKey: "consecutive_losses",
   },
   {
     key: "stagnation_days",
-
     questionKeyBt: "stagDaysQuestionBt",
     questionKeyMc: "stagDaysQuestionMc",
     formatKey: "stagnation_days",
   },
   {
     key: "stagnation_trades",
-
     questionKeyBt: "stagTradesQuestionBt",
     questionKeyMc: "stagTradesQuestionMc",
     formatKey: "stagnation_trades",
@@ -73,7 +68,7 @@ interface UlyssesMomentProps {
 
 /**
  * UlyssesMoment — The emotional-educational bridge between simulation
- * charts and the risk configuration panel.
+ * results and the risk configuration panel.
  *
  * Adapts its narrative based on data source:
  * - CSV:    "Your backtest revealed..." (historical facts)
@@ -96,7 +91,7 @@ export default function UlyssesMoment({ riskSuggestions, source }: UlyssesMoment
   if (activeMetrics.length === 0) return null;
 
   return (
-    <div className="w-full mt-6 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div id="ulysses-moment" className="w-full mt-6 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="relative border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent rounded-2xl p-6 overflow-hidden">
         {/* Decorative glow */}
         <div className="absolute -top-12 -left-12 w-32 h-32 bg-amber-500/8 blur-[60px] rounded-full pointer-events-none" />
