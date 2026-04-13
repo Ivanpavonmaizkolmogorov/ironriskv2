@@ -119,9 +119,9 @@ class StrategySummary:
     workspace_name: str
     broker: str
     total_trades: int
-    net_profit: float
+    wins: int
+    losses: int
     win_rate: float
-    max_drawdown: float
     first_trade_date: Optional[str] = None  # ISO date of first trade
     
     def to_dict(self) -> dict:
@@ -131,9 +131,9 @@ class StrategySummary:
             "workspace_name": self.workspace_name,
             "broker": self.broker or "",
             "total_trades": self.total_trades,
-            "net_profit": round(self.net_profit, 2),
+            "wins": self.wins,
+            "losses": self.losses,
             "win_rate": round(self.win_rate, 1),
-            "max_drawdown": round(self.max_drawdown, 2),
             "first_trade_date": self.first_trade_date,
         }
 
@@ -426,13 +426,7 @@ class VsComparisonService:
         
         wins = sum(1 for t in trades if t.profit > 0)
         total = len(trades)
-        net = sum(t.profit for t in trades)
-        
-        # Get max drawdown from metrics_snapshot if available
-        max_dd = 0.0
-        if strategy.metrics_snapshot:
-            dd_data = strategy.metrics_snapshot.get("max_drawdown", {})
-            max_dd = dd_data.get("max_max_drawdown", 0.0)
+        losses = total - wins
         
         return StrategySummary(
             strategy_id=strategy.id,
@@ -440,7 +434,7 @@ class VsComparisonService:
             workspace_name=account.name if account else "Unknown",
             broker=account.broker if account else "",
             total_trades=total,
-            net_profit=net,
+            wins=wins,
+            losses=losses,
             win_rate=(wins / total * 100) if total > 0 else 0.0,
-            max_drawdown=max_dd,
         )

@@ -83,9 +83,9 @@ interface StrategySummary {
   workspace_name: string;
   broker: string;
   total_trades: number;
-  net_profit: number;
+  wins: number;
+  losses: number;
   win_rate: number;
-  max_drawdown: number;
   first_trade_date: string | null;
 }
 
@@ -478,8 +478,8 @@ function VsComparisonPanel({
         </div>
         <div className="space-y-0.5 bg-surface-primary/30 rounded-lg border border-iron-800/30 divide-y divide-iron-800/30">
           <VsMetricRow label={t("winRate")} valueA={a.win_rate} valueB={b.win_rate} format="percent" higherIsBetter={true} />
-          <VsMetricRow label={t("netProfit")} valueA={a.net_profit} valueB={b.net_profit} format="currency" higherIsBetter={true} />
-          <VsMetricRow label={t("maxDrawdown")} valueA={a.max_drawdown} valueB={b.max_drawdown} format="currency" higherIsBetter={false} />
+          <VsMetricRow label={t("wins")} valueA={a.wins} valueB={b.wins} format="number" higherIsBetter={true} />
+          <VsMetricRow label={t("losses")} valueA={a.losses} valueB={b.losses} format="number" higherIsBetter={false} />
           <VsMetricRow label={t("totalTrades")} valueA={a.total_trades} valueB={b.total_trades} format="number" higherIsBetter={true} />
         </div>
       </div>
