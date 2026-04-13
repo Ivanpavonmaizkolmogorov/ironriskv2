@@ -20,6 +20,15 @@ export interface Strategy {
   distribution_fit?: Record<string, any> | null;
   bayesian_breakdown?: any;
   risk_multiplier?: number;
+  // VS Mode — linked twin strategies
+  linked_strategies?: Array<{
+    link_id: string;
+    strategy_id: string;
+    strategy_name: string;
+    workspace_name: string;
+    broker: string;
+    match_window_seconds: number;
+  }> | null;
 }
 
 export interface Portfolio {

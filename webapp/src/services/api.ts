@@ -131,6 +131,18 @@ export const strategyAPI = {
     api.post(`/api/strategies/${id}/apply-multiplier`, { risk_multiplier }),
   getTrades: (id: string, limit: number = 50, offset: number = 0) =>
     api.get(`/api/strategies/${id}/trades?limit=${limit}&offset=${offset}`),
+  // VS Mode
+  getLinks: (id: string) => api.get(`/api/vs/${id}/links`),
+  linkStrategy: (id: string, linkedId: string, windowSeconds: number = 60) =>
+    api.post(`/api/vs/${id}/link`, { linked_strategy_id: linkedId, match_window_seconds: windowSeconds }),
+  unlinkStrategy: (id: string, linkedId: string) =>
+    api.delete(`/api/vs/${id}/link/${linkedId}`),
+  getVsComparison: (id: string, linkedId: string) =>
+    api.get(`/api/vs/${id}/compare/${linkedId}`),
+  updateMatchWindow: (id: string, linkedId: string, windowSeconds: number) =>
+    api.patch(`/api/vs/${id}/link/${linkedId}/window`, { match_window_seconds: windowSeconds }),
+  listCrossWorkspace: (excludeAccountId?: string) =>
+    api.get(`/api/vs/strategies/cross-workspace${excludeAccountId ? `?exclude_account_id=${excludeAccountId}` : ''}`),
 };
 
 // --- Sandbox: Orphan Magics endpoints ---

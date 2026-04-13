@@ -202,7 +202,8 @@
     "batchDesc": "Importa varios archivos a la vez con detección automática",
     "tabInspector": "🕵️‍♂️ Inspector Micro",
     "tabBayes": "🧠 Motor Bayesiano",
-    "tabMacro": "🌍 Riesgo Macro"
+    "tabMacro": "🌍 Riesgo Macro",
+    "tabVs": "⚔️ VS Mode"
   },
   "charts": {
     "interactive": {
@@ -769,5 +770,42 @@
     "scanQrDetail": "Abre Telegram en tu móvil, escanea el QR y pulsa Iniciar.",
     "orBrowser": "o desde este navegador",
     "openTelegramWeb": "Abrir en Telegram Web"
+  },
+  "vsMode": {
+    "selectStrategy": "Selecciona una estrategia para comparar",
+    "portfolioNotSupported": "VS Mode no está disponible para portfolios",
+    "portfolioNotSupportedDesc": "Selecciona una estrategia individual para comparar con su gemela en otro workspace",
+    "linkTitle": "Vincular estrategia gemela",
+    "linkDesc": "Selecciona la misma estrategia en otro workspace para comparar ejecución, slippage y divergencias entre entornos",
+    "selectWorkspace": "Selecciona workspace",
+    "selectWorkspacePlaceholder": "-- Elige un workspace --",
+    "selectStrategyPlaceholder": "-- Elige una estrategia --",
+    "matchWindow": "Ventana de matching",
+    "seconds": "segundos",
+    "matchWindowDesc": "Tolerancia máxima entre open_time de ambos trades para considerarlos el mismo. Para bots, 60s es suficiente.",
+    "linkBtn": "Vincular gemela",
+    "addAnother": "Añadir otra gemela",
+    "noOtherWorkspaces": "No hay otros workspaces disponibles",
+    "noOtherWorkspacesDesc": "Crea otro workspace con la misma estrategia para poder compararlos",
+    "comparison": "Comparación",
+    "unlink": "Desvincular",
+    "unlinkConfirm": "¿Seguro que quieres desvincular esta estrategia gemela?",
+    "errorLoading": "Error al cargar la comparación",
+    "winRate": "Win Rate",
+    "netProfit": "Beneficio Neto",
+    "maxDrawdown": "Drawdown Máx.",
+    "totalTrades": "Total Trades",
+    "divergenceStats": "Estadísticas de Divergencia",
+    "matchRate": "Tasa Match",
+    "avgSlippage": "Slippage Medio",
+    "entryPrice": "Precio entrada",
+    "pnlDelta": "Delta P&L",
+    "perTrade": "por trade",
+    "hiddenCost": "Coste Oculto",
+    "cumulative": "acumulado",
+    "orphansIn": "trades sin par en",
+    "matchedTrades": "Trades Matcheados",
+    "orphanTrades": "Trades Huérfanos",
+    "onlyIn": "Solo en"
   }
 }

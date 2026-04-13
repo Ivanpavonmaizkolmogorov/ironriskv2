@@ -2,6 +2,7 @@ from .database import Base, engine, SessionLocal, get_db, get_settings
 from .user import User
 from .orphan import OrphanMagic
 from .strategy import Strategy
+from .strategy_link import StrategyLink
 from .trading_account import TradingAccount
 from .portfolio import Portfolio
 from .real_trade import RealTrade
@@ -19,6 +20,7 @@ __all__ = [
     "get_settings",
     "User",
     "Strategy",
+    "StrategyLink",
     "TradingAccount",
     "Portfolio",
     "RealTrade",
@@ -28,4 +30,5 @@ __all__ = [
     "UserAlertHistory",
     "WaitlistLead",
 ]
+
 

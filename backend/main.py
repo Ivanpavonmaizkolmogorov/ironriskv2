@@ -25,6 +25,7 @@ from api.simulate import router as simulate_router
 from api.admin import router as admin_router
 from api.telegram import router as telegram_router
 from api.settings import router as settings_router
+from api.vs_mode import router as vs_mode_router
 from services.settings_service import init_default_settings
 
 # Configure logging
@@ -96,6 +97,7 @@ app.include_router(simulate_router)
 app.include_router(admin_router)
 app.include_router(telegram_router)
 app.include_router(settings_router, prefix="/api/settings", tags=["System Settings"])
+app.include_router(vs_mode_router)
 
 from api import alerts, metrics_schema, waitlist
 app.include_router(alerts.router)

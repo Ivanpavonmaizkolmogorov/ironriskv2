@@ -202,7 +202,8 @@
     "batchDesc": "Import multiple files at once with auto-detection",
     "tabInspector": "🕵️‍♂️ Micro Inspector",
     "tabBayes": "🧠 Bayesian Engine",
-    "tabMacro": "🌍 Macro Risk"
+    "tabMacro": "🌍 Macro Risk",
+    "tabVs": "⚔️ VS Mode"
   },
   "charts": {
     "interactive": {
@@ -769,5 +770,42 @@
     "scanQrDetail": "Open Telegram on your phone, scan the QR, and tap Start.",
     "orBrowser": "or from this browser",
     "openTelegramWeb": "Open in Telegram Web"
+  },
+  "vsMode": {
+    "selectStrategy": "Select a strategy to compare",
+    "portfolioNotSupported": "VS Mode is not available for portfolios",
+    "portfolioNotSupportedDesc": "Select an individual strategy to compare with its twin in another workspace",
+    "linkTitle": "Link twin strategy",
+    "linkDesc": "Select the same strategy in another workspace to compare execution, slippage, and divergences across environments",
+    "selectWorkspace": "Select workspace",
+    "selectWorkspacePlaceholder": "-- Choose a workspace --",
+    "selectStrategyPlaceholder": "-- Choose a strategy --",
+    "matchWindow": "Match window",
+    "seconds": "seconds",
+    "matchWindowDesc": "Maximum tolerance between open_time of both trades to consider them the same. For bots, 60s is enough.",
+    "linkBtn": "Link twin",
+    "addAnother": "Add another twin",
+    "noOtherWorkspaces": "No other workspaces available",
+    "noOtherWorkspacesDesc": "Create another workspace with the same strategy to compare them",
+    "comparison": "Comparison",
+    "unlink": "Unlink",
+    "unlinkConfirm": "Are you sure you want to unlink this twin strategy?",
+    "errorLoading": "Error loading comparison",
+    "winRate": "Win Rate",
+    "netProfit": "Net Profit",
+    "maxDrawdown": "Max Drawdown",
+    "totalTrades": "Total Trades",
+    "divergenceStats": "Divergence Statistics",
+    "matchRate": "Match Rate",
+    "avgSlippage": "Avg Slippage",
+    "entryPrice": "Entry price",
+    "pnlDelta": "P&L Delta",
+    "perTrade": "per trade",
+    "hiddenCost": "Hidden Cost",
+    "cumulative": "cumulative",
+    "orphansIn": "unmatched trades in",
+    "matchedTrades": "Matched Trades",
+    "orphanTrades": "Orphan Trades",
+    "onlyIn": "Only in"
   }
 }

@@ -2,6 +2,7 @@ import React from "react";
 import type { RiskAsset } from "@/types/strategy";
 import { InspectorView } from "./views/InspectorView";
 import { MachineLearningView } from "./views/MachineLearningView";
+import { VsView } from "./views/VsView";
 
 export interface DashboardContext {
   activeAsset: RiskAsset | null;
@@ -40,8 +41,14 @@ export const MachineLearningViewDef: DashboardViewDef = {
   renderComponent: (context) => <MachineLearningView context={context} />
 };
 
+export const VsModeViewDef: DashboardViewDef = {
+  id: "vs-mode",
+  name: "⚔️ VS Mode",
+  renderComponent: (context) => <VsView context={context} />
+};
+
 export const DASHBOARD_VIEWS: DashboardViewDef[] = [
   ObjectInspectorViewDef,
-  MachineLearningViewDef
+  MachineLearningViewDef,
+  VsModeViewDef
 ];
-
