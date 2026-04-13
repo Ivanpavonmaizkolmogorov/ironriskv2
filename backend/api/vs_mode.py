@@ -160,10 +160,15 @@ def get_strategy_links(
 def get_vs_comparison(
     strategy_id: str,
     linked_strategy_id: str,
+    from_date: str = None,
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
 ):
-    """Run a full VS comparison between two linked strategies."""
+    """Run a full VS comparison between two linked strategies.
+    
+    Args:
+        from_date: Optional ISO date string (e.g. '2024-01-15') to filter trades from this date onwards.
+    """
     strat_a = _get_user_strategy(db, strategy_id, user.id)
     strat_b = _get_user_strategy(db, linked_strategy_id, user.id)
     
@@ -175,8 +180,17 @@ def get_vs_comparison(
     
     window = link.match_window_seconds if link else 60.0
     
+    # Parse from_date if provided
+    from_dt = None
+    if from_date:
+        from datetime import datetime
+        try:
+            from_dt = datetime.fromisoformat(from_date)
+        except ValueError:
+            pass
+    
     service = VsComparisonService(db)
-    result = service.compare(strat_a, strat_b, window_seconds=window)
+    result = service.compare(strat_a, strat_b, window_seconds=window, from_date=from_dt)
     
     return result.to_dict()
 

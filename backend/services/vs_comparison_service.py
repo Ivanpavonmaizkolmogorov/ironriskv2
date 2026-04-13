@@ -122,6 +122,7 @@ class StrategySummary:
     net_profit: float
     win_rate: float
     max_drawdown: float
+    first_trade_date: Optional[str] = None  # ISO date of first trade
     
     def to_dict(self) -> dict:
         return {
@@ -133,6 +134,7 @@ class StrategySummary:
             "net_profit": round(self.net_profit, 2),
             "win_rate": round(self.win_rate, 1),
             "max_drawdown": round(self.max_drawdown, 2),
+            "first_trade_date": self.first_trade_date,
         }
 
 
@@ -146,6 +148,7 @@ class VsComparisonResult:
     orphan_trades_a: list[TradeSummary] = field(default_factory=list)
     orphan_trades_b: list[TradeSummary] = field(default_factory=list)
     match_window_seconds: float = 60.0
+    from_date: Optional[str] = None  # active filter, if any
     
     def to_dict(self) -> dict:
         return {
@@ -166,6 +169,7 @@ class VsComparisonResult:
             "orphan_trades_a": [_trade_dict(t) for t in self.orphan_trades_a],
             "orphan_trades_b": [_trade_dict(t) for t in self.orphan_trades_b],
             "match_window_seconds": self.match_window_seconds,
+            "from_date": self.from_date,
         }
 
 
@@ -311,12 +315,17 @@ class VsComparisonService:
         strategy_a: Strategy,
         strategy_b: Strategy,
         window_seconds: float = 60.0,
+        from_date: Optional[datetime] = None,
     ) -> VsComparisonResult:
-        """Run a full VS comparison between two strategies."""
+        """Run a full VS comparison between two strategies.
         
-        # Load trades
-        trades_a_raw = self._load_trades(strategy_a)
-        trades_b_raw = self._load_trades(strategy_b)
+        Args:
+            from_date: Optional datetime to filter trades from this date onwards.
+        """
+        
+        # Load trades (optionally filtered by from_date)
+        trades_a_raw = self._load_trades(strategy_a, from_date=from_date)
+        trades_b_raw = self._load_trades(strategy_b, from_date=from_date)
         
         trades_a = [TradeSummary.from_real_trade(t) for t in trades_a_raw]
         trades_b = [TradeSummary.from_real_trade(t) for t in trades_b_raw]
@@ -326,9 +335,15 @@ class VsComparisonService:
         matched, orphans_a, orphans_b = engine.match(trades_a, trades_b)
         stats = engine.compute_stats(trades_a, trades_b, matched, orphans_a, orphans_b)
         
-        # Build summaries
+        # Build summaries (from filtered trades, but get first_trade_date from ALL trades)
         summary_a = self._build_summary(strategy_a, trades_a_raw)
         summary_b = self._build_summary(strategy_b, trades_b_raw)
+        
+        # Get global first trade dates (unfiltered) for the date filter buttons
+        first_a = self._get_first_trade_date(strategy_a)
+        first_b = self._get_first_trade_date(strategy_b)
+        summary_a.first_trade_date = first_a.isoformat() if first_a else None
+        summary_b.first_trade_date = first_b.isoformat() if first_b else None
         
         return VsComparisonResult(
             summary_a=summary_a,
@@ -338,21 +353,38 @@ class VsComparisonService:
             orphan_trades_a=orphans_a,
             orphan_trades_b=orphans_b,
             match_window_seconds=window_seconds,
+            from_date=from_date.isoformat() if from_date else None,
         )
     
-    def _load_trades(self, strategy: Strategy) -> list[RealTrade]:
-        """Load all trades for a strategy by its magic numbers."""
+    def _load_trades(self, strategy: Strategy, from_date: Optional[datetime] = None) -> list[RealTrade]:
+        """Load trades for a strategy, optionally filtered by from_date."""
         magics = strategy.all_magic_numbers
-        return (
+        query = (
             self.db.query(RealTrade)
             .filter(
                 RealTrade.trading_account_id == strategy.trading_account_id,
                 RealTrade.magic_number.in_(magics),
-                RealTrade.open_time.isnot(None),  # Only trades with open_time
+                RealTrade.open_time.isnot(None),
+            )
+        )
+        if from_date:
+            query = query.filter(RealTrade.open_time >= from_date)
+        return query.order_by(RealTrade.open_time).all()
+    
+    def _get_first_trade_date(self, strategy: Strategy) -> Optional[datetime]:
+        """Get the date of the first trade for a strategy (unfiltered)."""
+        magics = strategy.all_magic_numbers
+        first = (
+            self.db.query(RealTrade.open_time)
+            .filter(
+                RealTrade.trading_account_id == strategy.trading_account_id,
+                RealTrade.magic_number.in_(magics),
+                RealTrade.open_time.isnot(None),
             )
             .order_by(RealTrade.open_time)
-            .all()
+            .first()
         )
+        return first[0] if first else None
     
     def _build_summary(self, strategy: Strategy, trades: list[RealTrade]) -> StrategySummary:
         """Build a summary from strategy model + live trades."""

@@ -806,6 +806,10 @@
     "orphansIn": "trades sin par en",
     "matchedTrades": "Trades Matcheados",
     "orphanTrades": "Trades Huérfanos",
-    "onlyIn": "Solo en"
+    "onlyIn": "Solo en",
+    "dateFilter": "Filtro temporal",
+    "allTrades": "Todos los trades",
+    "fromDate": "Desde",
+    "filterActive": "Filtro activo"
   }
 }

@@ -137,8 +137,8 @@ export const strategyAPI = {
     api.post(`/api/vs/${id}/link`, { linked_strategy_id: linkedId, match_window_seconds: windowSeconds }),
   unlinkStrategy: (id: string, linkedId: string) =>
     api.delete(`/api/vs/${id}/link/${linkedId}`),
-  getVsComparison: (id: string, linkedId: string) =>
-    api.get(`/api/vs/${id}/compare/${linkedId}`),
+  getVsComparison: (id: string, linkedId: string, fromDate?: string) =>
+    api.get(`/api/vs/${id}/compare/${linkedId}${fromDate ? `?from_date=${fromDate}` : ''}`),
   updateMatchWindow: (id: string, linkedId: string, windowSeconds: number) =>
     api.patch(`/api/vs/${id}/link/${linkedId}/window`, { match_window_seconds: windowSeconds }),
   listCrossWorkspace: (excludeAccountId?: string) =>

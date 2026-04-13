@@ -85,6 +85,7 @@ interface StrategySummary {
   net_profit: number;
   win_rate: number;
   max_drawdown: number;
+  first_trade_date: string | null;
 }
 
 interface VsComparisonData {
@@ -95,6 +96,7 @@ interface VsComparisonData {
   orphan_trades_a: TradeSummary[];
   orphan_trades_b: TradeSummary[];
   match_window_seconds: number;
+  from_date: string | null;
 }
 
 
@@ -322,14 +324,27 @@ function VsComparisonPanel({
   const [showTrades, setShowTrades] = useState(false);
   const [showOrphans, setShowOrphans] = useState(false);
   const [unlinking, setUnlinking] = useState(false);
+  const [fromDate, setFromDate] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
+  const fetchComparison = useCallback((dateFilter?: string) => {
     setLoading(true);
-    strategyAPI.getVsComparison(strategyId, link.strategy_id).then(res => {
+    strategyAPI.getVsComparison(strategyId, link.strategy_id, dateFilter).then(res => {
       setData(res.data);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [strategyId, link.strategy_id]);
+
+  useEffect(() => {
+    fetchComparison(fromDate);
+  }, [fetchComparison, fromDate]);
+
+  const handleDateFilter = (date: string | null) => {
+    if (!date) {
+      setFromDate(undefined);
+    } else {
+      setFromDate(date.split('T')[0]);  // Use just the date part
+    }
+  };
 
   const handleUnlink = async () => {
     if (!confirm(t("unlinkConfirm"))) return;
@@ -342,7 +357,7 @@ function VsComparisonPanel({
     }
   };
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <div className="border border-iron-800 rounded-xl p-6 flex items-center justify-center min-h-[200px]">
         <span className="inline-block w-6 h-6 border-2 border-iron-700 border-t-risk-blue rounded-full animate-spin" />
@@ -359,6 +374,7 @@ function VsComparisonPanel({
   }
 
   const { summary_a: a, summary_b: b, divergence_stats: stats } = data;
+  const fmtDate = (iso: string | null) => iso ? new Date(iso).toLocaleDateString() : null;
 
   return (
     <div className="space-y-4 animate-in fade-in duration-300">
@@ -368,6 +384,7 @@ function VsComparisonPanel({
           <div className="flex items-center gap-3">
             <span className="text-2xl">⚔️</span>
             <h3 className="text-sm font-bold text-iron-100 uppercase tracking-wider">{t("comparison")}</h3>
+            {loading && <span className="inline-block w-3 h-3 border border-iron-600 border-t-risk-blue rounded-full animate-spin" />}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-iron-500 font-mono bg-iron-900 px-2 py-0.5 rounded">
@@ -383,17 +400,69 @@ function VsComparisonPanel({
           </div>
         </div>
 
+        {/* Date filter bar */}
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <span className="text-[10px] text-iron-500 font-bold uppercase tracking-wider">📅 {t("dateFilter")}:</span>
+          <button
+            onClick={() => handleDateFilter(null)}
+            className={`text-[10px] px-2.5 py-1 rounded-full font-bold transition-all ${
+              !fromDate
+                ? "bg-risk-green/20 text-risk-green border border-risk-green/30"
+                : "bg-iron-900 text-iron-400 border border-iron-700 hover:border-iron-500"
+            }`}
+          >
+            {t("allTrades")}
+          </button>
+          {a.first_trade_date && (
+            <button
+              onClick={() => handleDateFilter(a.first_trade_date)}
+              className={`text-[10px] px-2.5 py-1 rounded-full font-bold transition-all ${
+                fromDate && fromDate === a.first_trade_date?.split('T')[0]
+                  ? "bg-risk-blue/20 text-risk-blue border border-risk-blue/30"
+                  : "bg-iron-900 text-iron-400 border border-iron-700 hover:border-iron-500"
+              }`}
+              title={`${t("fromDate")} ${fmtDate(a.first_trade_date)}`}
+            >
+              📌 {a.workspace_name} ({fmtDate(a.first_trade_date)})
+            </button>
+          )}
+          {b.first_trade_date && (
+            <button
+              onClick={() => handleDateFilter(b.first_trade_date)}
+              className={`text-[10px] px-2.5 py-1 rounded-full font-bold transition-all ${
+                fromDate && fromDate === b.first_trade_date?.split('T')[0]
+                  ? "bg-risk-blue/20 text-risk-blue border border-risk-blue/30"
+                  : "bg-iron-900 text-iron-400 border border-iron-700 hover:border-iron-500"
+              }`}
+              title={`${t("fromDate")} ${fmtDate(b.first_trade_date)}`}
+            >
+              📌 {b.workspace_name} ({fmtDate(b.first_trade_date)})
+            </button>
+          )}
+          {fromDate && (
+            <span className="text-[9px] text-iron-600 font-mono ml-1">
+              {t("filterActive")}: ≥ {fromDate}
+            </span>
+          )}
+        </div>
+
         {/* Side by side headers */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="bg-surface-primary/50 rounded-lg p-3 border border-iron-800/50">
             <p className="text-xs text-iron-500">{a.workspace_name}</p>
             <p className="text-sm font-bold text-iron-100">{a.name}</p>
-            {a.broker && <p className="text-[10px] text-iron-600 mt-0.5">{a.broker}</p>}
+            <div className="flex items-center gap-2 mt-1">
+              {a.broker && <span className="text-[10px] text-iron-600">{a.broker}</span>}
+              {a.first_trade_date && <span className="text-[9px] text-iron-700 font-mono">1st: {fmtDate(a.first_trade_date)}</span>}
+            </div>
           </div>
           <div className="bg-surface-primary/50 rounded-lg p-3 border border-iron-800/50">
             <p className="text-xs text-iron-500">{b.workspace_name}</p>
             <p className="text-sm font-bold text-iron-100">{b.name}</p>
-            {b.broker && <p className="text-[10px] text-iron-600 mt-0.5">{b.broker}</p>}
+            <div className="flex items-center gap-2 mt-1">
+              {b.broker && <span className="text-[10px] text-iron-600">{b.broker}</span>}
+              {b.first_trade_date && <span className="text-[9px] text-iron-700 font-mono">1st: {fmtDate(b.first_trade_date)}</span>}
+            </div>
           </div>
         </div>
 
