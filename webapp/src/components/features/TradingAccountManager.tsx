@@ -39,7 +39,11 @@ export default function TradingAccountManager() {
   const loadAccounts = async () => {
     try {
       const res = await tradingAccountAPI.list();
-      setAccounts(res.data);
+      const sorted = [...res.data].sort(
+        (a: TradingAccount, b: TradingAccount) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+      setAccounts(sorted);
       
       const activeAccounts = res.data.filter((a: any) => a.last_heartbeat_at);
       if (activeAccounts.length > 0) {
