@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { QRCodeSVG } from 'qrcode.react';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -26,6 +27,7 @@ export default function RegisterPage() {
   const [waitlistLoading, setWaitlistLoading] = useState(false);
   const [waitlistAlready, setWaitlistAlready] = useState(false);
   const [motivation, setMotivation] = useState("");
+  const [showTelegramQR, setShowTelegramQR] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) router.push(`/${locale}/dashboard`);
@@ -202,12 +204,48 @@ export default function RegisterPage() {
             {t("register")}
           </Button>
 
-          <p className="text-xs text-iron-400 mt-4 text-center leading-relaxed px-2">
-            {isEn
-              ? <> Don&apos;t have a code? IronRisk is in Closed Beta by invitation. Ask <a href="https://t.me/IronRisk_Ivan" target="_blank" rel="noopener noreferrer" className="text-risk-green hover:underline">@IronRisk_Ivan</a> on Telegram.</>
-              : <> ¿No tienes código? IronRisk está en Beta Privada por invitación. Pídeselo a <a href="https://t.me/IronRisk_Ivan" target="_blank" rel="noopener noreferrer" className="text-risk-green hover:underline">@IronRisk_Ivan</a> en Telegram.</>
-            }
-          </p>
+          <div className="text-xs text-iron-400 mt-4 text-center leading-relaxed px-2">
+            <p>
+              {isEn
+                ? <>Don&apos;t have a code? IronRisk is in Closed Beta by invitation.{' '}
+                    <button type="button" onClick={() => setShowTelegramQR(!showTelegramQR)} className="text-[#29B6F6] hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors">
+                      💬 Request code via Telegram
+                    </button>
+                  </>
+                : <>¿No tienes código? IronRisk está en Beta Privada por invitación.{' '}
+                    <button type="button" onClick={() => setShowTelegramQR(!showTelegramQR)} className="text-[#29B6F6] hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors">
+                      💬 Pedir código por Telegram
+                    </button>
+                  </>
+              }
+            </p>
+            {showTelegramQR && (
+              <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-xl mt-3 animate-in fade-in zoom-in-95 duration-300">
+                <QRCodeSVG
+                  value="https://t.me/IronRisk_Ivan"
+                  size={140}
+                  bgColor="#ffffff"
+                  fgColor="#0a0a0a"
+                  level="M"
+                  includeMargin={false}
+                />
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-xs font-bold text-neutral-800">@IronRisk_Ivan</span>
+                  <span className="text-[10px] text-neutral-500">
+                    {isEn ? 'Scan with your phone to open Telegram' : 'Escanea con tu móvil para abrir Telegram'}
+                  </span>
+                </div>
+                <a
+                  href="https://t.me/IronRisk_Ivan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-[#29B6F6] underline underline-offset-2"
+                >
+                  {isEn ? 'Or open directly from here →' : 'O abre directo desde aquí →'}
+                </a>
+              </div>
+            )}
+          </div>
         </form>
 
         <p className="text-center text-sm text-iron-500 mt-6">
