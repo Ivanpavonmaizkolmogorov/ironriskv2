@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { routing } from "@/i18n/routing";
 import ThemeProvider from "@/components/ui/ThemeProvider";
 import { MetricsProvider } from "@/contexts/MetricsContext";
@@ -93,6 +94,8 @@ export default async function RootLayout({
   }
 
   const messages = await getMessages();
+  const cookieStore = await cookies();
+  const disableAnalytics = cookieStore.get("disable-analytics")?.value === "true";
 
   return (
     <html lang={locale} className="dark">
@@ -120,7 +123,7 @@ export default async function RootLayout({
             </MetricsProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
-        <Analytics />
+        {!disableAnalytics && <Analytics />}
         {/* Service Worker Registration */}
         <script
           dangerouslySetInnerHTML={{
