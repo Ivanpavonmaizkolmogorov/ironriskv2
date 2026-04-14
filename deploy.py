@@ -35,19 +35,19 @@ def upload_dir(sftp, local_path, remote_path):
     return count
 
 def deploy():
-    print("🚀 Conectando a Hetzner...")
+    print("[*] Conectando a Hetzner...")
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(HOST, username=USER, password=PASSWORD)
 
-    print("📦 Subiendo archivos del backend...")
+    print("[*] Subiendo archivos del backend...")
     sftp = ssh.open_sftp()
     local_backend = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'backend')
     n = upload_dir(sftp, local_backend, REMOTE_DIR)
     sftp.close()
     print(f"   {n} archivos subidos")
 
-    print("🔄 Reiniciando servicio...")
+    print("[*] Reiniciando servicio...")
     stdin, stdout, stderr = ssh.exec_command('systemctl restart ironrisk')
     stdout.channel.recv_exit_status()
 
@@ -58,10 +58,10 @@ def deploy():
     ssh.close()
 
     if status == 'active':
-        print(f"✅ Deploy completo — servicio ACTIVO")
+        print(f"[OK] Deploy completo - servicio ACTIVO")
         print(f"   API: https://62-238-19-114.nip.io")
     else:
-        print(f"❌ Error — servicio: {status}")
+        print(f"[ERROR] servicio: {status}")
         sys.exit(1)
 
 if __name__ == '__main__':
