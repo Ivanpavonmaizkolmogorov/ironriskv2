@@ -54,7 +54,7 @@ function SortHeader({
 
   return (
     <th
-      className={`px-3 py-2.5 font-medium cursor-pointer select-none hover:text-iron-200 transition-colors ${alignCls} ${active ? "text-iron-200" : ""}`}
+      className={`px-1 sm:px-3 py-1.5 sm:py-2.5 font-medium cursor-pointer select-none hover:text-iron-200 transition-colors ${alignCls} ${active ? "text-iron-200" : ""}`}
       onClick={() => onSort(sortKey)}
     >
       <div className={`inline-flex items-center gap-1 ${align === "right" ? "justify-end" : align === "center" ? "justify-center" : "justify-start"}`}>
@@ -317,7 +317,7 @@ export default function StrategyTable({
 
       {/* Table */}
       <div className="flex-1 min-h-0 overflow-x-auto overflow-y-auto rounded-lg border border-iron-800 bg-surface-secondary">
-        <table className="w-full text-sm border-collapse">
+        <table className="w-full text-[10px] sm:text-sm border-collapse">
           <thead>
             <tr className="border-b border-iron-700 text-iron-500 text-[10px] uppercase tracking-wider sticky top-0 bg-surface-secondary z-10">
               <th className="px-2 py-2 text-center w-8">
@@ -357,7 +357,7 @@ export default function StrategyTable({
                     `}
                   >
                     {/* Checkbox */}
-                    <td className="px-3 py-1.5 text-center">
+                    <td className="px-1.5 sm:px-3 py-1 sm:py-1.5 text-center">
                       <input
                         type="checkbox"
                         checked={checkedIds.has(s.id)}
@@ -378,7 +378,7 @@ export default function StrategyTable({
 
                     {/* OOP Dynamic Columns */}
                     {view.columns.map(c => (
-                      <td key={c.id} className={`px-3 py-1.5 ${c.align === "left" ? "text-left" : c.align === "center" ? "text-center" : "text-right"}`}>
+                      <td key={c.id} className={`px-1 sm:px-3 py-1 sm:py-1.5 ${c.align === "left" ? "text-left" : c.align === "center" ? "text-center" : "text-right"}`}>
                         {c.renderCell(s, processed)}
                       </td>
                     ))}
@@ -431,7 +431,7 @@ export default function StrategyTable({
 
                           {/* OOP Dynamic Columns */}
                           {view.columns.map(c => (
-                            <td key={c.id} className={`px-3 py-1.5 scale-95 origin-left ${c.align === "left" ? "text-left" : c.align === "center" ? "text-center" : "text-right"}`}>
+                            <td key={c.id} className={`px-1 sm:px-3 py-1 sm:py-1.5 scale-95 origin-left ${c.align === "left" ? "text-left" : c.align === "center" ? "text-center" : "text-right"}`}>
                               {c.renderCell(child, universeContextWithCache || processed, true)}
                             </td>
                           ))}
@@ -460,7 +460,7 @@ export default function StrategyTable({
               <td className="px-3 py-2.5" />
               <td className="px-1 py-2.5" />
                {view.columns.map(c => (
-                <td key={c.id} className={`px-3 py-2.5 ${c.align === "left" ? "text-left" : c.align === "center" ? "text-center" : "text-right"}`}>
+                <td key={c.id} className={`px-1 sm:px-3 py-2 sm:py-2.5 ${c.align === "left" ? "text-left" : c.align === "center" ? "text-center" : "text-right"}`}>
                    {c.renderFooter ? c.renderFooter(processed) : ""}
                 </td>
               ))}

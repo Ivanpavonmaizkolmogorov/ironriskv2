@@ -47,8 +47,8 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
       <div className="flex flex-col gap-4 min-w-0 w-full overflow-hidden">
         {/* CARD 1: Backtest Equity Curve */}
         <Card className="min-w-0 w-full overflow-hidden">
-          <div className="flex flex-wrap items-start md:items-center justify-between mb-3 gap-2">
-            <h3 className="text-base font-semibold text-iron-100 flex flex-wrap items-center gap-2 flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-2 gap-2">
+            <h3 className="text-sm md:text-base font-semibold text-iron-100 flex items-center gap-1.5 flex-1 min-w-0">
               <span className="shrink-0">📈</span>
               <span className="truncate" title={activeAsset.name}>
                 {"strategy_ids" in activeAsset ? tWorkspace("cardPortfolioBacktest") : tWorkspace("cardBacktest")} — {activeAsset.name}
@@ -69,8 +69,8 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
 
         {/* CARD 2: Live Equity Curve */}
         <Card className="min-w-0 w-full overflow-hidden">
-          <div className="flex flex-wrap items-start md:items-center justify-between mb-3 gap-2">
-            <h3 className="text-base font-semibold text-iron-100 flex flex-wrap items-center gap-2 flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-2 gap-2">
+            <h3 className="text-sm md:text-base font-semibold text-iron-100 flex items-center gap-1.5 flex-1 min-w-0">
               <span className="shrink-0">📈</span>
               <span className="text-cyan-400 shrink-0">{tWorkspace("liveBadge")}</span>
               {/* Show open trades animated badge if > 0 */}
