@@ -42,7 +42,7 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
   }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-4 items-start">
+    <div className="grid md:grid-cols-2 gap-4 items-start">
       {/* ═══ LEFT COLUMN: Equity Curves (Backtest + Live) ═══ */}
       <div className="flex flex-col gap-4">
         {/* CARD 1: Backtest Equity Curve */}

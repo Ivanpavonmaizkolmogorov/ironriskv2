@@ -582,7 +582,7 @@ export default function DashboardPage() {
       <div ref={splitterContainerRef} className="flex-1 min-h-0 max-w-7xl mx-auto w-full px-3 sm:px-6 py-3 sm:py-4 flex flex-col">
 
         {/* TOP: Terminal Analytics — scrollable panel */}
-        <div className="overflow-auto" style={{ height: `calc(${splitRatio * 100}% - 20px)` }}>
+        <div className="overflow-y-auto overflow-x-hidden" style={{ height: `calc(${splitRatio * 100}% - 20px)` }}>
           <div className="w-full flex flex-col">
             {/* === DASHBOARD TOP LAYER (VIEW CONTROLLER) === */}
             <div className="flex flex-col gap-4">
@@ -683,7 +683,7 @@ export default function DashboardPage() {
           </div>
 
           {/* BOTTOM: Tab Switcher + Data Grids */}
-          <div className="flex-1 min-h-0 flex flex-col w-full gap-3 overflow-y-auto pr-2 pb-8">
+          <div className="flex-1 min-h-0 flex flex-col w-full gap-3 overflow-y-auto overflow-x-hidden pr-2 pb-8">
 
             {/* ── Tab Bar & View Switcher ── */}
             <div className="flex items-center justify-between border-b border-iron-800 shrink-0">
