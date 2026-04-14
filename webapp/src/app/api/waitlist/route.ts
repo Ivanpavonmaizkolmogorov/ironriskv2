@@ -3,10 +3,24 @@
  *  Runs as a Vercel serverless function — zero server costs.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) throw new Error("Supabase not configured");
+  return createClient(url, key);
+}
 
 export async function POST(req: NextRequest) {
   try {
+    let supabase;
+    try {
+      supabase = getSupabase();
+    } catch {
+      return NextResponse.json({ error: "Waitlist service not configured" }, { status: 503 });
+    }
+
     const body = await req.json();
     const email = body.email?.trim()?.toLowerCase();
 
