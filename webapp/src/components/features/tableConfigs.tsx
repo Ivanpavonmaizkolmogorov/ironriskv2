@@ -94,7 +94,7 @@ const COMMON_COLUMNS: Record<string, ColumnDef> = {
     align: "left",
     sortValue: (s) => s.name.toLowerCase(),
     renderCell: (s, _assets, isChild) => (
-      <div className={`max-w-[200px] group relative ${isChild ? "pl-2" : ""}`}>
+      <div className={`max-w-[110px] sm:max-w-[200px] group relative ${isChild ? "pl-2" : ""}`}>
         <span className={`${isChild ? "text-iron-400 font-normal" : "text-iron-100 font-medium"} truncate block`} title={s.name}>
           {s.name}
         </span>
@@ -134,7 +134,7 @@ const COMMON_COLUMNS: Record<string, ColumnDef> = {
       const pct = absMax > 0 ? (Math.abs(ev) / absMax) * 100 : 0;
       
       return (
-        <div className="flex flex-col items-end gap-0.5 min-w-[60px]">
+        <div className="flex flex-col items-end gap-0.5 min-w-[45px] sm:min-w-[60px]">
           <span className={`font-mono tabular-nums text-sm ${isProfit ? "text-risk-green" : "text-risk-red"}`}>
             {metricFormatter.format("net_profit", ev)}
           </span>
@@ -198,7 +198,7 @@ const LIVE_COLUMNS: Record<string, ColumnDef> = {
       const pct = liveAbsMax > 0 ? (Math.abs(ev) / liveAbsMax) * 100 : 0;
       
       return (
-        <div className="flex flex-col items-end gap-0.5 min-w-[60px]">
+        <div className="flex flex-col items-end gap-0.5 min-w-[45px] sm:min-w-[60px]">
           <span className={`font-mono tabular-nums text-sm ${isProfit ? "text-risk-green" : "text-risk-red"}`}>
             {metricFormatter.format("net_profit", ev)}
           </span>
@@ -436,7 +436,7 @@ export const HybridView: TableViewDef = {
         }
         
         return (
-          <div className="flex flex-col items-end leading-tight group gap-0.5 min-w-[60px]">
+          <div className="flex flex-col items-end leading-tight group gap-0.5 min-w-[45px] sm:min-w-[60px]">
              <span className={`font-mono tabular-nums font-semibold ${isLive ? color : "text-iron-600"}`}>
                {isLive ? metricFormatter.format("net_profit", liveEv) : "—"}
              </span>
@@ -666,7 +666,7 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
       const sign = decay > 0 ? "+" : "";
       
       return (
-        <div className="flex flex-col items-end gap-0.5 min-w-[60px]">
+        <div className="flex flex-col items-end gap-0.5 min-w-[45px] sm:min-w-[60px]">
           <span className={`font-mono font-semibold text-sm ${color}`}>
             {sign}{decay.toFixed(1)}%
           </span>
@@ -689,7 +689,7 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
       
       if (s.bayesian_breakdown === undefined) {
          return (
-          <div className="flex flex-col items-end leading-tight gap-0.5 min-w-[60px]">
+          <div className="flex flex-col items-end leading-tight gap-0.5 min-w-[45px] sm:min-w-[60px]">
              <div className="h-3.5 w-16 bg-iron-700/60 rounded animate-pulse" />
              <div className="w-full h-1.5 bg-iron-800/60 rounded-full overflow-hidden">
                <div className="h-full w-1/3 bg-iron-700/60 rounded-full animate-pulse" />
@@ -704,7 +704,7 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
       
       if (!isLive || postEv === undefined) {
          return (
-          <div className="flex flex-col items-end leading-tight group gap-0.5 min-w-[60px] opacity-50">
+          <div className="flex flex-col items-end leading-tight group gap-0.5 min-w-[45px] sm:min-w-[60px] opacity-50">
              <span className="font-mono tabular-nums font-semibold text-iron-600">—</span>
              <div className="w-full h-1 bg-transparent rounded-full flex justify-end"></div>
              <span className="text-[9px] text-iron-500 font-mono tracking-tighter uppercase mt-0.5">PRIOR: {metricFormatter.format("net_profit", btEv)}</span>
@@ -734,7 +734,7 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
       }
       
       return (
-        <div className="flex flex-col items-end leading-tight group gap-0.5 min-w-[60px]">
+        <div className="flex flex-col items-end leading-tight group gap-0.5 min-w-[45px] sm:min-w-[60px]">
            <span className={`font-mono tabular-nums font-semibold ${color}`}>
              {metricFormatter.format("net_profit", postEv)}
            </span>
@@ -776,7 +776,7 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
       const btPct = (bt / total) * 100;
       
       return (
-        <div className="flex flex-col items-end gap-0.5 min-w-[70px]">
+        <div className="flex flex-col items-end gap-0.5 min-w-[50px] sm:min-w-[70px]">
           <span className="font-mono text-sm text-[#00aaff]">
             {livePct.toFixed(1)}% Live
           </span>
