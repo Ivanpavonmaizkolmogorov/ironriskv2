@@ -87,7 +87,7 @@ export default function ThemeSelector({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 bg-surface-secondary border border-iron-800 rounded-xl shadow-xl overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-72 max-w-72 bg-surface-secondary border border-iron-800 rounded-xl shadow-xl overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-200">
           <div className="p-4 border-b border-iron-800">
             <h3 className="text-sm font-semibold text-iron-100">{getPopoverTitle()}</h3>
             <p className="text-xs text-iron-400 mt-1">{getPopoverDesc()}</p>
