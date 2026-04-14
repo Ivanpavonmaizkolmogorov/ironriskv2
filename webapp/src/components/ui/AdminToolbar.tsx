@@ -17,7 +17,7 @@ export default function AdminToolbar() {
   const t = useTranslations('admin');
   const locale = useLocale();
   const pathname = usePathname();
-  const { user, isAuthenticated, token } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { isAdmin, adminMode, toggleAdminMode, loadFeatures, setAdminStatus } = useFeatureAccess();
 
   const [mounted, setMounted] = useState(false);
@@ -64,7 +64,7 @@ export default function AdminToolbar() {
       const res = await fetch(`${API_BASE}/api/admin/test-uptime`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('ironrisk_jwt') : ''}`,
           'Content-Type': 'application/json',
         },
       });
