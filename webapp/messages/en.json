@@ -103,6 +103,11 @@
       "tableLabel": "Empirical Weight",
       "tooltip": "Current credibility ratio. Indicates whether the statistical engine is trusting your actual Live trades or the original Backtest history more to calculate your probabilities. Note: The Backtest is capped at a maximum weight of 30 trades. This ensures that Live performance gains relevance rapidly, acting as an early protection mechanism before a broken strategy reaches historical drawdowns, and establishing a fair asymmetric standard to compare the degradation across all strategies."
     },
+    "live_trades_count": {
+      "label": "Live Trades",
+      "tableLabel": "Live Trades",
+      "tooltip": "Total number of real trades executed in Live for this strategy. More Live trades increase the Bayesian engine's confidence in the adjusted metrics. 🟢 100+ trades = high confidence, 🔵 30+ = significant data, ⚪ <30 = early stage where backtest still dominates."
+    },
     "bayes_p_positive": {
       "label": "P(Expectancy>0)",
       "tableLabel": "P(Exp>0)",

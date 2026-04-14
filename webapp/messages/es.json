@@ -103,6 +103,11 @@
       "tableLabel": "Peso Empírico",
       "tooltip": "Proporción de credibilidad actual. Te indica si el motor estadístico confía más en las operaciones reales en Live o en el Backtest histórico para calcular tus probabilidades. Nota: Al Backtest se le otorga un peso máximo equivalente a 30 operaciones. Esto permite que el rendimiento en Live gane relevancia rápidamente, sirviendo de protección temprana ante drawdowns fuera de patrón cuando la estrategia está rota, sirviendo también como estandar asimétrico comparativo entre estrategias."
     },
+    "live_trades_count": {
+      "label": "Trades en Live",
+      "tableLabel": "Trades Live",
+      "tooltip": "Número total de operaciones reales ejecutadas en Live para esta estrategia. Más trades en Live aumentan la confianza del motor Bayesiano en las métricas ajustadas. 🟢 100+ trades = confianza alta, 🔵 30+ = datos significativos, ⚪ <30 = fase temprana donde el backtest aún domina."
+    },
     "bayes_p_positive": {
       "label": "P(Expectancy>0)",
       "tableLabel": "P(Exp>0)",
