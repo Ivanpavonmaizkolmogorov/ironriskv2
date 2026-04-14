@@ -547,9 +547,9 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
     : "text-iron-400";
 
   return (
-    <div className="space-y-6 p-6 max-w-4xl mx-auto">
+    <div className="space-y-4 p-2 sm:p-6 max-w-4xl mx-auto min-w-0 w-full">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <span className="text-2xl">🧠</span>
         <div>
           <h1 className="text-xl font-bold text-iron-100">{tMath("ui.title")}</h1>
@@ -558,9 +558,9 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
       </div>
 
         <div className="lg:col-span-3 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <p className="text-iron-400 text-sm">{tMath("ui.analyzing")} <span className="font-mono text-iron-200">{activeAsset?.name}</span></p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+              <p className="text-iron-400 text-sm truncate">{tMath("ui.analyzing")} <span className="font-mono text-iron-200">{activeAsset?.name}</span></p>
               <div className="flex gap-2">
                  <div className="bg-surface-tertiary px-2 py-0.5 rounded-md border border-iron-800 flex items-center gap-1.5">
                     <span className="text-[9px] text-iron-400">Backtest:</span>
@@ -579,7 +579,7 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
             <>
               {/* Veredicto Maestro de Riesgo */}
               {(data?.info_report || data?.risk_gauges) && (
-                <div className="bg-iron-900 border border-iron-800 rounded-xl p-4 flex items-center gap-4 shadow-xl mb-4">
+                <div className="bg-iron-900 border border-iron-800 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-start gap-4 shadow-xl mb-4 min-w-0 w-full overflow-hidden">
                   {(() => {
                     let hasFatal = false;
                     let hasRed = data.info_report?.signals.some(s => s.severity === 'warning') || false;
@@ -702,7 +702,7 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
               )}
 
               {/* Unified P(EV > 0) Card */}
-              <div className="bg-surface-secondary border border-iron-700 rounded-xl p-6 space-y-5">
+              <div className="bg-surface-secondary border border-iron-700 rounded-xl p-3 sm:p-6 space-y-4 min-w-0 w-full overflow-hidden">
                 {/* Gauge */}
                 <div>
                   <div className="flex items-center justify-between mb-3">

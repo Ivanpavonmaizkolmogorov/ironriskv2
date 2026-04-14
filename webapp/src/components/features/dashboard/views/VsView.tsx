@@ -381,9 +381,9 @@ function VsComparisonPanel({
   const fmtDate = (iso: string | null) => iso ? new Date(iso).toLocaleDateString() : null;
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-300">
+    <div className="space-y-4 animate-in fade-in duration-300 min-w-0 w-full">
       {/* VS Header */}
-      <div className="bg-gradient-to-r from-surface-tertiary to-surface-secondary border border-iron-800 rounded-xl p-5">
+      <div className="bg-gradient-to-r from-surface-tertiary to-surface-secondary border border-iron-800 rounded-xl p-3 sm:p-5 min-w-0 w-full overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl">⚔️</span>
@@ -452,18 +452,18 @@ function VsComparisonPanel({
         </div>
 
         {/* Side by side headers */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="bg-surface-primary/50 rounded-lg p-3 border border-iron-800/50">
-            <p className="text-xs text-iron-500">{a.workspace_name}</p>
-            <p className="text-sm font-bold text-iron-100">{a.name}</p>
+        <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4">
+          <div className="bg-surface-primary/50 rounded-lg p-2 sm:p-3 border border-iron-800/50 min-w-0 overflow-hidden">
+            <p className="text-[10px] sm:text-xs text-iron-500 truncate">{a.workspace_name}</p>
+            <p className="text-xs sm:text-sm font-bold text-iron-100 truncate">{a.name}</p>
             <div className="flex items-center gap-2 mt-1">
               {a.broker && <span className="text-[10px] text-iron-600">{a.broker}</span>}
               {a.first_trade_date && <span className="text-[9px] text-iron-700 font-mono">1st: {fmtDate(a.first_trade_date)}</span>}
             </div>
           </div>
-          <div className="bg-surface-primary/50 rounded-lg p-3 border border-iron-800/50">
-            <p className="text-xs text-iron-500">{b.workspace_name}</p>
-            <p className="text-sm font-bold text-iron-100">{b.name}</p>
+          <div className="bg-surface-primary/50 rounded-lg p-2 sm:p-3 border border-iron-800/50 min-w-0 overflow-hidden">
+            <p className="text-[10px] sm:text-xs text-iron-500 truncate">{b.workspace_name}</p>
+            <p className="text-xs sm:text-sm font-bold text-iron-100 truncate">{b.name}</p>
             <div className="flex items-center gap-2 mt-1">
               {b.broker && <span className="text-[10px] text-iron-600">{b.broker}</span>}
               {b.first_trade_date && <span className="text-[9px] text-iron-700 font-mono">1st: {fmtDate(b.first_trade_date)}</span>}
@@ -485,7 +485,7 @@ function VsComparisonPanel({
       </div>
 
       {/* Divergence Stats */}
-      <div className="bg-surface-secondary border border-iron-800 rounded-xl p-5">
+      <div className="bg-surface-secondary border border-iron-800 rounded-xl p-3 sm:p-5 min-w-0 w-full overflow-hidden">
         <h4 className="text-xs font-bold text-iron-400 uppercase tracking-wider mb-3 flex items-center gap-2">
           <span>📊</span> {t("divergenceStats")} <InfoPopover content={t("tipDivergence")} position="bottom" width="w-80" />
         </h4>
@@ -1009,8 +1009,8 @@ export function VsView({ context }: { context: DashboardContext }) {
   const existingLinkIds = links.map(l => l.strategy_id);
 
   return (
-    <Card>
-      <div className="space-y-6">
+    <Card className="min-w-0 w-full overflow-hidden p-2 sm:p-6">
+      <div className="space-y-4">
         {/* Bulk match button */}
         <div className="flex items-center justify-end">
           <button
