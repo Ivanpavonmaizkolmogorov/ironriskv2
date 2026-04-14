@@ -1,0 +1,51 @@
+[
+  {
+    "id": "629e0d51-1eaf-4f28-9611-da21b8036699",
+    "email": "olivermiller-oliver@web.de",
+    "source": "landing-en",
+    "created_at": "2026-04-10T21:12:40.774467+00:00",
+    "notes": null
+  },
+  {
+    "id": "32a77d2b-e936-4452-bb44-e03c77f3633f",
+    "email": "diego.pozo1@hotmail.com",
+    "source": "landing-en",
+    "created_at": "2026-04-10T21:12:43.613492+00:00",
+    "notes": null
+  },
+  {
+    "id": "246bd5f7-72a2-43c5-bc5d-8f9472b10435",
+    "email": "hak7731@gmail.com",
+    "source": "landing-en",
+    "created_at": "2026-04-10T21:12:46.412646+00:00",
+    "notes": null
+  },
+  {
+    "id": "7e86c7b1-391e-483f-9ea9-f6a4f3694798",
+    "email": "ivanpavonmaiz@gmail.com",
+    "source": "landing",
+    "created_at": "2026-04-10T21:12:49.238456+00:00",
+    "notes": null
+  },
+  {
+    "id": "38805b37-9ec4-4a20-afff-43ae38cf91aa",
+    "email": "rogersohn@gmail.com",
+    "source": "landing-en",
+    "created_at": "2026-04-10T21:12:52.059394+00:00",
+    "notes": null
+  },
+  {
+    "id": "0b276bf2-c4fb-49de-8d31-31aa7091d062",
+    "email": "tradinvector@gmail.com",
+    "source": "landing",
+    "created_at": "2026-04-10T21:12:54.880968+00:00",
+    "notes": null
+  },
+  {
+    "id": "dded6ea1-39e8-4c7d-838e-84629f7e22cc",
+    "email": "erob125@pm.me",
+    "source": "landing-en",
+    "created_at": "2026-04-10T21:12:57.692383+00:00",
+    "notes": null
+  }
+]

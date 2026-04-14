@@ -824,6 +824,34 @@ export const BayesianView: TableViewDef = {
   columns: [
     COMMON_COLUMNS.name,
     COMMON_COLUMNS.magic,
+    {
+      id: "bayes_live_trades",
+      label: "Live Trades",
+      metricKey: "live_trades_count",
+      align: "right",
+      sortValue: (s) => s.bayesian_breakdown?.live_trades_total || 0,
+      renderCell: (s) => {
+        const n = s.bayesian_breakdown?.live_trades_total;
+        if (n === undefined || n === 0) return <span className="text-iron-600 font-mono">—</span>;
+        
+        let color = "text-iron-400";
+        let badge = "";
+        if (n >= 100) { color = "text-risk-green font-semibold"; badge = "🟢"; }
+        else if (n >= 30) { color = "text-[#00aaff]"; badge = "🔵"; }
+        else if (n >= 1) { color = "text-iron-300"; badge = "⚪"; }
+        
+        return (
+          <div className="flex items-center justify-end gap-1.5">
+            <span className="text-[10px]">{badge}</span>
+            <span className={`font-mono text-sm tabular-nums ${color}`}>{n}</span>
+          </div>
+        );
+      },
+      renderFooter: (assets) => {
+        const total = assets.reduce((sum, s) => sum + (s.bayesian_breakdown?.live_trades_total || 0), 0);
+        return <span className="font-mono text-iron-300 font-semibold block text-right">{total}</span>;
+      }
+    },
     BAYESIAN_COLUMNS.blind_risk,
     BAYESIAN_COLUMNS.bayesian_ev,
     BAYESIAN_COLUMNS.degradation,

@@ -1,0 +1,806 @@
+{
+  "alembic_version": [
+    {
+      "column": "version_num",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "feature_flags": [
+    {
+      "column": "key",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "tier",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "label",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "updated_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "orphan_magics": [
+    {
+      "column": "id",
+      "type": "integer",
+      "nullable": "NO",
+      "default": "nextval('orphan_magics_id_seq'::regclass)"
+    },
+    {
+      "column": "account_id",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "magic_number",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "first_seen",
+      "type": "timestamp without time zone",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "last_seen",
+      "type": "timestamp without time zone",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "current_pnl",
+      "type": "double precision",
+      "nullable": "YES",
+      "default": null
+    }
+  ],
+  "portfolios": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "trading_account_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "name",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "strategy_ids",
+      "type": "json",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "start_date",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "auto_include_new",
+      "type": "boolean",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "is_default",
+      "type": "boolean",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "equity_curve",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "metrics_snapshot",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "gauss_params",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "distribution_fit",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "risk_config",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "max_drawdown_limit",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "daily_loss_limit",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "dashboard_layout",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "total_trades",
+      "type": "integer",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "net_profit",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "real_trades": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "trading_account_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "ticket",
+      "type": "integer",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "magic_number",
+      "type": "integer",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "symbol",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "volume",
+      "type": "double precision",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "open_time",
+      "type": "timestamp with time zone",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "open_price",
+      "type": "double precision",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "close_price",
+      "type": "double precision",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "sl",
+      "type": "double precision",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "tp",
+      "type": "double precision",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "deal_type",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "commission",
+      "type": "double precision",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "swap",
+      "type": "double precision",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "profit",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "comment",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "close_time",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "strategies": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "trading_account_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "name",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "description",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "magic_number",
+      "type": "integer",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "magic_aliases",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "start_date",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "max_drawdown_limit",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "daily_loss_limit",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "metrics_snapshot",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "equity_curve",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "gauss_params",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "distribution_fit",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "risk_config",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "dashboard_layout",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "total_trades",
+      "type": "integer",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "net_profit",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "bt_discount",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "risk_multiplier",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "original_equity_curve",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "strategy_links": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "strategy_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "linked_strategy_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "match_window_seconds",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "system_settings": [
+    {
+      "column": "key",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "value",
+      "type": "text",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "description",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "updated_at",
+      "type": "timestamp with time zone",
+      "nullable": "YES",
+      "default": "now()"
+    }
+  ],
+  "trading_accounts": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "user_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "name",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "broker",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "account_number",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "api_token",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "is_active",
+      "type": "boolean",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "default_dashboard_layout",
+      "type": "json",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "theme",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "last_heartbeat_at",
+      "type": "timestamp with time zone",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "user_alert_configs": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "user_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "target_type",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "target_id",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "metric_key",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "operator",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "threshold_value",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "channel",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "cooldown_minutes",
+      "type": "integer",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "is_active",
+      "type": "boolean",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "user_alert_history": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "user_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "config_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "triggered_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "value_at_trigger",
+      "type": "double precision",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "message_sent",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "user_preferences": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "user_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "theme",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "custom_theme_json",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "telegram_chat_id",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "telegram_sync_token",
+      "type": "character varying",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "locale",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "updated_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "user_themes": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "user_id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "label",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "mode",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "colors",
+      "type": "json",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "users": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "email",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "hashed_password",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "is_admin",
+      "type": "boolean",
+      "nullable": "NO",
+      "default": null
+    }
+  ],
+  "waitlist_leads": [
+    {
+      "column": "id",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "email",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "source",
+      "type": "character varying",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "notes",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    }
+  ]
+}

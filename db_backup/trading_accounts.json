@@ -1,0 +1,41 @@
+[
+  {
+    "id": "4fc55b8b-b758-4d22-9020-50e5cec21cc6",
+    "user_id": "4720b826-6e76-4b12-91e6-1fab0cf98446",
+    "name": "AxiCapitalPropio",
+    "broker": "AxiCapitalPropio",
+    "account_number": "60117392",
+    "api_token": "irk_qt3bIkf8xX3ZaTZzRowqPNkpmpD48i1Sh5E63rloTnA",
+    "is_active": true,
+    "default_dashboard_layout": {},
+    "theme": null,
+    "last_heartbeat_at": "2026-04-14T06:59:05.364252+00:00",
+    "created_at": "2026-04-12T20:28:01.327059+00:00"
+  },
+  {
+    "id": "d9940bda-9c90-4958-9338-873bd71719d6",
+    "user_id": "4720b826-6e76-4b12-91e6-1fab0cf98446",
+    "name": "Nigromante DarwinexZero",
+    "broker": "Darwinex",
+    "account_number": "4000077342",
+    "api_token": "irk_b1mrpT_Mkedlt9Qf79uqHDvB5hNoe7uzJ3Ybz5h2b90",
+    "is_active": true,
+    "default_dashboard_layout": {},
+    "theme": null,
+    "last_heartbeat_at": "2026-04-14T06:59:07.047069+00:00",
+    "created_at": "2026-04-10T14:47:08.468653+00:00"
+  },
+  {
+    "id": "3e0b90db-fd7e-409c-8a3f-22d0ccd47ba9",
+    "user_id": "4720b826-6e76-4b12-91e6-1fab0cf98446",
+    "name": "DemoOficial",
+    "broker": "DemoOficial",
+    "account_number": "10031538",
+    "api_token": "irk_pqvUBNFvdS-XlcsSQJpL6BRWlgsALtimuykOqXUFdCc",
+    "is_active": true,
+    "default_dashboard_layout": {},
+    "theme": null,
+    "last_heartbeat_at": "2026-04-14T06:59:08.463296+00:00",
+    "created_at": "2026-04-13T17:41:33.889327+00:00"
+  }
+]

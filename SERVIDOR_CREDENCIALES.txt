@@ -1,0 +1,20 @@
+=======================================
+🔑 CREDENCIALES DEL SERVIDOR HETZNER 🔑
+=======================================
+
+Estas son las credenciales maestras (root) para el backend de IronRisk alojado en Hetzner Cloud.
+Sirven para conectarse mediante SSH al servidor si algún día necesitas reiniciar o hacer mantenimiento.
+
+Proveedor: Hetzner Cloud
+SO: Ubuntu 24.04
+IP del Servidor: 62.238.19.114
+Usuario: root
+
+Contraseña Original (Email): tiXPqb3nFagRwN7fvdWq (¡Ya no funciona, Hetzner obligó a cambiarla!)
+NUEVA CONTRASEÑA DEFINITIVA: IronRisk_Production_2026!
+
+=======================================
+🌍 URL DE LA API (ENDPOINT DE PRODUCCIÓN)
+=======================================
+Base URL: https://62-238-19-114.nip.io
+Swagger UI: https://62-238-19-114.nip.io/docs

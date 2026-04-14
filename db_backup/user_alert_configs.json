@@ -1,0 +1,15 @@
+[
+  {
+    "id": "131e6ac7-6e86-4e9e-b021-388678e2151f",
+    "user_id": "4720b826-6e76-4b12-91e6-1fab0cf98446",
+    "target_type": "account",
+    "target_id": "4fc55b8b-b758-4d22-9020-50e5cec21cc6",
+    "metric_key": "ea_disconnect_minutes",
+    "operator": ">=",
+    "threshold_value": 5.0,
+    "channel": "telegram",
+    "cooldown_minutes": 0,
+    "is_active": true,
+    "created_at": "2026-04-12T21:24:20.269261+00:00"
+  }
+]

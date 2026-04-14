@@ -1,0 +1,72 @@
+[
+  {
+    "id": "b8ff61b6-0d34-47ff-b6ca-6e1b17c8fb85",
+    "strategy_id": "4b4d84af-b594-4bfa-9632-43079c92b294",
+    "linked_strategy_id": "337a9ea9-4f49-4d82-87e9-2f951d9e9616",
+    "match_window_seconds": 60.0,
+    "created_at": "2026-04-13T20:12:05.766386+00:00"
+  },
+  {
+    "id": "eda5dc69-3b32-4f03-83aa-2282c2c08258",
+    "strategy_id": "337a9ea9-4f49-4d82-87e9-2f951d9e9616",
+    "linked_strategy_id": "4b4d84af-b594-4bfa-9632-43079c92b294",
+    "match_window_seconds": 60.0,
+    "created_at": "2026-04-13T20:12:05.766397+00:00"
+  },
+  {
+    "id": "d3939de4-acc2-4a30-9a85-b85d314265d9",
+    "strategy_id": "84b21bbf-ff90-4c92-90f3-9b1043979640",
+    "linked_strategy_id": "84403bb8-f42b-43e0-aaaa-fab96436a282",
+    "match_window_seconds": 60.0,
+    "created_at": "2026-04-13T21:55:15.482650+00:00"
+  },
+  {
+    "id": "f499149f-5d20-44f7-9ea0-7c8216b87033",
+    "strategy_id": "84403bb8-f42b-43e0-aaaa-fab96436a282",
+    "linked_strategy_id": "84b21bbf-ff90-4c92-90f3-9b1043979640",
+    "match_window_seconds": 60.0,
+    "created_at": "2026-04-13T21:55:15.482664+00:00"
+  },
+  {
+    "id": "b50c3c0f-47af-4146-8d86-8ce1f0877be4",
+    "strategy_id": "06eb7eea-7af1-4d72-8800-a6f47131cd31",
+    "linked_strategy_id": "b87578a4-e639-4c7a-98d5-8c920d4cdc9f",
+    "match_window_seconds": 60.0,
+    "created_at": "2026-04-13T21:55:15.988998+00:00"
+  },
+  {
+    "id": "9cb3eca4-d9f2-4337-bd20-7b54c71aa909",
+    "strategy_id": "b87578a4-e639-4c7a-98d5-8c920d4cdc9f",
+    "linked_strategy_id": "06eb7eea-7af1-4d72-8800-a6f47131cd31",
+    "match_window_seconds": 60.0,
+    "created_at": "2026-04-13T21:55:15.989012+00:00"
+  },
+  {
+    "id": "a7e9c64b-c9eb-46be-ba95-5d7b74b3e146",
+    "strategy_id": "0c5a50b7-36c8-452d-89d7-e47f887fa42c",
+    "linked_strategy_id": "c82b0386-3e2d-4d3c-a2a7-f3b2e61344fa",
+    "match_window_seconds": 60.0,
+    "created_at": "2026-04-13T21:55:16.486058+00:00"
+  },
+  {
+    "id": "cb2b46ca-6539-4dee-a91f-475344b05b25",
+    "strategy_id": "c82b0386-3e2d-4d3c-a2a7-f3b2e61344fa",
+    "linked_strategy_id": "0c5a50b7-36c8-452d-89d7-e47f887fa42c",
+    "match_window_seconds": 60.0,
+    "created_at": "2026-04-13T21:55:16.486073+00:00"
+  },
+  {
+    "id": "900afde4-17ac-4867-b090-2072cea5db17",
+    "strategy_id": "18a85e46-9f9b-4c0f-92df-0eca9912908e",
+    "linked_strategy_id": "3cf19c82-5fda-4ef2-9a67-8c4412b4cad1",
+    "match_window_seconds": 60.0,
+    "created_at": "2026-04-13T21:55:16.969385+00:00"
+  },
+  {
+    "id": "d9cd7fca-f946-4d6a-a0b7-1c827fd8d982",
+    "strategy_id": "3cf19c82-5fda-4ef2-9a67-8c4412b4cad1",
+    "linked_strategy_id": "18a85e46-9f9b-4c0f-92df-0eca9912908e",
+    "match_window_seconds": 60.0,
+    "created_at": "2026-04-13T21:55:16.969401+00:00"
+  }
+]

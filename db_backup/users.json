@@ -1,0 +1,9 @@
+[
+  {
+    "id": "4720b826-6e76-4b12-91e6-1fab0cf98446",
+    "email": "ivanpavonmaiz@gmail.com",
+    "hashed_password": "$2b$12$MyWsANkwm1mLd3w/eu1lnuL/0TsTGa1.gnH9q8I6DtVHSyFi7dK/K",
+    "created_at": "2026-04-10T14:43:02.207969+00:00",
+    "is_admin": true
+  }
+]

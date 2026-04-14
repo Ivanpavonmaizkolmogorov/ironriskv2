@@ -1,12 +1,17 @@
-"""Admin API — Feature Flags + User Management."""
+"""Admin API — Feature Flags + User Management + Server Monitoring."""
 
+import logging
 from typing import List, Dict, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from pydantic import BaseModel
 
-from models.database import get_db
+from models.database import get_db, SessionLocal
+from services.email_service import EmailService
+
+logger = logging.getLogger(__name__)
 from models.user import User
 from models.feature_flag import FeatureFlag
 from services.auth_service import get_current_user
@@ -170,4 +175,106 @@ def update_user(
         trading_accounts_count=acc_count,
         strategies_count=strat_count,
     )
+
+
+# ─────────────────────────────────────────────
+# Server Health Test (Admin-only)
+# ─────────────────────────────────────────────
+
+@router.post("/test-uptime")
+def test_uptime(
+    admin: User = Depends(get_admin_user),
+):
+    """
+    Admin-only: Performs a full server health check and sends a
+    confirmation email so you can verify monitoring is working.
+    Checks: DB connectivity, email service, uptime.
+    """
+    import platform
+    import psutil
+    import os
+
+    checks = {}
+
+    # 1. Database connectivity
+    try:
+        with SessionLocal() as db:
+            result = db.execute(text("SELECT COUNT(*) FROM users")).scalar()
+            checks["database"] = {"status": "ok", "users": result}
+    except Exception as e:
+        checks["database"] = {"status": "error", "detail": str(e)}
+
+    # 2. System info
+    try:
+        checks["system"] = {
+            "os": platform.system(),
+            "cpu_percent": psutil.cpu_percent(interval=0.5),
+            "memory_percent": psutil.virtual_memory().percent,
+            "disk_percent": psutil.disk_usage('/').percent,
+            "uptime_hours": round((datetime.now(timezone.utc).timestamp() - psutil.boot_time()) / 3600, 1),
+        }
+    except Exception:
+        checks["system"] = {"status": "psutil not available"}
+
+    # 3. Send test email
+    email_sent = False
+    try:
+        svc = EmailService()
+        if svc.is_configured():
+            from email.message import EmailMessage
+            import smtplib
+
+            now = datetime.now(timezone.utc).strftime("%d-%b-%Y %H:%M UTC")
+            cpu = checks.get("system", {}).get("cpu_percent", "?")
+            mem = checks.get("system", {}).get("memory_percent", "?")
+            disk = checks.get("system", {}).get("disk_percent", "?")
+            uptime_h = checks.get("system", {}).get("uptime_hours", "?")
+            db_users = checks.get("database", {}).get("users", "?")
+
+            html = f"""
+            <html><body style="font-family: -apple-system, sans-serif; padding: 20px; background: #0d1117; color: #c9d1d9;">
+            <div style="max-width: 500px; margin: 0 auto; background: #161b22; padding: 30px; border-radius: 12px; border-top: 4px solid #00e676; border: 1px solid #30363d;">
+                <h2 style="color: #00e676; margin: 0 0 20px;">✅ IronRisk Server OK</h2>
+                <p style="color: #8b949e; font-size: 14px;">Test ejecutado: <strong style="color: #c9d1d9;">{now}</strong></p>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr><td style="padding: 8px; color: #8b949e; border-bottom: 1px solid #30363d;">CPU</td>
+                        <td style="padding: 8px; color: #c9d1d9; border-bottom: 1px solid #30363d; text-align: right;"><strong>{cpu}%</strong></td></tr>
+                    <tr><td style="padding: 8px; color: #8b949e; border-bottom: 1px solid #30363d;">RAM</td>
+                        <td style="padding: 8px; color: #c9d1d9; border-bottom: 1px solid #30363d; text-align: right;"><strong>{mem}%</strong></td></tr>
+                    <tr><td style="padding: 8px; color: #8b949e; border-bottom: 1px solid #30363d;">Disco</td>
+                        <td style="padding: 8px; color: #c9d1d9; border-bottom: 1px solid #30363d; text-align: right;"><strong>{disk}%</strong></td></tr>
+                    <tr><td style="padding: 8px; color: #8b949e; border-bottom: 1px solid #30363d;">Uptime</td>
+                        <td style="padding: 8px; color: #c9d1d9; border-bottom: 1px solid #30363d; text-align: right;"><strong>{uptime_h}h</strong></td></tr>
+                    <tr><td style="padding: 8px; color: #8b949e;">DB Usuarios</td>
+                        <td style="padding: 8px; color: #c9d1d9; text-align: right;"><strong>{db_users}</strong></td></tr>
+                </table>
+                <p style="font-size: 12px; color: #484f58; margin-top: 20px;">Este email confirma que tu servidor Hetzner, la base de datos y el servicio de correo están operativos.</p>
+            </div>
+            </body></html>
+            """
+
+            msg = EmailMessage()
+            msg["Subject"] = f"✅ IronRisk Server Health — {now}"
+            msg["From"] = f"IronRisk Monitor <{svc.sender_email}>"
+            msg["To"] = admin.email
+            msg.set_content("IronRisk Server Health Check passed.")
+            msg.add_alternative(html, subtype="html")
+
+            with smtplib.SMTP(svc.smtp_server, svc.smtp_port) as server:
+                server.starttls()
+                server.login(svc.sender_email, svc.sender_password)
+                server.send_message(msg)
+
+            email_sent = True
+            checks["email"] = {"status": "sent", "to": admin.email}
+        else:
+            checks["email"] = {"status": "not_configured"}
+    except Exception as e:
+        checks["email"] = {"status": "error", "detail": str(e)}
+
+    return {
+        "status": "all_ok" if email_sent and checks.get("database", {}).get("status") == "ok" else "partial",
+        "checks": checks,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
 
