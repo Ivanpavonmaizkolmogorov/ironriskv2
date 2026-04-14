@@ -7,13 +7,15 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
+  allowOverflow?: boolean;
 }
 
-export default function Card({ children, className = "", hover = false }: CardProps) {
+export default function Card({ children, className = "", hover = false, allowOverflow = false }: CardProps) {
   return (
     <div
       className={`
-        bg-surface-secondary border border-iron-800 rounded-xl p-6
+        bg-surface-secondary border border-iron-800 rounded-xl p-3 sm:p-5
+        min-w-0 w-full ${!allowOverflow ? "overflow-hidden" : ""}
         ${hover ? "hover:border-iron-600 hover:shadow-lg transition-all duration-300" : ""}
         ${className}
       `}
