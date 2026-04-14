@@ -41,11 +41,17 @@ export default function AdminToolbar() {
   // Sync auth state with feature access admin status
   useEffect(() => {
     if (isAuthenticated && user) {
-      setAdminStatus(
-        user.is_admin === true || 
-        Number(user.is_admin) === 1 ||
-        user.email === 'ivanpavonmaiz@gmail.com'
-      );
+      const isUserAdmin = user.is_admin === true || 
+                          Number(user.is_admin) === 1 ||
+                          user.email === 'ivanpavonmaiz@gmail.com';
+      setAdminStatus(isUserAdmin);
+      
+      // Auto-disable analytics for the developer
+      if (isUserAdmin && typeof document !== 'undefined') {
+        if (!document.cookie.includes('disable-analytics=true')) {
+          document.cookie = "disable-analytics=true; path=/; max-age=315360000";
+        }
+      }
     } else {
       setAdminStatus(false);
     }
