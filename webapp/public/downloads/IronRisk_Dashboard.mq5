@@ -29,7 +29,7 @@ string g_PnlSymbol = "IronRisk_PnL";
 
 // --- User Inputs ---
 input string   InpApiToken    = "PASTE_TOKEN_HERE"; // Trading Account API Token
-input string   InpWebhookHost = "ironrisk-api-production.up.railway.app"; // Backend Server (no http://)
+input string   InpWebhookHost = "api.ironrisk.pro"; // Backend Server (no http://)
 input int      InpWebhookPort = 443;                // Port (8000 dev, 443 prod)
 const string   InpWebhookPath = "/api/live/";       // API Base Path (internal)
 input bool     InpUseHTTPS    = true;               // Use HTTPS
@@ -1077,7 +1077,7 @@ void DrawDashboard()
    PNL("IR_BGLINE", 0, 200, chartW, 2, C'50,50,50');
    
    // Title + Status (row 1, y=12)
-   LB("IR_TITLE", 20, 12, "IRONRISK DASHBOARD v64", 16, clrWhite);
+   LB("IR_TITLE", 20, 12, "IRONRISK DASHBOARD", 16, clrWhite);
    
    color sc = clrGray;
    string dispStatus = g_ServerStatus;
@@ -1645,7 +1645,7 @@ void DrawBootstrapScreen()
    ChartSetInteger(0, CHART_COLOR_FOREGROUND, clrDarkGray);
    
    PNL("IR_BOOT_BG", 50, 80, 700, 200, C'15,15,15');
-   LB("IR_BOOT_T1", 80, 100, "IRONRISK DASHBOARD v64", 20, clrWhite);
+   LB("IR_BOOT_T1", 80, 100, "IRONRISK DASHBOARD", 20, clrWhite);
    LB("IR_BOOT_T2", 80, 140, "Private symbol " + g_PnlSymbol + " created correctly.", 12, clrLimeGreen);
    LB("IR_BOOT_T3", 80, 170, "A chart for " + g_PnlSymbol + " has been opened automatically.", 11, clrSilver);
    LB("IR_BOOT_T4", 80, 195, ">>> Drag this EA to the '" + g_PnlSymbol + "' tab <<<", 13, clrGold);
