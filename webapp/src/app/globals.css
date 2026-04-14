@@ -47,6 +47,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Fix iOS/Safari/Chrome autofill yellow background in dark theme */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface-secondary) inset !important;
+  -webkit-text-fill-color: var(--iron-100) !important;
+  caret-color: var(--iron-100) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
