@@ -43,7 +43,7 @@ export default function BugReportButton() {
       rel="noopener noreferrer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="fixed bottom-20 right-6 z-50 flex items-center gap-2 bg-surface-secondary border border-iron-700 hover:border-risk-blue/50 rounded-full shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-300 group"
+      className="fixed bottom-14 right-2 scale-[0.65] origin-bottom-right md:scale-100 md:bottom-20 md:right-6 z-50 flex items-center gap-2 bg-surface-secondary border border-iron-700 hover:border-risk-blue/50 rounded-full shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-300 group"
       title={isEn ? "Report a bug" : "Reportar un problema"}
       style={{ padding: isHovered ? "10px 18px 10px 14px" : "10px" }}
     >

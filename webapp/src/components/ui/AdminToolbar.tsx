@@ -86,7 +86,7 @@ export default function AdminToolbar() {
   if (!mounted || !isAdmin || !isCoreAppRoute) return null;
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start gap-3 animate-in fade-in slide-in-from-bottom-4">
+    <div className="fixed bottom-2 left-2 scale-[0.65] origin-bottom-left md:scale-100 md:bottom-6 md:left-6 z-50 flex flex-col items-start gap-2 md:gap-3 animate-in fade-in slide-in-from-bottom-4 pointer-events-auto">
       {adminMode && (
         <>
           <Link 
