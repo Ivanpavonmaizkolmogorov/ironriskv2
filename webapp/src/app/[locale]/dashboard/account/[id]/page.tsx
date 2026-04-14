@@ -126,28 +126,44 @@ export default function DashboardPage() {
   const splitterContainerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
 
-  const onSplitterMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
+  const onSplitterDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     isDraggingRef.current = true;
     document.body.style.cursor = 'row-resize';
     document.body.style.userSelect = 'none';
 
-    const onMouseMove = (ev: MouseEvent) => {
+    const onMove = (ev: MouseEvent | TouchEvent) => {
       if (!isDraggingRef.current || !splitterContainerRef.current) return;
+      
+      let clientY = 0;
+      if (typeof TouchEvent !== 'undefined' && ev instanceof TouchEvent) {
+          if (ev.touches.length > 0) {
+              clientY = ev.touches[0].clientY;
+              if (ev.cancelable) ev.preventDefault(); // Prevent pull-to-refresh / scrolling
+          } else return;
+      } else {
+          clientY = (ev as MouseEvent).clientY;
+      }
+      
       const rect = splitterContainerRef.current.getBoundingClientRect();
-      const y = ev.clientY - rect.top;
+      const y = clientY - rect.top;
       const ratio = Math.min(0.85, Math.max(0.15, y / rect.height));
       setSplitRatio(ratio);
     };
-    const onMouseUp = () => {
+    
+    const onUp = () => {
       isDraggingRef.current = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onUp);
     };
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
+    
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onUp);
   }, []);
   const { isAuthenticated, user, logout, loadUser } = useAuthStore();
   const { strategies, selectedStrategy, isLoading, fetchStrategies, selectStrategy, deleteStrategy, updateStrategy } =
@@ -642,7 +658,8 @@ export default function DashboardPage() {
           {/* ═══ DRAGGABLE SPLITTER ═══ */}
           <div
             className="group relative flex items-center justify-center shrink-0 py-1.5 cursor-row-resize"
-            onMouseDown={onSplitterMouseDown}
+            onMouseDown={onSplitterDragStart}
+            onTouchStart={onSplitterDragStart}
           >
             <div className="absolute w-full h-[2px] rounded-full bg-iron-800 group-hover:bg-cyan-500/60 transition-colors" />
             
@@ -654,9 +671,10 @@ export default function DashboardPage() {
                 onClick={(e) => { e.stopPropagation(); setSplitRatio(0.85); }}
                 className="w-5 h-5 rounded-full bg-iron-800 hover:bg-cyan-500/20 border border-iron-700 hover:border-cyan-500/50 flex items-center justify-center text-iron-500 hover:text-cyan-400 transition-colors"
                 title="Maximizar Panel Superior"
+                onTouchStart={(e) => e.stopPropagation()}
               >
                 <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 5l4 4 4-4" />
+                  <path d="M4 11l4-4 4 4" />
                 </svg>
               </button>
               
@@ -664,6 +682,7 @@ export default function DashboardPage() {
                 onClick={(e) => { e.stopPropagation(); setSplitRatio(DEFAULT_SPLIT); }}
                 className="w-5 h-5 rounded-full bg-iron-800 hover:bg-iron-700 border border-iron-700 flex items-center justify-center text-iron-500 hover:text-iron-300 transition-colors"
                 title="Restablecer Equilibrio"
+                onTouchStart={(e) => e.stopPropagation()}
               >
                 <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M2 8h12M8 2v12" />
@@ -674,9 +693,10 @@ export default function DashboardPage() {
                 onClick={(e) => { e.stopPropagation(); setSplitRatio(0.15); }}
                 className="w-5 h-5 rounded-full bg-iron-800 hover:bg-cyan-500/20 border border-iron-700 hover:border-cyan-500/50 flex items-center justify-center text-iron-500 hover:text-cyan-400 transition-colors"
                 title="Maximizar Panel Inferior"
+                onTouchStart={(e) => e.stopPropagation()}
               >
                 <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 11l4-4 4 4" />
+                  <path d="M4 5l4 4 4-4" />
                 </svg>
               </button>
             </div>
