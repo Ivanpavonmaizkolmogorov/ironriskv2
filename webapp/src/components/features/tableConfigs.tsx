@@ -824,10 +824,6 @@ export const BayesianView: TableViewDef = {
   columns: [
     COMMON_COLUMNS.name,
     COMMON_COLUMNS.magic,
-    BAYESIAN_COLUMNS.blind_risk,
-    BAYESIAN_COLUMNS.bayesian_ev,
-    BAYESIAN_COLUMNS.degradation,
-    BAYESIAN_COLUMNS.weight,
     {
       id: "bayes_live_trades",
       label: "Live Trades",
@@ -856,6 +852,10 @@ export const BayesianView: TableViewDef = {
         return <span className="font-mono text-iron-300 font-semibold block text-right">{total}</span>;
       }
     },
+    BAYESIAN_COLUMNS.blind_risk,
+    BAYESIAN_COLUMNS.bayesian_ev,
+    BAYESIAN_COLUMNS.degradation,
+    BAYESIAN_COLUMNS.weight,
   ]
 };
 
