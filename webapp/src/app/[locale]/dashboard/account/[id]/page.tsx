@@ -479,7 +479,10 @@ export default function DashboardPage() {
             </button>
 
             <div className="relative">
-              <Button size="sm" onClick={() => setShowNewStrategyFork(prev => !prev)}>{tWorkspace("btnNewStrategy")}</Button>
+              <Button size="sm" onClick={() => setShowNewStrategyFork(prev => !prev)}>
+                <span className="hidden sm:inline">{tWorkspace("btnNewStrategy")}</span>
+                <span className="sm:hidden font-bold text-lg leading-none px-1">+</span>
+              </Button>
               {showNewStrategyFork && (
                 <div className="absolute right-0 top-full mt-2 w-72 bg-surface-secondary border border-iron-700 rounded-xl p-3 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200 space-y-2">
                   <Link href={`/dashboard/wizard?accountId=${accountId}`}
@@ -525,17 +528,19 @@ export default function DashboardPage() {
             )}
             {account && (
               <Button variant="ghost" size="sm" onClick={() => setIsWorkspaceSettingsOpen(true)}
-                className="text-iron-400 hover:text-iron-200">
-                {tWorkspace("btnSettings")}
+                className="text-iron-400 hover:text-iron-200 px-2 sm:px-3">
+                <span className="hidden sm:inline">{tWorkspace("btnSettings")}</span>
+                <span className="sm:hidden text-lg leading-none" title={tWorkspace("btnSettings")}>⚙️</span>
               </Button>
             )}
-            <Button variant="ghost" size="sm" className="min-w-[120px] text-center" onClick={() => {
+            <Button variant="ghost" size="sm" className="px-2 sm:px-3 sm:min-w-[120px] text-center" onClick={() => {
               router.push(`/${locale}`);
               setTimeout(() => {
                 useAuthStore.getState().logout();
               }, 200);
             }}>
-              {t("logout")}
+              <span className="hidden sm:inline">{t("logout")}</span>
+              <span className="sm:hidden text-lg leading-none" title={t("logout")}>🚪</span>
             </Button>
           </div>
         </div>
@@ -582,7 +587,7 @@ export default function DashboardPage() {
             {/* === DASHBOARD TOP LAYER (VIEW CONTROLLER) === */}
             <div className="flex flex-col gap-4">
               {/* Toolbar */}
-              <div className="flex bg-surface-tertiary p-1 rounded-lg border border-iron-800 w-fit max-w-full overflow-x-auto">
+              <div className="flex bg-surface-tertiary p-1 rounded-lg border border-iron-800 w-fit max-w-full overflow-x-auto scrollbar-hide">
                 {DASHBOARD_VIEWS.map((dv) => {
                   const isActive = activeDashboardView === dv.id;
                   const dvName = dv.id === "ml-bayes" ? tWorkspace("tabBayes") : dv.id === "inspector" ? tWorkspace("tabInspector") : dv.id === "macro" ? tWorkspace("tabMacro") : dv.id === "vs-mode" ? tWorkspace("tabVs") : dv.name;
