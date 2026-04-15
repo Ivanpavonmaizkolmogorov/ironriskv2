@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { getVerdictStyle, type VerdictStatus } from "@/utils/VerdictConfig";
 import { metricFormatter } from "@/utils/MetricFormatter";
+import { Humanizer, type RiskGaugeData } from "@/utils/Humanizer";
 
 // --- Log-Gamma (Lanczos approximation) for Beta PDF ---
 function logGamma(z: number): number {
@@ -468,6 +469,7 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
   const tMath = useTranslations("bayesMath");
   const tV = useTranslations("verdict");
   const tR = useTranslations("riskReport");
+  const tH = useTranslations("humanizer");
   const selectedId = activeAsset?.id ?? "";
   const isPortfolio = activeAsset ? "strategy_ids" in activeAsset : false;
   const [data, setData] = useState<BayesData | null>(null);
@@ -577,183 +579,207 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
 
           {d ? (
             <>
-              {/* Veredicto Maestro de Riesgo */}
-              {(data?.info_report || data?.risk_gauges) && (
-                <div className="bg-iron-900 border border-iron-800 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-start gap-4 shadow-xl mb-4 min-w-0 w-full overflow-hidden">
-                  {(() => {
-                    let hasFatal = false;
-                    let hasRed = data.info_report?.signals.some(s => s.severity === 'warning') || false;
-                    let hasAmber = data.info_report?.signals.some(s => s.severity === 'notable') || false;
-                    
-                    const gaugeReasons: { icon: string, text: string }[] = [];
+               {/* Veredicto Maestro de Riesgo — Humanized */}
+               {(data?.info_report || data?.risk_gauges) && (() => {
+                 const humanizer = new Humanizer(tH, tV);
 
+                 let hasFatal = false;
+                 let hasRed = data.info_report?.signals.some((s: any) => s.severity === 'warning') || false;
+                 let hasAmber = data.info_report?.signals.some((s: any) => s.severity === 'notable') || false;
 
-                    if (data.risk_gauges) {
-                      Object.entries(data.risk_gauges).forEach(([key, gauge]: [string, any]) => {
-                        const name = tR(`gaugeNames.${key}` as any) || key;
-                        const val = metricFormatter.format(key, gauge.current);
-                        const gv = getVerdictStyle(gauge.status as VerdictStatus);
-                        let extra = '';
-                        if (gauge.limit && gauge.limit > 0) {
-                           extra = ` - ${tMath("ui.gaugePctLim", { pct: ((gauge.current / gauge.limit) * 100).toFixed(1), limit: metricFormatter.format(key, gauge.limit) })}`;
-                        }
+                 // Collect gauge data for humanizer
+                 const gaugeEntries: Array<{ key: string; gauge: any; gv: any }> = [];
+                 if (data.risk_gauges) {
+                   Object.entries(data.risk_gauges).forEach(([key, gauge]: [string, any]) => {
+                     const gv = getVerdictStyle(gauge.status as VerdictStatus);
+                     gaugeEntries.push({ key, gauge, gv });
+                     if (gauge.status === 'fatal') hasFatal = true;
+                     else if (gauge.status === 'red') hasRed = true;
+                     else if (gauge.status === 'amber') hasAmber = true;
+                   });
+                 }
 
-                        if (gauge.status === 'fatal') {
-                          hasFatal = true;
-                          gaugeReasons.push({ icon: gv.icon, text: `${name}: ${tV('limitBreached')} (${val})${extra}` });
-                        } else if (gauge.status === 'red') {
-                          hasRed = true;
-                          gaugeReasons.push({ icon: gv.icon, text: `${name} P${Math.round(gauge.percentile)} (${val})${extra}` });
-                        } else if (gauge.status === 'amber') {
-                          hasAmber = true;
-                          gaugeReasons.push({ icon: gv.icon, text: `${name} P${Math.round(gauge.percentile)} (${val})${extra}` });
-                        }
-                      });
-                    }
+                 const status: VerdictStatus = hasFatal ? 'fatal' : hasRed ? 'red' : hasAmber ? 'amber' : 'green';
+                 const v = getVerdictStyle(status);
 
-                    const status = hasFatal ? 'fatal' : hasRed ? 'red' : hasAmber ? 'amber' : 'green';
-                    const v = getVerdictStyle(status as VerdictStatus);
-                    
-                    return (
-                      <>
-                        <div className={`flex flex-col justify-center items-center p-3 rounded-xl min-w-[120px] border ${v.bgColor}`}>
-                          <div className={`text-4xl mb-1 ${v.iconClass}`}>{v.icon}</div>
-                          <div className={`font-mono font-bold tracking-widest text-sm ${v.labelClass}`}>{tV(v.labelKey as any)}</div>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-iron-200 font-bold text-sm">{tV('masterTitle')}</h3>
-                            <InfoPopover
-                              content={
-                                <div className="space-y-3 p-1">
-                                  {['green', 'amber', 'red', 'fatal'].reverse().map((statusKey) => {
-                                    const s = getVerdictStyle(statusKey as VerdictStatus);
-                                    return (
-                                      <div key={statusKey} className="flex gap-2 text-[11px] items-start">
-                                        <span className={`text-[14px] mt-0.5 ${s.iconClass}`}>{s.icon}</span>
-                                        <div>
-                                          <span className={`font-mono font-bold ${s.labelClass}`}>{tV(s.labelKey as any)}</span>
-                                          <p className="text-iron-400 mt-0.5 leading-tight">{tV(s.descKey as any)}</p>
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              }
-                              width="w-64"
-                              position="bottom"
-                            >
-                              <span className="text-[10px] text-iron-500 hover:text-iron-300 cursor-pointer transition-colors bg-iron-800/50 rounded-full w-4 h-4 flex items-center justify-center">?</span>
-                            </InfoPopover>
-                          </div>
-                          <div className="text-[11px] text-iron-400 space-y-1">
-                            {gaugeReasons.map((g, i) => (
-                              <div key={`g-${i}`} className="flex items-center gap-2 max-w-2xl">
-                                <div className="w-1.5 h-1.5 rounded-full bg-iron-600 shrink-0"></div>
-                                <span>{g.icon} {tV('empiricalRisk')}: {g.text}</span>
-                              </div>
-                            ))}
-                            {data.info_report?.signals.map((s: any, i: number) => {
-                              const sIcon = s.severity === 'warning' ? '🔴' : s.severity === 'notable' ? '🟡' : '🟢';
-                              let msg = s.detail;
-                              if (s.i18n_key && s.i18n_params) {
-                                const params = { ...s.i18n_params };
-                                // Resolve label from labelKey (e.g. "streak" → "Loss Streak" / "Racha Pérdidas")
-                                if (params.labelKey) {
-                                  const labelKeyMap: Record<string, string> = { winRate: 'winRateLabel', streak: 'streakLabel', avgPnl: 'avgPnlLabel', pnl: 'avgPnlLabel' };
-                                  params.label = tR(labelKeyMap[params.labelKey] as any ?? params.labelKey);
-                                }
-                                msg = tR(s.i18n_key as any, params);
-                              }
-                              return (
-                                <div key={`s-${i}`} className="flex items-start gap-2 max-w-2xl">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-iron-600 shrink-0 mt-1.5"></div>
-                                  <span>{sIcon} {msg}</span>
-                                </div>
-                              );
-                            })}
-                            {(!data.info_report || data.info_report.signals.length === 0) && gaugeReasons.length === 0 && d && (() => {
-                                const blindRisk = 1 - d.p_positive;
-                                const pct = (blindRisk * 100).toFixed(1);
-                                const isLow = blindRisk < 0.2;
-                                const isMid = blindRisk >= 0.2 && blindRisk < 0.5;
-                                const icon = isLow ? "🟢" : isMid ? "🟡" : "🔴";
-                                const dotColor = isLow ? "bg-emerald-500" : isMid ? "bg-amber-500" : "bg-red-500";
-                                const key = isLow ? "blindRiskLow" : "blindRiskSignal";
-                                return (
-                                  <div className="flex items-center gap-2">
-                                    <div className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></div>
-                                    <span>{icon} {tV(key, { pct })}</span>
-                                  </div>
-                                );
-                            })()}
-                          </div>
-                          {hasFatal && (
-                            <div className="mt-4 p-3 bg-red-500/5 border-l-2 border-red-500 rounded-r-lg">
-                              <h4 className="text-sm font-bold text-red-500 mb-1 flex items-center gap-2">⚠️ {tV('ulyssesBreachTitle')}</h4>
-                              <p className="text-xs text-red-400/80 leading-relaxed">{tV('ulyssesBreachDesc')}</p>
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )
-                  })()}
+                 // Humanized signals (only non-green)
+                 const humanSignals = data.risk_gauges
+                   ? humanizer.whatIsHappening(data.risk_gauges as Record<string, RiskGaugeData>)
+                   : [];
+
+                 return (
+                 <div className="bg-iron-900 border border-iron-800 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-start gap-4 shadow-xl mb-4 min-w-0 w-full overflow-hidden">
+                   {/* Badge */}
+                   <div className={`flex flex-col justify-center items-center p-3 rounded-xl min-w-[120px] border ${v.bgColor}`}>
+                     <div className={`text-4xl mb-1 ${v.iconClass}`}>{v.icon}</div>
+                     <div className={`font-mono font-bold tracking-widest text-sm ${v.labelClass}`}>{tV(v.labelKey as any)}</div>
+                   </div>
+
+                   {/* Content */}
+                   <div className="flex-1 min-w-0">
+                     {/* Title row */}
+                     <div className="flex items-center gap-2 mb-2">
+                       <h3 className="text-iron-200 font-bold text-sm">{tV('masterTitle')}</h3>
+                       <InfoPopover
+                         content={
+                           <div className="space-y-3 p-1">
+                             {['green', 'amber', 'red', 'fatal'].reverse().map((statusKey) => {
+                               const s = getVerdictStyle(statusKey as VerdictStatus);
+                               return (
+                                 <div key={statusKey} className="flex gap-2 text-[11px] items-start">
+                                   <span className={`text-[14px] mt-0.5 ${s.iconClass}`}>{s.icon}</span>
+                                   <div>
+                                     <span className={`font-mono font-bold ${s.labelClass}`}>{tV(s.labelKey as any)}</span>
+                                     <p className="text-iron-400 mt-0.5 leading-tight">{tV(s.descKey as any)}</p>
+                                   </div>
+                                 </div>
+                               );
+                             })}
+                           </div>
+                         }
+                         width="w-64"
+                         position="bottom"
+                       >
+                         <span className="text-[10px] text-iron-500 hover:text-iron-300 cursor-pointer transition-colors bg-iron-800/50 rounded-full w-4 h-4 flex items-center justify-center">?</span>
+                       </InfoPopover>
+                     </div>
+
+                     {/* Human headline — the main takeaway */}
+                     <p className={`text-sm font-medium leading-relaxed mb-2 ${v.textColor}`}>
+                       {humanizer.verdictHeadline(status)}
+                     </p>
+
+                     {/* What's happening — only if non-green signals exist */}
+                     {humanSignals.length > 0 && (
+                       <div className="mb-3">
+                         <div className="text-[10px] text-iron-500 font-semibold uppercase tracking-wider mb-1.5">
+                           ⚠️ {tV('whatIsHappening')}
+                         </div>
+                         <div className="space-y-1">
+                           {humanSignals.map((sig, i) => {
+                             const sigV = getVerdictStyle(sig.status as VerdictStatus);
+                             return (
+                               <div key={`h-${i}`} className="flex items-start gap-2 text-[11px] text-iron-300">
+                                 <span className={`shrink-0 mt-0.5 ${sigV.iconClass}`}>{sigV.icon}</span>
+                                 <span>{sig.narrative}</span>
+                               </div>
+                             );
+                           })}
+                         </div>
+                       </div>
+                     )}
+
+                     {/* Guidance — contextual, declarative */}
+                     <p className="text-[11px] text-iron-500 italic leading-relaxed">
+                       {humanizer.verdictGuidance(status)}
+                     </p>
+
+                     {/* Technical details — collapsible, second plane */}
+                     {(gaugeEntries.some(g => g.gauge.status !== 'green') || (data.info_report?.signals?.length ?? 0) > 0) && (
+                       <details className="mt-3">
+                         <summary className="cursor-pointer text-[10px] text-iron-600 hover:text-iron-400 select-none transition-colors">
+                           ▶ {tV('technicalDetails')}
+                         </summary>
+                         <div className="mt-2 space-y-1 text-[11px] text-iron-400">
+                           {gaugeEntries.filter(g => g.gauge.status !== 'green').map(({ key, gauge, gv }, i) => {
+                             const name = tR(`gaugeNames.${key}` as any) || key;
+                             const val = metricFormatter.format(key, gauge.current);
+                             let extra = '';
+                             if (gauge.limit && gauge.limit > 0) {
+                               extra = ` — ${tMath("ui.gaugePctLim", { pct: ((gauge.current / gauge.limit) * 100).toFixed(1), limit: metricFormatter.format(key, gauge.limit) })}`;
+                             }
+                             const detail = gauge.status === 'fatal'
+                               ? `${name}: ${tV('limitBreached')} (${val})${extra}`
+                               : `${name} P${Math.round(gauge.percentile)} (${val})${extra}`;
+                             return (
+                               <div key={`td-${i}`} className="flex items-center gap-2">
+                                 <div className="w-1.5 h-1.5 rounded-full bg-iron-600 shrink-0"></div>
+                                 <span>{gv.icon} {tV('empiricalRisk')}: {detail}</span>
+                               </div>
+                             );
+                           })}
+                           {data.info_report?.signals.map((s: any, i: number) => {
+                             const sIcon = s.severity === 'warning' ? '🔴' : s.severity === 'notable' ? '🟡' : '🟢';
+                             let msg = s.detail;
+                             if (s.i18n_key && s.i18n_params) {
+                               const params = { ...s.i18n_params };
+                               if (params.labelKey) {
+                                 const labelKeyMap: Record<string, string> = { winRate: 'winRateLabel', streak: 'streakLabel', avgPnl: 'avgPnlLabel', pnl: 'avgPnlLabel' };
+                                 params.label = tR(labelKeyMap[params.labelKey] as any ?? params.labelKey);
+                               }
+                               msg = tR(s.i18n_key as any, params);
+                             }
+                             return (
+                               <div key={`s-${i}`} className="flex items-start gap-2">
+                                 <div className="w-1.5 h-1.5 rounded-full bg-iron-600 shrink-0 mt-1.5"></div>
+                                 <span>{sIcon} {msg}</span>
+                               </div>
+                             );
+                           })}
+                         </div>
+                       </details>
+                     )}
+
+                     {/* Ulysses Pact breach block */}
+                     {hasFatal && (
+                       <div className="mt-4 p-3 bg-red-500/5 border-l-2 border-red-500 rounded-r-lg">
+                         <h4 className="text-sm font-bold text-red-500 mb-1 flex items-center gap-2">⚠️ {tV('ulyssesBreachTitle')}</h4>
+                         <p className="text-xs text-red-400/80 leading-relaxed">{tV('ulyssesBreachDesc')}</p>
+                       </div>
+                     )}
+                   </div>
+                 </div>
+                 );
+               })()}
+
+               {/* Blind Risk Card — protagonist metric */}
+               <div className="bg-surface-secondary border border-iron-700 rounded-xl p-3 sm:p-6 space-y-4 min-w-0 w-full overflow-hidden">
+                 {/* Blind Risk as main gauge */}
+                 {(() => {
+                   const blindRiskHumanizer = new Humanizer(tH, tV);
+                   const blindRiskRaw = 1 - d.p_positive;
+                   const blindPct = blindRiskRaw * 100;
+                   const blindPctStr = blindPct.toFixed(1);
+                   const { zone, narrative } = blindRiskHumanizer.blindRiskInfo(blindPct);
+                   const riskColor = zone === 'low' ? 'text-risk-green' : zone === 'moderate' ? 'text-amber-400' : 'text-risk-red';
+                   const barColor = zone === 'low' ? 'bg-gradient-to-r from-emerald-600 to-emerald-400' : zone === 'moderate' ? 'bg-gradient-to-r from-amber-600 to-amber-400' : 'bg-gradient-to-r from-red-700 to-red-500';
+                   const riskBg = zone === 'low' ? '' : zone === 'moderate' ? 'bg-amber-500/5 border-amber-500/20' : 'bg-red-500/5 border-red-500/20';
+                   return (
+                     <div>
+                       <div className="flex items-center justify-between mb-3">
+                         <div>
+                           <h2 className="text-sm font-semibold text-iron-300">{tMath("ui.blindRiskLabel")}</h2>
+                         </div>
+                         <div className={`text-4xl font-black ${riskColor}`}>
+                           {blindPctStr}%
+                         </div>
+                       </div>
+                       <div className="w-full bg-iron-800 rounded-full h-3 overflow-hidden">
+                         <div
+                           className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                           style={{ width: `${Math.min(blindPct, 100)}%` }}
+                         />
+                       </div>
+                       <div className="flex justify-between text-[9px] text-iron-600 mt-1">
+                         <span>{tMath("ui.blindRiskLow")}</span>
+                         <span>{tMath("ui.blindRiskHigh")}</span>
+                       </div>
+                       {/* Human narrative for blind risk */}
+                       <div className={`mt-3 px-3 py-2 rounded-lg border border-iron-800/50 ${riskBg} transition-all`}>
+                         <p className={`text-xs ${riskColor} leading-relaxed`}>{narrative}</p>
+                       </div>
+                       {/* P(EV>0) as secondary complement */}
+                       <div className="mt-2 flex items-center justify-between text-[10px] text-iron-500">
+                         <span>{tMath("ui.probEdgePositive")}</span>
+                         <span className={`font-mono font-bold ${mainColor}`}>{(d.p_positive * 100).toFixed(1)}%</span>
+                       </div>
+                     </div>
+                   );
+                 })()}
                 </div>
-              )}
 
-              {/* Unified P(EV > 0) Card */}
-              <div className="bg-surface-secondary border border-iron-700 rounded-xl p-3 sm:p-6 space-y-4 min-w-0 w-full overflow-hidden">
-                {/* Gauge */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h2 className="text-sm font-semibold text-iron-300">P(Expectancy &gt; 0)</h2>
-                      <p className="text-[10px] text-iron-600">{tMath("ui.probEdgePositive")}</p>
-                    </div>
-                    <div className={`text-4xl font-black ${mainColor}`}>
-                      {(d.p_positive * 100).toFixed(1)}%
-                    </div>
-                  </div>
-                  <div className="w-full bg-iron-800 rounded-full h-3 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        d.p_positive > 0.8 ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
-                        : d.p_positive > 0.5 ? "bg-gradient-to-r from-amber-600 to-amber-400"
-                        : "bg-gradient-to-r from-red-700 to-red-500"
-                      }`}
-                      style={{ width: `${d.p_positive * 100}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[9px] text-iron-600 mt-1">
-                    <span>{tMath("ui.edgeDead")}</span>
-                    <span>{tMath("ui.edgeConfirmed")}</span>
-                  </div>
-                  {/* Blind Risk — contextual 1-P indicator */}
-                  {(() => {
-                    const blindRisk = 1 - d.p_positive;
-                    const blindPct = (blindRisk * 100).toFixed(1);
-                    const isLow = blindRisk < 0.2;
-                    const isMedium = blindRisk >= 0.2 && blindRisk < 0.5;
-                    const isCritical = blindRisk >= 0.5;
-                    const riskColor = isLow ? "text-iron-500" : isMedium ? "text-amber-400" : "text-risk-red";
-                    const riskBg = isLow ? "bg-iron-800/30" : isMedium ? "bg-amber-500/5 border-amber-500/20" : "bg-red-500/5 border-red-500/20";
-                    return (
-                      <div className={`mt-3 flex items-center justify-between px-3 py-2 rounded-lg border border-iron-800/50 ${riskBg} transition-all`}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px]">{isCritical ? "🔴" : isMedium ? "🟡" : "⚪"}</span>
-                          <span className="text-[10px] text-iron-500 font-medium">
-                            {tMath("ui.blindRiskLabel")}
-                          </span>
-                        </div>
-                        <span className={`font-mono font-bold text-sm ${riskColor}`}>{blindPct}%</span>
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                {/* Consistency Tests Strip */}
-                <div className="border-t border-iron-700" />
-                <div>
+               {/* Consistency Tests + Technical Details Card */}
+               <div className="bg-surface-secondary border border-iron-700 rounded-xl p-3 sm:p-6 space-y-4 min-w-0 w-full overflow-hidden">
                   <h3 className="text-sm font-semibold text-iron-300 mb-2 flex items-center gap-2">{tMath("ui.guardianTitle")}</h3>
                   <p className="text-xs text-iron-500 mb-3">{tMath("ui.guardianDesc")}</p>
                   
@@ -858,7 +884,6 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
                           </div>
                         </div>
                       </details>
-                    </div>
 
                 {/* Divider */}
                 <div className="border-t border-iron-700" />
@@ -1334,53 +1359,61 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
                 </details>
               </div>
 
-              {/* Risk Gauges */}
+              {/* Risk Gauges — Human narratives + technical details */}
               <div className="bg-surface-secondary border border-iron-700 rounded-xl p-4">
-                <h3 className="text-xs font-semibold text-iron-300 mb-3">📉 Gauges de Riesgo (info visual)</h3>
+                <h3 className="text-xs font-semibold text-iron-300 mb-3">📉 Gauges de Riesgo</h3>
                 {data?.risk_gauges && Object.keys(data.risk_gauges).length > 0 ? (
                   <>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {Object.entries(data.risk_gauges).map(([key, gauge]) => {
-                        const label = METRICS.find(m => m.key === key)?.label || key;
-                        const statusColor = gauge.status === "green" ? "text-risk-green" : gauge.status === "amber" ? "text-amber-400" : "text-risk-red";
-                        const statusIcon = gauge.status === "green" ? "✅" : gauge.status === "amber" ? "⚠️" : "🔴";
-                        return (
-                          <div key={key} className={`bg-surface-tertiary rounded-lg p-3 ${gauge.simulated ? 'border border-amber-500/30' : ''}`}>
-                            <div className="text-xs text-iron-400 font-semibold flex items-center gap-1">
-                              {label}
-                              {gauge.simulated && <span className="text-amber-400 text-[10px]" title={tMath("ui.gaugeTooltipSim")}>🧪 sim</span>}
-                            </div>
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-sm font-bold text-iron-200">
-                                {metricFormatter.format(key, gauge.current)}
-                              </span>
-                              <span className={`text-xs font-mono font-bold ${statusColor}`}>
-                                {statusIcon} P{gauge.percentile.toFixed(0)}
-                              </span>
-                            </div>
-                            <div className="w-full bg-iron-800 rounded-full h-1.5 mt-1">
-                              <div
-                                className={`h-full rounded-full ${
-                                  gauge.status === "green" ? "bg-emerald-500" : gauge.status === "amber" ? "bg-amber-500" : "bg-red-500"
-                                }`}
-                                style={{ width: `${Math.min(gauge.percentile, 100)}%` }}
-                              />
-                            </div>
-                            {gauge.limit && gauge.limit > 0 && (
-                              <div className="text-[11px] text-iron-500 mt-1 opacity-90 font-mono tracking-tight" title={tMath("ui.gaugeTooltipLim")}>
-                                {tMath("ui.gaugePctLim", { 
-                                  pct: ((gauge.current / gauge.limit) * 100).toFixed(1),
-                                  limit: metricFormatter.format(key, gauge.limit)
-                                })}
+                      {(() => {
+                        const gaugeHumanizer = new Humanizer(tH, tV);
+                        return Object.entries(data.risk_gauges).map(([key, gauge]) => {
+                          const label = METRICS.find(m => m.key === key)?.label || key;
+                          const statusColor = gauge.status === "green" ? "text-risk-green" : gauge.status === "amber" ? "text-amber-400" : "text-risk-red";
+                          const statusIcon = gauge.status === "green" ? "✅" : gauge.status === "amber" ? "⚠️" : "🔴";
+                          const humanPhrase = gaugeHumanizer.gaugeNarrative(key, gauge as RiskGaugeData);
+                          return (
+                            <div key={key} className={`bg-surface-tertiary rounded-lg p-3 ${gauge.simulated ? 'border border-amber-500/30' : ''}`}>
+                              <div className="text-xs text-iron-400 font-semibold flex items-center gap-1">
+                                {label}
+                                {gauge.simulated && <span className="text-amber-400 text-[10px]" title={tMath("ui.gaugeTooltipSim")}>🧪 sim</span>}
                               </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-sm font-bold text-iron-200">
+                                  {metricFormatter.format(key, gauge.current)}
+                                </span>
+                              </div>
+                              {/* Human narrative — first line */}
+                              <p className={`text-[10px] mt-1 leading-snug ${statusColor}`}>
+                                {humanPhrase}
+                              </p>
+                              <div className="w-full bg-iron-800 rounded-full h-1.5 mt-1.5">
+                                <div
+                                  className={`h-full rounded-full ${
+                                    gauge.status === "green" ? "bg-emerald-500" : gauge.status === "amber" ? "bg-amber-500" : "bg-red-500"
+                                  }`}
+                                  style={{ width: `${Math.min(gauge.percentile, 100)}%` }}
+                                />
+                              </div>
+                              {/* Percentile — second line (visible but secondary) */}
+                              <div className="flex items-center justify-between mt-1">
+                                <span className={`text-[10px] font-mono ${statusColor}`}>
+                                  {statusIcon} P{gauge.percentile.toFixed(0)}
+                                </span>
+                                {gauge.limit && gauge.limit > 0 && (
+                                  <span className="text-[10px] text-iron-500 font-mono" title={tMath("ui.gaugeTooltipLim")}>
+                                    {tMath("ui.gaugePctLim", { 
+                                      pct: ((gauge.current / gauge.limit) * 100).toFixed(1),
+                                      limit: metricFormatter.format(key, gauge.limit)
+                                    })}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
                     </div>
-                    <p className="text-xs text-iron-500 mt-3 pl-1">
-                      Percentiles respecto al backtest. No alimentan P(EV&gt;0).
-                    </p>
                   </>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
