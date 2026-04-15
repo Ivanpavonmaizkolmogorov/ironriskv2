@@ -123,7 +123,7 @@ import os
 from datetime import datetime, timezone
 
 _deploy_time = datetime.now(timezone.utc).strftime("%d-%b %H:%M UTC")
-_deploy_id = os.environ.get("RAILWAY_DEPLOYMENT_ID", "local")
+_deploy_id = os.environ.get("DEPLOY_ID", "local")
 _build_version = f"Build {_deploy_time}"
 
 

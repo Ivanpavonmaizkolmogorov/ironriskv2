@@ -1,7 +1,6 @@
 """
 IronRisk — One-command backend deploy to Hetzner.
 Usage: python deploy.py
-Same as a 'git push' to Railway, but for our VPS.
 """
 import paramiko
 import os
