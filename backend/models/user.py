@@ -21,6 +21,7 @@ class User(Base):
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Relationships
     trading_accounts = relationship("TradingAccount", back_populates="user", cascade="all, delete-orphan")

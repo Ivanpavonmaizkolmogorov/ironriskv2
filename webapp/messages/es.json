@@ -876,5 +876,24 @@
     "bulkSelected": "seleccionadas",
     "bulkLinking": "Vinculando...",
     "bulkLinkBtn": "Vincular {count} pares"
+  },
+  "changelog": {
+    "title": "Novedades",
+    "subtitle": "Últimas mejoras de IronRisk",
+    "tags": {
+      "feature": "Nueva función",
+      "fix": "Corrección",
+      "improvement": "Mejora"
+    },
+    "entries": {
+      "humanizer_v1": {
+        "title": "Motor Bayesiano humanizado",
+        "body": "El veredicto del motor ahora habla en lenguaje claro. Riesgo Ciego como métrica protagonista, frases humanas en cada gauge de riesgo y señales de alerta priorizadas."
+      },
+      "email_verification": {
+        "title": "Verificación de email",
+        "body": "Ahora puedes verificar tu correo para asegurar tu cuenta. Recibirás un email de verificación al registrarte."
+      }
+    }
   }
 }

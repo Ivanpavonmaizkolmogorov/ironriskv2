@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import LocaleSwitcher from "@/components/ui/LocaleSwitcher";
@@ -26,6 +26,8 @@ export default function LoginPage() {
   const [forgotError, setForgotError] = useState<string | null>(null);
 
   const isEn = locale === "en";
+  const searchParams = useSearchParams();
+  const justVerified = searchParams.get("verified") === "true";
 
   useEffect(() => {
     if (isAuthenticated) router.push("/dashboard");
@@ -140,6 +142,18 @@ export default function LoginPage() {
           </div>
         ) : (
           <>
+            {/* ═══ Email Verified Success Banner ═══ */}
+            {justVerified && (
+              <div className="bg-risk-green/10 border border-risk-green/30 rounded-xl p-4 mb-4 text-center animate-in fade-in duration-500">
+                <p className="text-risk-green font-semibold text-sm">
+                  {isEn ? "✓ Email verified successfully!" : "✓ ¡Email verificado correctamente!"}
+                </p>
+                <p className="text-iron-400 text-xs mt-1">
+                  {isEn ? "You can now log in." : "Ya puedes iniciar sesión."}
+                </p>
+              </div>
+            )}
+
             {/* ═══ Login Form ═══ */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input

@@ -35,6 +35,21 @@ logger = logging.getLogger("ironrisk")
 # Create tables (dev only — use Alembic migrations in production)
 Base.metadata.create_all(bind=engine)
 
+# ── Auto-migrations (idempotent) ──
+from sqlalchemy import inspect as sa_inspect, text as sa_text
+_inspector = sa_inspect(engine)
+_user_cols = [c["name"] for c in _inspector.get_columns("users")]
+if "email_verified" not in _user_cols:
+    with engine.connect() as _conn:
+        _dialect = engine.dialect.name
+        if _dialect == "sqlite":
+            _conn.execute(sa_text("ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT 1 NOT NULL"))
+        else:
+            _conn.execute(sa_text("ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT TRUE NOT NULL"))
+            _conn.execute(sa_text("ALTER TABLE users ALTER COLUMN email_verified SET DEFAULT FALSE"))
+        _conn.commit()
+    logger.info("Migration: added email_verified column to users")
+
 settings = get_settings()
 
 app = FastAPI(

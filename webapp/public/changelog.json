@@ -1,0 +1,14 @@
+[
+  {
+    "id": "email_verification",
+    "date": "2026-04-15",
+    "tag": "feature",
+    "internal": false
+  },
+  {
+    "id": "humanizer_v1",
+    "date": "2026-04-15",
+    "tag": "feature",
+    "internal": false
+  }
+]

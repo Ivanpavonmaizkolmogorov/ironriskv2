@@ -143,6 +143,76 @@ class EmailService:
             logger.error(f"Failed to transmit welcome email to {recipient_email}: {e}")
             return False
 
+    def send_verification_email(self, recipient_email: str, token: str, locale: str = "es") -> bool:
+        """Sends an email with a verification link to confirm the user's email address."""
+        if not self.is_configured():
+            logger.warning(f"EmailService not configured. Skipping verification email to {recipient_email}.")
+            return False
+
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        verify_url = f"{frontend_url}/{locale}/verify-email?token={token}"
+
+        if locale == "en":
+            subject = "IronRisk — Verify Your Email"
+            lbl_title = "Confirm Your Email"
+            lbl_desc = f"You've registered with <strong>{recipient_email}</strong>. Click below to verify your email and unlock all features."
+            lbl_btn = "Verify Email"
+            lbl_skip = "You can skip this step, but some features may be limited."
+            lbl_footer = "The IronRisk Quant Team"
+        else:
+            subject = "IronRisk — Verifica tu Email"
+            lbl_title = "Confirma tu Correo"
+            lbl_desc = f"Te has registrado con <strong>{recipient_email}</strong>. Haz click abajo para verificar tu correo y desbloquear todas las funciones."
+            lbl_btn = "Verificar Email"
+            lbl_skip = "Puedes saltar este paso, pero algunas funciones podrían estar limitadas."
+            lbl_footer = "El Equipo de Cuantificación de IronRisk"
+
+        html_content = f"""
+        <html>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
+                <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
+                <h2 style="color: #00e676; margin-top: 10px; font-size: 20px; font-weight: 800;">{lbl_title}</h2>
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">{lbl_desc}</p>
+                
+                <div style="text-align: center; margin: 35px 0;">
+                    <a href="{verify_url}" 
+                       style="display: inline-block; padding: 14px 28px; background-color: #00e676; color: #000000; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                       {lbl_btn}
+                    </a>
+                </div>
+
+                <p style="font-size: 13px; color: #484f58; text-align: center; margin-bottom: 25px;">
+                    {lbl_skip}
+                </p>
+
+                <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
+                    <strong style="color: #8b949e;">{lbl_footer}</strong><br>
+                    <a href="https://www.ironrisk.pro" style="color: #00e676; text-decoration: none; font-size: 12px;">www.ironrisk.pro</a>
+                </p>
+            </div>
+          </body>
+        </html>
+        """
+
+        msg = EmailMessage()
+        msg['Subject'] = subject
+        msg['From'] = f"IronRisk <{self.sender_email}>"
+        msg['To'] = recipient_email
+        msg.set_content("Verifica tu email para completar tu registro en IronRisk.")
+        msg.add_alternative(html_content, subtype='html')
+
+        try:
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.sender_email, self.sender_password)
+                server.send_message(msg)
+            logger.info(f"✅ Verification email sent to {recipient_email}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send verification email to {recipient_email}: {e}")
+            return False
+
     def send_password_reset_email(self, recipient_email: str, token: str, locale: str = "es") -> bool:
         """
         Sends an HTML email with a secure link to reset the user's password.

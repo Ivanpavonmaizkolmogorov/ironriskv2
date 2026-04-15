@@ -876,5 +876,24 @@
     "bulkSelected": "selected",
     "bulkLinking": "Linking...",
     "bulkLinkBtn": "Link {count} pairs"
+  },
+  "changelog": {
+    "title": "What's New",
+    "subtitle": "Latest IronRisk improvements",
+    "tags": {
+      "feature": "New Feature",
+      "fix": "Bug Fix",
+      "improvement": "Improvement"
+    },
+    "entries": {
+      "humanizer_v1": {
+        "title": "Humanized Bayesian Engine",
+        "body": "The engine verdict now speaks in plain language. Blind Risk as the main metric, human phrases on every risk gauge, and prioritized alert signals."
+      },
+      "email_verification": {
+        "title": "Email Verification",
+        "body": "You can now verify your email to secure your account. You'll receive a verification email when you register."
+      }
+    }
   }
 }

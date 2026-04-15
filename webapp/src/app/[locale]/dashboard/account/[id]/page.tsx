@@ -32,6 +32,8 @@ import ConnectionStatus from "@/components/ui/ConnectionStatus";
 import { getConnectionMonitor } from "@/services/ConnectionMonitor";
 import InteractiveDistribution from "@/components/features/charts/InteractiveDistribution";
 import AlertsDrawer from "@/components/features/AlertsDrawer";
+import ChangelogButton from "@/components/ui/ChangelogButton";
+import EmailVerificationBanner from "@/components/ui/EmailVerificationBanner";
 import api from "@/services/api";
 
 
@@ -473,6 +475,9 @@ export default function DashboardPage() {
               </div>
             )}
 
+            {/* 📋 Changelog */}
+            <ChangelogButton />
+
             {/* 🔔 Global Alerts Button */}
             <button
               onClick={() => setIsGlobalAlertsOpen(true)}
@@ -576,6 +581,11 @@ export default function DashboardPage() {
           accountId={account?.id || ""}
           initialTargetId={typeof selectedStrategy === 'string' ? selectedStrategy : selectedStrategy?.id}
         />
+      )}
+
+      {/* Email Verification Banner (soft mode) */}
+      {user && !user.email_verified && (
+        <EmailVerificationBanner userEmail={user.email} />
       )}
 
       <PactBanner 

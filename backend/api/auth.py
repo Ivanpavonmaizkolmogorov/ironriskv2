@@ -1,9 +1,10 @@
-"""Auth API routes — Login, Register, Token Management, Password Recovery."""
+"""Auth API routes — Login, Register, Email Verification, Password Recovery."""
 
 import logging
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 
@@ -24,6 +25,19 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 
+def _create_verification_token(user_id: str, email: str) -> str:
+    """Create a short-lived JWT for email verification (24h TTL)."""
+    settings = get_settings()
+    expire = datetime.now(timezone.utc) + timedelta(hours=24)
+    payload = {
+        "sub": user_id,
+        "email": email,
+        "purpose": "email_verification",
+        "exp": expire,
+    }
+    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+
 @router.post("/register", response_model=TokenResponse)
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
     settings = get_settings()
@@ -33,17 +47,18 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     user = register_user(db, req.email, req.password)
     token = create_jwt(user.id, user.email)
 
-    # Fire-and-forget email in background thread — NEVER block the response
+    # Send verification email (fire-and-forget in background thread)
     import threading
-    def _send_email():
+    def _send_emails():
         try:
             email_svc = EmailService()
-            ok = email_svc.send_welcome_email(user.email, locale=req.locale)
+            verify_token = _create_verification_token(user.id, user.email)
+            ok = email_svc.send_verification_email(user.email, verify_token, locale=req.locale)
             if not ok:
-                logger.warning(f"Welcome email failed for {user.email}, account created OK.")
+                logger.warning(f"Verification email failed for {user.email}, account created OK.")
         except Exception as e:
-            logger.error(f"Welcome email exception for {user.email}: {e}")
-    threading.Thread(target=_send_email, daemon=True).start()
+            logger.error(f"Verification email exception for {user.email}: {e}")
+    threading.Thread(target=_send_emails, daemon=True).start()
 
     return TokenResponse(access_token=token, email_sent=True)
 
@@ -58,6 +73,67 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserResponse)
 def get_me(user: User = Depends(get_current_user)):
     return user
+
+
+# ═══════════════════════════════════════════════════════════════════
+# Email Verification
+# ═══════════════════════════════════════════════════════════════════
+
+@router.get("/verify-email")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    """
+    Validates the verification JWT and marks the user's email as verified.
+    Redirects to the frontend login page with a success indicator.
+    """
+    settings = get_settings()
+    try:
+        payload = jwt.decode(
+            token,
+            settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+        )
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Invalid or expired verification link.")
+
+    if payload.get("purpose") != "email_verification":
+        raise HTTPException(status_code=400, detail="Invalid token purpose.")
+
+    user = db.query(User).filter(User.id == payload["sub"]).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    if not user.email_verified:
+        user.email_verified = True
+        db.commit()
+        logger.info(f"✅ Email verified for {user.email}")
+
+    # Redirect to frontend login with verified flag
+    import os
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    return RedirectResponse(url=f"{frontend_url}/es/login?verified=true")
+
+
+@router.post("/resend-verification")
+def resend_verification(user: User = Depends(get_current_user)):
+    """
+    Resend verification email for the currently authenticated user.
+    Requires a valid JWT (user is logged in but not verified).
+    """
+    if user.email_verified:
+        return {"detail": "Email already verified."}
+
+    verify_token = _create_verification_token(user.id, user.email)
+
+    import threading
+    def _send():
+        try:
+            email_svc = EmailService()
+            email_svc.send_verification_email(user.email, verify_token, locale="es")
+        except Exception as e:
+            logger.error(f"Resend verification failed for {user.email}: {e}")
+    threading.Thread(target=_send, daemon=True).start()
+
+    return {"detail": "Verification email sent."}
 
 
 # ═══════════════════════════════════════════════════════════════════
