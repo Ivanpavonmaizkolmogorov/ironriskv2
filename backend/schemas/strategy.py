@@ -64,6 +64,23 @@ class CreateFromSimulationRequest(BaseModel):
     start_date: Optional[str] = None
     bt_discount: Optional[float] = None
 
+# --- SQX Integration Schemas ---
+
+class SQXTrade(BaseModel):
+    """A single trade coming from StrategyQuant X Snippet."""
+    ticket: int
+    open_time: str
+    close_time: str
+    profit: float
+
+class SQXImportRequest(BaseModel):
+    """Direct import of an SQX strategy via Java Snippet."""
+    name: str
+    magic_number: int
+    trades: List[SQXTrade]
+    # Optionally SQX could send max drawdown directly, or backend derives it
+    max_drawdown_limit: float = 0.0
+
 # --- Responses ---
 
 class MetricSnapshotResponse(BaseModel):

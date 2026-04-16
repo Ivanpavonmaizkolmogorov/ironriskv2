@@ -43,22 +43,25 @@ self.addEventListener('fetch', (event) => {
   // API calls: network only (real-time data, never cache)
   if (url.pathname.startsWith('/api/')) return;
 
-  // Static assets: cache-first
+  // Next.js dev assets: skip entirely so HMR works without interference
+  if (url.pathname.startsWith('/_next/')) return;
+
+  // Static assets: network-first with cache fallback
   if (
-    url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|woff2?|ico|webp)$/) ||
-    url.pathname.startsWith('/_next/static/')
+    url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|woff2?|ico|webp)$/)
   ) {
     event.respondWith(
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-        return fetch(event.request).then((response) => {
+      fetch(event.request)
+        .then((response) => {
           if (response.ok) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           }
           return response;
-        });
-      })
+        })
+        .catch(() => caches.match(event.request).then((cached) => {
+          return cached || new Response('', { status: 503, statusText: 'Offline' });
+        }))
     );
     return;
   }
@@ -73,6 +76,12 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
-  );
-});
+      .catch(() => caches.match(event.request).then((cached) => {
+        return cached || new Response('Servidor desconectado. Por favor, asegúrese de que la aplicación está en ejecución.', { 
+          status: 503, 
+          statusText: 'Service Unavailable',
+          headers: new Headers({
+            'Content-Type': 'text/plain; charset=utf-8'
+          })
+        });
+      }))

@@ -49,6 +49,32 @@ def ensure_default_portfolio(db: Session, trading_account_id: str) -> Portfolio:
     return portfolio
 
 
+def ensure_sqx_inbox_portfolio(db: Session, trading_account_id: str) -> Portfolio:
+    """Create or return the 'SQX Inbox' sandbox portfolio for a trading account."""
+    name = "📥 SQX Sandbox"
+    portfolio = db.query(Portfolio).filter(
+        Portfolio.trading_account_id == trading_account_id,
+        Portfolio.name == name,
+    ).first()
+
+    if portfolio:
+        return portfolio
+
+    portfolio = Portfolio(
+        trading_account_id=trading_account_id,
+        name=name,
+        strategy_ids=[],
+        auto_include_new=False,
+        is_default=False,
+    )
+    db.add(portfolio)
+    db.commit()
+    db.refresh(portfolio)
+    logger.info(f"Created '{name}' portfolio for trading_account {trading_account_id}")
+
+    return portfolio
+
+
 def recalculate_portfolio(db: Session, portfolio: Portfolio) -> Portfolio:
     """Merge equity curves chronologically and recompute all metrics."""
     strategies = db.query(Strategy).filter(

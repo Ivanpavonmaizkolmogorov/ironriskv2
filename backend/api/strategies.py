@@ -8,7 +8,10 @@ from typing import List
 
 from models.database import get_db
 from models.user import User
-from schemas.strategy import StrategyResponse, StrategyListResponse, StrategyUpdate, CreateFromSimulationRequest, LiveTradeResponse
+from schemas.strategy import (
+    StrategyResponse, StrategyListResponse, StrategyUpdate, 
+    CreateFromSimulationRequest, LiveTradeResponse, SQXImportRequest
+)
 from services.auth_service import get_current_user
 from services.strategy_service import (
     create_strategy_from_csv, create_strategy_from_simulation,
@@ -46,6 +49,71 @@ def create_from_simulation(
     except Exception as e:
         logger.error(f"create-from-simulation failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+security = HTTPBearer()
+
+@router.post("/sqx-import", response_model=StrategyResponse)
+def sqx_import(
+    req: SQXImportRequest,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db),
+):
+    """Direct import of a strategy from StrategyQuant X JSON payload."""
+    from services.portfolio_service import ensure_sqx_inbox_portfolio, remove_strategy_from_portfolios, recalculate_portfolio
+    from services.trading_account_service import validate_api_token
+    from models.trading_account import TradingAccount
+    
+    # Extract token from the Bearer header
+    api_token = credentials.credentials
+    
+    # 1. Find user's trading account using the provided api_token
+    account = validate_api_token(db, api_token)
+    trading_acct_id = account.id
+    
+    # 2. Build the equity curve
+    equity_curve = []
+    cum_equity = 0.0
+    
+    sorted_trades = sorted(req.trades, key=lambda t: t.close_time)
+    
+    for i, t in enumerate(sorted_trades):
+        cum_equity += t.profit
+        equity_curve.append({
+            "trade": i + 1,
+            "equity": round(cum_equity, 2),
+            "date": t.close_time,
+            "pnl": t.profit
+        })
+        
+    start_date = sorted_trades[0].open_time if sorted_trades else None
+    
+    # 3. Call create_strategy_from_simulation
+    strategy = create_strategy_from_simulation(
+        db=db,
+        trading_account_id=trading_acct_id,
+        name=req.name,
+        magic_number=req.magic_number,
+        equity_curve=equity_curve,
+        start_date=start_date,
+        risk_config={"max_drawdown": {"enabled": True, "limit": req.max_drawdown_limit}} if req.max_drawdown_limit > 0 else None,
+        bt_discount=10.0
+    )
+    
+    # 4. Move to SQX sandbox ONLY (remove from auto-included default workspace)
+    remove_strategy_from_portfolios(db, strategy.id, trading_acct_id)
+    
+    sandbox = ensure_sqx_inbox_portfolio(db, trading_acct_id)
+    ids = list(sandbox.strategy_ids or [])
+    if strategy.id not in ids:
+        ids.append(strategy.id)
+        sandbox.strategy_ids = ids
+        db.commit()
+        recalculate_portfolio(db, sandbox)
+        
+    logger.info(f"Imported SQX strategy '{strategy.name}' into Sandbox")
+    return strategy
 
 
 @router.post("/upload", response_model=StrategyResponse)

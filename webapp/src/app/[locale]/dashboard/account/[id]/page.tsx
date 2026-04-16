@@ -34,6 +34,8 @@ import InteractiveDistribution from "@/components/features/charts/InteractiveDis
 import AlertsDrawer from "@/components/features/AlertsDrawer";
 import ChangelogButton from "@/components/ui/ChangelogButton";
 import EmailVerificationBanner from "@/components/ui/EmailVerificationBanner";
+import SQXToolsDropdown from "@/components/ui/SQXToolsDropdown";
+import UserProfileDropdown from "@/components/ui/UserProfileDropdown";
 import api from "@/services/api";
 
 
@@ -446,22 +448,18 @@ export default function DashboardPage() {
               {account ? account.name : "..."}
             </span>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            <ThemeSelector mode="workspace" />
-            <LanguageSwitcher />
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {account && (
-              <div className="hidden md:flex items-center bg-risk-green/10 border border-risk-green/30 rounded-lg px-2 py-1 gap-2">
-                <span className="text-xs text-iron-400">{tWorkspace("tokenLabel")}</span>
-                <span className="text-xs font-mono text-risk-green">{account.api_token.substring(0, 12)}...</span>
-                <button onClick={copyToken} className="text-xs text-risk-green hover:text-risk-green/70">
-                  {copied ? tWorkspace("copied") : tWorkspace("btnCopy")}
-                </button>
-              </div>
+              <SQXToolsDropdown
+                apiToken={account.api_token}
+                onCopyToken={copyToken}
+                copied={copied}
+              />
             )}
 
             {/* Global Import Progress Bar */}
             {isBatchImporting && (
-              <div className="w-32 lg:w-48 ml-2 mr-2 space-y-1">
+              <div className="w-32 lg:w-48 space-y-1">
                 <div className="flex justify-between text-[10px] text-iron-400 font-medium">
                   <span>Importing...</span>
                   <span>{batchProgress.done}/{batchProgress.total}</span>
@@ -540,29 +538,29 @@ export default function DashboardPage() {
               )}
             </div>
             <OrphanInbox accountId={accountId} onLinked={() => { fetchStrategies(accountId); setLiveEquityVersion(v => v + 1); }} />
-            {account && user?.is_admin && (
-              <Link href="/dashboard/bayes-sandbox" title="Bayes Sandbox (Master)">
-                <Button variant="ghost" size="sm" className="text-iron-500 hover:text-[#00aaff] transition-colors">
-                  🧠
-                </Button>
-              </Link>
-            )}
-            {account && (
-              <Button variant="ghost" size="sm" onClick={() => setIsWorkspaceSettingsOpen(true)}
-                className="text-iron-400 hover:text-iron-200 px-2 sm:px-3">
-                <span className="hidden sm:inline">{tWorkspace("btnSettings")}</span>
-                <span className="sm:hidden text-lg leading-none" title={tWorkspace("btnSettings")}>⚙️</span>
-              </Button>
-            )}
-            <Button variant="ghost" size="sm" className="px-2 sm:px-3 sm:min-w-[120px] text-center" onClick={() => {
-              router.push(`/${locale}`);
-              setTimeout(() => {
-                useAuthStore.getState().logout();
-              }, 200);
-            }}>
-              <span className="hidden sm:inline">{t("logout")}</span>
-              <span className="sm:hidden text-lg leading-none" title={t("logout")}>🚪</span>
-            </Button>
+
+            {/* User Profile Avatar — consolidates Theme, Language, Settings, Logout */}
+            <div className="relative flex items-center">
+              {/* ThemeSelector rendered as invisible trigger — its popover appears normally */}
+              <div className="absolute right-10 top-0 [&>div>button]:opacity-0 [&>div>button]:w-0 [&>div>button]:h-0 [&>div>button]:overflow-hidden" id="theme-trigger-anchor">
+                <ThemeSelector mode="workspace" />
+              </div>
+              <UserProfileDropdown
+                user={user}
+                onLogout={() => {
+                  router.push(`/${locale}`);
+                  setTimeout(() => { useAuthStore.getState().logout(); }, 200);
+                }}
+                onOpenSettings={() => setIsWorkspaceSettingsOpen(true)}
+                onOpenTheme={() => {
+                  // Programmatically click the hidden ThemeSelector button
+                  const anchor = document.getElementById("theme-trigger-anchor");
+                  const btn = anchor?.querySelector("button");
+                  btn?.click();
+                }}
+                showBayesSandbox={!!account}
+              />
+            </div>
           </div>
         </div>
       </nav>
