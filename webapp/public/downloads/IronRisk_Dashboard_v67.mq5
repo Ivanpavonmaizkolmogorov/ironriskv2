@@ -4,13 +4,14 @@
 //+------------------------------------------------------------------+
 #property copyright "IronRisk System"
 #property link      "https://ironrisk.pro"
-#property version   "1.67"
+#property version   "1.68"
 
-// SINGLE-DRAG ARCHITECTURE (v67):
+// SINGLE-DRAG ARCHITECTURE (v68):
 //   The EA auto-creates IronRisk_PnL, saves itself as a template,
 //   applies it to the new chart, and self-destructs. One drag only.
 // v18: Persistent M1 bars via CustomRatesReplace (survives MT5 restarts)
 // v67: Token loading from MQL5/Files/IronRisk/config.txt (installer support)
+// v68: Zero-input — all connection params auto-loaded from config.txt
 
 // --- External Dependencies (Wininet) ---
 #import "wininet.dll"
@@ -28,39 +29,52 @@ int InternetCloseHandle(int hInternet);
 #define INTERNET_FLAG_SECURE (uint)0x00800000
 string g_PnlSymbol = "IronRisk_PnL";
 
+// --- Connection (auto-configured from config.txt) ---
+string         InpApiToken    = "PASTE_TOKEN_HERE";
+string         InpWebhookHost = "api.ironrisk.pro";
+int            InpWebhookPort = 443;
+const string   InpWebhookPath = "/api/live/";
+bool           InpUseHTTPS    = true;
+
 // --- User Inputs ---
-input string   InpApiToken    = "PASTE_TOKEN_HERE"; // Trading Account API Token
-input string   InpWebhookHost = "api.ironrisk.pro"; // Backend Server (no http://)
-input int      InpWebhookPort = 443;                // Port (8000 dev, 443 prod)
-const string   InpWebhookPath = "/api/live/";       // API Base Path (internal)
-input bool     InpUseHTTPS    = true;               // Use HTTPS
 input int      InpTimerSec    = 5;                  // Heartbeat Frequency (seconds)
 
 //+------------------------------------------------------------------+
-//| LoadTokenFromConfig: Reads token from installer config file      |
+//| LoadConfigFromFile: Reads all settings from installer config.txt |
 //+------------------------------------------------------------------+
-string LoadTokenFromConfig(string inputToken)
+void LoadConfigFromFile()
   {
-   if(inputToken != "PASTE_TOKEN_HERE" && inputToken != "")
-      return inputToken;
-   
    string configFile = "IronRisk\\config.txt";
-   if(!FileIsExist(configFile)) return inputToken;
+   if(!FileIsExist(configFile))
+     {
+      Print("[IR] No config file found at ", configFile);
+      return;
+     }
    
    int h = FileOpen(configFile, FILE_READ|FILE_TXT|FILE_ANSI);
-   if(h == INVALID_HANDLE) return inputToken;
+   if(h == INVALID_HANDLE)
+     {
+      Print("[IR] Cannot open config file at ", configFile);
+      return;
+     }
    
-   string token = "";
    while(!FileIsEnding(h))
      {
       string line = FileReadString(h);
-      if(StringFind(line, "token=") == 0) { token = StringSubstr(line, 6); break; }
-      if(StringFind(line, "irk_") == 0)   { token = line; break; }
+      StringTrimLeft(line); StringTrimRight(line);
+      
+      if(StringFind(line, "token=") == 0)
+        {
+         string t = StringSubstr(line, 6);
+         if(t != "" && t != "PASTE_TOKEN_HERE") InpApiToken = t;
+        }
+      else if(StringFind(line, "host=") == 0)  InpWebhookHost = StringSubstr(line, 5);
+      else if(StringFind(line, "port=") == 0)  InpWebhookPort = (int)StringToInteger(StringSubstr(line, 5));
+      else if(StringFind(line, "https=") == 0) InpUseHTTPS = (StringSubstr(line, 6) == "true" || StringSubstr(line, 6) == "1");
+      else if(StringFind(line, "irk_") == 0 && line != "") InpApiToken = line;
      }
    FileClose(h);
-   
-   if(token != "") { Print("[IR] Token loaded from config file"); return token; }
-   return inputToken;
+   Print("[IR] Config loaded from file. Host: ", InpWebhookHost);
   }
 
 // --- Global Types ---
@@ -1873,8 +1887,8 @@ int OnInit()
    if(!TerminalInfoInteger(TERMINAL_DLLS_ALLOWED) && !MQLInfoInteger(MQL_DLLS_ALLOWED))
      { MessageBox("You must allow DLL imports.", "IronRisk", MB_ICONWARNING|MB_OK); return(INIT_FAILED); }
 
-    string resolvedToken = LoadTokenFromConfig(InpApiToken);
-    AppServer = new CServerClient(InpWebhookHost, InpWebhookPort, InpWebhookPath, InpUseHTTPS, resolvedToken);
+    LoadConfigFromFile();
+    AppServer = new CServerClient(InpWebhookHost, InpWebhookPort, InpWebhookPath, InpUseHTTPS, InpApiToken);
    g_Layout = new CDashboardLayout();
    g_Formatter = new CMetricFormatter();
     InitDefaultRiskVars();
