@@ -140,12 +140,15 @@ export default function UserProfileDropdown({
 
   // ─── Menu Items (OOP-style declarative config) ───
   const menuItems: MenuItem[] = [
-    {
-      id: "tools",
-      label: locale === "es" ? "Herramientas" : "Tools",
-      icon: "🔧",
-      action: () => setShowTools(true),
-    },
+    ...(isAdmin
+      ? [{
+          id: "tools",
+          label: locale === "es" ? "Herramientas" : "Tools",
+          icon: "🔧",
+          action: () => setShowTools(true),
+          adminOnly: true,
+        }]
+      : []),
     {
       id: "theme",
       label: locale === "es" ? "Tema visual" : "Visual theme",
