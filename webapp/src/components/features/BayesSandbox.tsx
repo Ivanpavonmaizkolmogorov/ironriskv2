@@ -380,6 +380,7 @@ interface InfoSignal {
 interface InfoReport {
   headline: string;
   conflict_detected: boolean;
+  phase: "waiting" | "calibrating" | "active";
   signals: InfoSignal[];
 }
 
@@ -1045,10 +1046,44 @@ export default function BayesSandbox() {
           {d ? (
             <>
               {/* Veredicto Maestro */}
-              {data?.historical_risk && data.historical_risk.length > 0 && (
+              {data?.historical_risk && data.historical_risk.length > 0 && (() => {
+                const phase = data?.info_report?.phase || 'active';
+
+                // --- EARLY PHASE: informational badge ---
+                if (phase === 'waiting' || phase === 'calibrating') {
+                  const isWaiting = phase === 'waiting';
+                  return (
+                    <div className="bg-iron-900 border border-iron-800 rounded-xl p-4 flex items-center gap-4 shadow-xl">
+                      <div className="flex flex-col justify-center items-center p-3 rounded-xl min-w-[120px] border border-blue-500/30 bg-blue-500/10">
+                        <div className="text-3xl mb-1 text-blue-400">{isWaiting ? '⏳' : '📡'}</div>
+                        <div className="font-mono font-bold tracking-widest text-sm text-blue-400">
+                          {isWaiting ? 'ESPERANDO' : 'CALIBRANDO'}
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-iron-200 font-bold mb-1 text-sm">Veredicto Maestro de Riesgo</h3>
+                        <p className="text-[11px] text-blue-300 leading-relaxed">
+                          {isWaiting
+                            ? 'Sin datos live. Solo se muestra la proyección del backtest.'
+                            : `Calibrando — ${data?.live_trades_total ?? 0} trades live. Los indicadores aún no tienen potencia estadística.`
+                          }
+                        </p>
+                        <p className="text-[10px] text-iron-500 italic mt-1">
+                          {isWaiting
+                            ? 'Necesitas al menos 10 trades live para activar el semáforo.'
+                            : `Faltan ${Math.max(0, 10 - (data?.live_trades_total ?? 0))} trades para el veredicto completo.`
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // --- ACTIVE PHASE: full traffic light ---
+                const lastRisk = data.historical_risk[data.historical_risk.length - 1];
+                return (
                 <div className="bg-iron-900 border border-iron-800 rounded-xl p-4 flex items-center gap-4 shadow-xl">
                   {(() => {
-                    const lastRisk = data.historical_risk[data.historical_risk.length - 1];
                     const status = lastRisk.status;
                     return (
                       <>
@@ -1087,7 +1122,8 @@ export default function BayesSandbox() {
                     );
                   })()}
                 </div>
-              )}
+                );
+              })()}
 
               {/* Unified P(EV > 0) Card */}
               <div className="bg-surface-secondary border border-iron-700 rounded-xl p-6 space-y-5">

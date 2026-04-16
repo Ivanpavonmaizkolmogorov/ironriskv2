@@ -403,6 +403,7 @@ interface InfoSignal {
 interface InfoReport {
   headline: string;
   conflict_detected: boolean;
+  phase: "waiting" | "calibrating" | "active";
   signals: InfoSignal[];
 }
 
@@ -581,6 +582,39 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
             <>
                {/* Veredicto Maestro de Riesgo — Humanized */}
                {(data?.info_report || data?.risk_gauges) && (() => {
+                 const phase = data?.info_report?.phase || 'active';
+
+                 // --- EARLY PHASE: show informational badge, not the traffic light ---
+                 if (phase === 'waiting' || phase === 'calibrating') {
+                   const isWaiting = phase === 'waiting';
+                   return (
+                     <div className="bg-iron-900 border border-iron-800 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-start gap-4 shadow-xl mb-4 min-w-0 w-full overflow-hidden">
+                       <div className="flex flex-col justify-center items-center p-3 rounded-xl min-w-[120px] border border-blue-500/30 bg-blue-500/10">
+                         <div className="text-4xl mb-1 text-blue-400">{isWaiting ? '⏳' : '📡'}</div>
+                         <div className="font-mono font-bold tracking-widest text-sm text-blue-400">
+                           {isWaiting ? 'ESPERANDO' : 'CALIBRANDO'}
+                         </div>
+                       </div>
+                       <div className="flex-1 min-w-0">
+                         <h3 className="text-iron-200 font-bold text-sm mb-1">{tV('masterTitle')}</h3>
+                         <p className="text-sm font-medium text-blue-300 leading-relaxed mb-2">
+                           {isWaiting
+                             ? 'Sin datos live. Solo se muestra la proyección del backtest.'
+                             : `Calibrando — ${data?.live_trades_total ?? 0} trades live. Los indicadores aún no tienen potencia estadística.`
+                           }
+                         </p>
+                         <p className="text-[11px] text-iron-500 italic leading-relaxed">
+                           {isWaiting
+                             ? 'Necesitas operar al menos 10 trades para que el motor pueda emitir un veredicto con fundamento estadístico.'
+                             : `Faltan ${Math.max(0, 10 - (data?.live_trades_total ?? 0))} trades más para activar el semáforo completo. Puede ser variación normal con cada operación.`
+                           }
+                         </p>
+                       </div>
+                     </div>
+                   );
+                 }
+
+                 // --- ACTIVE PHASE: full traffic light ---
                  const humanizer = new Humanizer(tH, tV);
 
                  let hasFatal = false;

@@ -18,17 +18,23 @@ class InfoSignal:
     i18n_params: Optional[dict] = None  # e.g. {"label": "Win Rate", "observed": "37%", ...}
 
 
+# Phase thresholds — configurable
+MIN_TRADES_FOR_ACTIVE = 10  # Below this, consistency tests lack statistical power
+
+
 @dataclass
 class RiskInfoReport:
     """The full informative report for a strategy."""
     signals: list[InfoSignal] = field(default_factory=list)
     headline: str = ""        # Top-level summary sentence
     conflict_detected: bool = False
+    phase: str = "active"     # "waiting" | "calibrating" | "active"
 
     def to_dict(self) -> dict:
         return {
             "headline": self.headline,
             "conflict_detected": self.conflict_detected,
+            "phase": self.phase,
             "signals": [
                 {
                     "category": s.category,
@@ -83,6 +89,14 @@ class RiskInfoEngine:
         live_trades: int = 0,
     ) -> RiskInfoReport:
         report = RiskInfoReport()
+
+        # --- Phase determination ---
+        if live_trades == 0:
+            report.phase = "waiting"
+        elif live_trades < MIN_TRADES_FOR_ACTIVE:
+            report.phase = "calibrating"
+        else:
+            report.phase = "active"
 
         # --- 1. Consistency signals ---
         n_red = 0
@@ -180,6 +194,12 @@ class RiskInfoEngine:
 
     def _make_headline(self, report: RiskInfoReport, live_trades: int) -> str:
         """Generate a factual, non-prescriptive headline."""
+        # Early-phase headlines take priority
+        if report.phase == "waiting":
+            return "Sin datos live. Solo se muestra la proyección del backtest."
+        elif report.phase == "calibrating":
+            return f"Calibrando — {live_trades} trades live. Los indicadores aún no tienen potencia estadística."
+
         warnings = [s for s in report.signals if s.severity == "warning"]
         notables = [s for s in report.signals if s.severity == "notable"]
 
