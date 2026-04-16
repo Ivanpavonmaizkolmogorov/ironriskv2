@@ -151,7 +151,15 @@ $ans = Read-Host "Would you like to auto-restart MetaTrader 5 now to finish the 
 
 if ($ans -match "^[yY]") {
     Write-Host "  [SYSTEM] Restarting MetaTrader 5..." -ForegroundColor Yellow
-    Stop-Process -Name terminal64 -Force -ErrorAction SilentlyContinue
+    $targetKillExe = (Join-Path $selected.BrokerPath "terminal64.exe").ToLower()
+    try {
+        $procsToKill = Get-CimInstance Win32_Process -Filter "Name='terminal64.exe'" -ErrorAction SilentlyContinue
+        foreach ($p in $procsToKill) {
+            if ($p.ExecutablePath -and $p.ExecutablePath.ToLower() -eq $targetKillExe) {
+                Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
+            }
+        }
+    } catch {}
     Start-Sleep -Seconds 3
     
     # Inject Auto-start Service
