@@ -337,6 +337,9 @@ export default function UserProfileDropdown({
                         {item.id === "tools" && (
                           <span className="ml-auto text-[10px] text-iron-600">→</span>
                         )}
+                        {item.adminOnly && (
+                          <span className="ml-auto text-[9px] text-amber-500/60 font-mono">admin</span>
+                        )}
                       </button>
                       {item.dividerAfter && <div className="mx-3 my-1 border-t border-iron-800" />}
                     </React.Fragment>
