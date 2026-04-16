@@ -889,6 +889,14 @@
       "improvement": "Improvement"
     },
     "entries": {
+      "user_profile_avatar": {
+        "title": "User Profile in Navbar",
+        "body": "Your avatar with initials now groups Theme, Language, Settings, and Sign out into a single dropdown. Fewer buttons, same functionality."
+      },
+      "sqx_tools_center": {
+        "title": "SQX Tools Center",
+        "body": "New 🔧 SQX button in the navbar that centralizes snippet downloads (Uploader, MagicAssigner, Dashboard EA) and token copy in one place."
+      },
       "vps_hostname": {
         "title": "VPS/Computer Visibility",
         "body": "Each workspace now shows the hostname of the computer or VPS running your MetaTrader. Auto-detected during installation — no DLLs or manual setup required."

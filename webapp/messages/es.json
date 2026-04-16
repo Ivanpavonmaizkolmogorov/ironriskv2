@@ -889,6 +889,14 @@
       "improvement": "Mejora"
     },
     "entries": {
+      "user_profile_avatar": {
+        "title": "Perfil de usuario en la barra",
+        "body": "Tu avatar con iniciales ahora agrupa Tema, Idioma, Configuración y Cerrar Sesión en un solo menú desplegable. Menos botones, misma potencia."
+      },
+      "sqx_tools_center": {
+        "title": "Centro de Herramientas SQX",
+        "body": "Nuevo botón 🔧 SQX en la barra que centraliza descargas de snippets (Uploader, MagicAssigner, Dashboard EA) y copia de token en un solo lugar."
+      },
       "vps_hostname": {
         "title": "Visibilidad de VPS/Ordenador",
         "body": "Cada workspace muestra ahora el nombre del equipo o VPS desde el que emite datos tu MetaTrader. Se detecta automáticamente durante la instalación — sin DLLs ni configuración manual."

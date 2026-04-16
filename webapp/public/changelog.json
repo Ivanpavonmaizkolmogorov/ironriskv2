@@ -1,5 +1,17 @@
 [
   {
+    "id": "user_profile_avatar",
+    "date": "2026-04-16",
+    "tag": "feature",
+    "internal": false
+  },
+  {
+    "id": "sqx_tools_center",
+    "date": "2026-04-16",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "vps_hostname",
     "date": "2026-04-16",
     "tag": "feature",
