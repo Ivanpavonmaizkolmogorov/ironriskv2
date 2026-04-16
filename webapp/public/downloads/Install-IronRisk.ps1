@@ -55,14 +55,16 @@ Get-ChildItem $TerminalBasePath -Directory | ForEach-Object {
         
         # Check if terminal is currently running
         $isRunning = $false
-        Get-Process terminal64 -ErrorAction SilentlyContinue | ForEach-Object {
-            try { 
-                # Avoid permission denied errors on inaccessible paths
-                if ($_.MainModule -and $_.MainModule.FileName -eq (Join-Path $brokerPath "terminal64.exe")) {
-                    $isRunning = $true 
-                } 
-            } catch {}
-        }
+        $targetExe = (Join-Path $brokerPath "terminal64.exe").ToLower()
+        try {
+            $runningProcs = Get-CimInstance Win32_Process -Filter "Name='terminal64.exe'" -ErrorAction SilentlyContinue
+            foreach ($p in $runningProcs) {
+                if ($p.ExecutablePath -and $p.ExecutablePath.ToLower() -eq $targetExe) {
+                    $isRunning = $true
+                    break
+                }
+            }
+        } catch {}
         $runText = if ($isRunning) { "(RUNNING)" } else { "" }
         
         $terminals += [PSCustomObject]@{
