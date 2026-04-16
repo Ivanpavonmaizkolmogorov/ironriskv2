@@ -21,6 +21,7 @@ class TradingAccountResponse(BaseModel):
     default_dashboard_layout: Optional[dict] = None
     theme: Optional[str] = None
     has_connected: bool = False
+    hostname: Optional[str] = None
     last_heartbeat_at: Optional[datetime] = None
     created_at: datetime
 

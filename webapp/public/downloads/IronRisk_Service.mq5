@@ -33,6 +33,7 @@ bool           InpUseHTTPS    = true;               // Use HTTPS
 input int      InpTimerSec    = 5;                   // Heartbeat Frequency (seconds)
 
 const string   API_BASE_PATH  = "/api/live/";        // API Base Path (internal)
+string         GlobalHostname = "Unknown";             // Captured from config.txt
 
 
 //+------------------------------------------------------------------+
@@ -77,6 +78,8 @@ public:
                else if(StringFind(line, "host=") == 0) InpWebhookHost = StringSubstr(line, 5);
                else if(StringFind(line, "port=") == 0) InpWebhookPort = (int)StringToInteger(StringSubstr(line, 5));
                else if(StringFind(line, "https=") == 0) InpUseHTTPS = (StringSubstr(line, 6) == "true" || StringSubstr(line, 6) == "1");
+               else if(StringFind(line, "https=") == 0) InpUseHTTPS = (StringSubstr(line, 6) == "true" || StringSubstr(line, 6) == "1");
+               else if(StringFind(line, "hostname=") == 0) GlobalHostname = StringSubstr(line, 9);
                
                // Also support plain token on first line if it starts with irk_
                else if(StringFind(line, "irk_") == 0)
@@ -459,6 +462,7 @@ public:
       
       string payload = "{\"api_token\":\"" + m_token + "\""
                      + ",\"account_number\":\"" + IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN)) + "\""
+                     + ",\"hostname\":\"" + GlobalHostname + "\""
                      + ",\"trades\":[" + jsonTrades + "]}";
       
       string resp = m_http.Post(m_basePath + "sync-trades", payload);
@@ -491,6 +495,7 @@ public:
      {
       string json = "{\"api_token\":\"" + m_token + "\""
                   + ",\"account_number\":\"" + IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN)) + "\""
+                  + ",\"hostname\":\"" + GlobalHostname + "\""
                   + ",\"magic_number\":" + IntegerToString(magic)
                   + ",\"current_pnl\":" + DoubleToString(pnl, 2)
                   + ",\"current_drawdown\":" + DoubleToString(dd, 2)

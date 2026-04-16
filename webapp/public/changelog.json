@@ -1,5 +1,11 @@
 [
   {
+    "id": "vps_hostname",
+    "date": "2026-04-16",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "zero_friction",
     "date": "2026-04-16",
     "tag": "feature",

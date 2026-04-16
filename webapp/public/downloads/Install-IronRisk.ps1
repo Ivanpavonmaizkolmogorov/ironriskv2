@@ -129,7 +129,7 @@ $cfgDir = Join-Path $base "MQL5\Files\IronRisk"
 if (-not (Test-Path $cfgDir)) { New-Item -ItemType Directory -Path $cfgDir -Force | Out-Null }
 $cfgFile = Join-Path $cfgDir "config.txt"
 
-$configText = "token=$Token"
+$configText = "token=$Token`r`nhostname=$env:COMPUTERNAME"
 if ($Server -match "localhost") {
     $configText += "`r`nhost=127.0.0.1`r`nport=8001`r`nhttps=false"
 }

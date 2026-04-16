@@ -8,6 +8,7 @@ export interface TradingAccount {
   api_token: string;
   is_active: boolean;
   has_connected: boolean;
+  hostname?: string | null;
   theme?: string | null;
   default_dashboard_layout?: any;
   last_heartbeat_at?: string | null;

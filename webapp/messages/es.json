@@ -889,6 +889,10 @@
       "improvement": "Mejora"
     },
     "entries": {
+      "vps_hostname": {
+        "title": "Visibilidad de VPS/Ordenador",
+        "body": "Cada workspace muestra ahora el nombre del equipo o VPS desde el que emite datos tu MetaTrader. Se detecta automáticamente durante la instalación — sin DLLs ni configuración manual."
+      },
       "zero_friction": {
         "title": "Onboarding Zero-Fricción",
         "body": "Instalación del Service y Dashboard directamente desde el Auto-Instalador, sin configuraciones manuales. El entorno se encripta de forma transparente."

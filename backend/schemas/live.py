@@ -16,6 +16,7 @@ class HeartbeatRequest(BaseModel):
     stagnation_days: int = 0
     stagnation_trades: int = 0
     floating_by_magic: Optional[dict[str, float]] = None  # v46: per-magic floating PnL
+    hostname: Optional[str] = None  # VPS/Computer name injected by installer
     language: str = "es"
 
 

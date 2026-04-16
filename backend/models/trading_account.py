@@ -27,6 +27,7 @@ class TradingAccount(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     broker: Mapped[str] = mapped_column(String(100), nullable=True) # Optional
     account_number: Mapped[str] = mapped_column(String(50), nullable=True) # Optional
+    hostname: Mapped[str] = mapped_column(String(100), nullable=True) # VPS/Computer name captured by installer
     api_token: Mapped[str] = mapped_column(
         String(64), unique=True, nullable=False, default=generate_api_token, index=True
     )

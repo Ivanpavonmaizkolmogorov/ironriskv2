@@ -620,8 +620,10 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
             f"[AUTO-BIND] Workspace '{account.name}' (id={account.id}) bound to MT5 account {incoming_acc}"
         )
 
-    # 1.6 Guardar timestamp de conexión activa
+    # 1.6 Guardar timestamp de conexión activa + hostname del VPS/ordenador
     account.last_heartbeat_at = datetime.now(timezone.utc)
+    if req.hostname and req.hostname != account.hostname:
+        account.hostname = req.hostname
     db.commit()
 
     master_toggles = (account.default_dashboard_layout or {}).get("master_toggles", {}) if account else {}

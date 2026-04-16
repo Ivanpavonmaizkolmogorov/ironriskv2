@@ -322,6 +322,7 @@ export default function TradingAccountManager() {
                 ) : a.is_active && !a.has_connected ? (
                   <span className="text-risk-yellow/70 italic">{t("actNumber")}: ⏳ {t("autoDetectPending")}</span>
                 ) : null}
+                {a.hostname && <span>🖥️ VPS: <span className="text-iron-300">{a.hostname}</span></span>}
               </div>
             </div>
             <div className="flex flex-wrap sm:flex-col justify-end gap-2 mt-3 sm:mt-0 sm:ml-4 shrink-0">

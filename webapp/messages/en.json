@@ -889,6 +889,10 @@
       "improvement": "Improvement"
     },
     "entries": {
+      "vps_hostname": {
+        "title": "VPS/Computer Visibility",
+        "body": "Each workspace now shows the hostname of the computer or VPS running your MetaTrader. Auto-detected during installation — no DLLs or manual setup required."
+      },
       "zero_friction": {
         "title": "Zero-Friction Onboarding",
         "body": "Install the Service and Dashboard directly from the Auto-Installer with zero manual configuration. The workspace is seamlessly encrypted."
