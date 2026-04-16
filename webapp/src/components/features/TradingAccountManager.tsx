@@ -13,7 +13,7 @@ import { useThemeStore } from "@/store/useThemeStore";
 import ThemeSelector from "./ThemeSelector";
 import { Pencil } from "lucide-react";
 import { isConnectionAlive, getConnectionMonitor } from "@/services/ConnectionMonitor";
-import { EA_DOWNLOAD_PATH } from "@/config/ea";
+import { EA_DOWNLOAD_PATH, SERVICE_DOWNLOAD_PATH } from "@/config/ea";
 
 export default function TradingAccountManager() {
   const router = useRouter();
@@ -27,6 +27,7 @@ export default function TradingAccountManager() {
   const [isEntering, setIsEntering] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [installerDownloaded, setInstallerDownloaded] = useState<string | null>(null);
   const t = useTranslations("workspaceManager");
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export default function TradingAccountManager() {
   };
 
   const createAccount = async () => {
-    if (!newName.trim() || !newAccountNumber.trim()) return;
+    if (!newName.trim()) return;
     setIsCreating(true);
     try {
       await tradingAccountAPI.create({
@@ -104,6 +105,43 @@ export default function TradingAccountManager() {
     setTimeout(() => setCopied(null), 2000);
   };
 
+  const downloadInstaller = (token: string) => {
+    const lines = [
+      '@echo off',
+      'title IronRisk Auto-Installer',
+      'setlocal enabledelayedexpansion',
+      'mode con: cols=85 lines=25',
+      'color 0A',
+      '',
+      `set "TOKEN=${token}"`,
+      `set "SERVER=${window.location.origin}/downloads"`,
+      '',
+      ':: Create temporary script',
+      'set "PS1_FILE=%TEMP%\\Install-IronRisk.ps1"',
+      `curl -sL -o "%PS1_FILE%" "%SERVER%/Install-IronRisk.ps1?v=${Date.now()}"`,
+      '',
+      'if exist "%PS1_FILE%" (',
+      '    powershell -NoProfile -ExecutionPolicy Bypass -File "%PS1_FILE%" -Token "%TOKEN%" -Server "%SERVER%"',
+      '    del "%PS1_FILE%"',
+      ') else (',
+      '    color 0C',
+      '    echo [X] Error: Could not download the installer from %SERVER%',
+      '    pause',
+      ')',
+      'exit'
+    ];
+    const bat = lines.join('\r\n');
+    const blob = new Blob([bat], { type: "application/x-bat" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Install-IronRisk.bat`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setInstallerDownloaded(token);
+    setTimeout(() => setInstallerDownloaded(null), 4000);
+  };
+
   const renameAccount = async (id: string) => {
     if (!editingName.trim()) { setEditingId(null); return; }
     setAccounts((prev: TradingAccount[]) => prev.map(a => a.id === id ? { ...a, name: editingName.trim() } : a));
@@ -142,17 +180,26 @@ export default function TradingAccountManager() {
       <Card>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-iron-100">🏦 {t("title")}</h3>
-        <a href={EA_DOWNLOAD_PATH} download>
-          <button className="
-        bg-transparent text-iron-400 hover:text-iron-200 hover:bg-surface-elevated px-3 py-1.5 text-xs
-        rounded-lg font-medium transition-all duration-200
-        disabled:opacity-40 disabled:cursor-not-allowed
-        focus:outline-none focus:ring-2 focus:ring-risk-green/30
-        text-risk-green border border-risk-green/30
-      ">
-            ⬇️ {t("downloadEA")}
-          </button>
-        </a>
+        <div className="flex items-center gap-2">
+          <a href={SERVICE_DOWNLOAD_PATH} download>
+            <button className="
+              bg-transparent text-iron-500 hover:text-iron-300 hover:bg-surface-elevated px-2.5 py-1.5 text-xs
+              rounded-lg font-medium transition-all duration-200
+              focus:outline-none
+            ">
+              ⬇️ Service .ex5
+            </button>
+          </a>
+          <a href={EA_DOWNLOAD_PATH} download>
+            <button className="
+              bg-transparent text-iron-500 hover:text-iron-300 hover:bg-surface-elevated px-2.5 py-1.5 text-xs
+              rounded-lg font-medium transition-all duration-200
+              focus:outline-none
+            ">
+              ⬇️ Dashboard .ex5
+            </button>
+          </a>
+        </div>
       </div>
       <p className="text-sm text-iron-500 mb-6">
         {t("description")}
@@ -207,7 +254,7 @@ export default function TradingAccountManager() {
             <Button 
               onClick={createAccount} 
               isLoading={isCreating} 
-              disabled={!newName.trim() || !newAccountNumber.trim()} 
+              disabled={!newName.trim()} 
               size="lg"
               className="w-full sm:w-auto px-10 shadow-[0_0_15px_rgba(0,230,118,0.2)]"
             >
@@ -239,7 +286,7 @@ export default function TradingAccountManager() {
             {t("guidedBindWarning")}
           </p>
           <div className="flex justify-end mt-1">
-            <Button onClick={createAccount} isLoading={isCreating} disabled={!newName.trim() || !newAccountNumber.trim()} size="md">
+            <Button onClick={createAccount} isLoading={isCreating} disabled={!newName.trim()} size="md">
               {t("btnCreate")}
             </Button>
           </div>
@@ -290,12 +337,17 @@ export default function TradingAccountManager() {
                 {a.is_active && (
                   <>
                     {!a.has_connected ? (
-                      <a href={EA_DOWNLOAD_PATH} download className="no-underline">
-                        <button className="flex items-center gap-1.5 bg-risk-yellow/10 border border-risk-yellow/20 px-2.5 py-1 rounded-full text-xs font-semibold text-risk-yellow animate-pulse hover:bg-risk-yellow/20 cursor-pointer transition-colors">
-                          <div className="w-1.5 h-1.5 bg-risk-yellow rounded-full"></div>
-                          {t("waitingEA")} ⬇
-                        </button>
-                      </a>
+                      <button
+                        onClick={() => downloadInstaller(a.api_token)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all duration-300 ${
+                          installerDownloaded === a.api_token
+                            ? "bg-risk-green/20 border border-risk-green/40 text-risk-green"
+                            : "bg-risk-yellow/10 border border-risk-yellow/20 text-risk-yellow animate-pulse hover:bg-risk-yellow/20"
+                        }`}
+                      >
+                        <div className={`w-1.5 h-1.5 rounded-full ${installerDownloaded === a.api_token ? "bg-risk-green" : "bg-risk-yellow"}`}></div>
+                        {installerDownloaded === a.api_token ? `✅ ${t("installerReady")}` : `⚡ ${t("downloadInstaller")} ⬇`}
+                      </button>
                     ) : (
                       <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                         isConnectionAlive(a.last_heartbeat_at)
@@ -324,21 +376,11 @@ export default function TradingAccountManager() {
               </div>
               <div className="flex gap-4 mt-1 text-xs text-iron-500">
                 {a.broker && <span>{t("actBroker")}: <span className="text-iron-300">{a.broker}</span></span>}
-                {a.account_number && <span>{t("actNumber")}: <span className="text-iron-300">{a.account_number}</span></span>}
-              </div>
-              <div
-                className="mt-3 flex items-center gap-2 min-w-0 cursor-pointer group/token"
-                onClick={() => copyToken(a.api_token)}
-                title={copied === a.api_token ? "✅" : t("btnCopy")}
-              >
-                <span className="text-xs text-iron-400 shrink-0">{t("actToken")}:</span>
-                <span className="text-xs font-mono text-risk-green bg-risk-green/10 px-2 py-1 rounded truncate group-hover/token:bg-risk-green/20 transition-colors">
-                   {a.api_token}
-                </span>
-                <span className="text-[10px] text-iron-500 group-hover/token:text-iron-300 transition-colors shrink-0">
-                  {copied === a.api_token ? "✅" : "📋"}
-                </span>
-              </div>
+                {a.account_number ? (
+                  <span>{t("actNumber")}: <span className="text-iron-300">{a.account_number}</span></span>
+                ) : a.is_active && !a.has_connected ? (
+                  <span className="text-risk-yellow/70 italic">{t("actNumber")}: ⏳ {t("autoDetectPending")}</span>
+                ) : null}
             </div>
             <div className="flex flex-wrap sm:flex-col justify-end gap-2 mt-3 sm:mt-0 sm:ml-4 shrink-0">
               {a.is_active && (
@@ -359,10 +401,12 @@ export default function TradingAccountManager() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full text-left justify-center sm:justify-start min-w-[110px]"
-                    onClick={() => copyToken(a.api_token)}
+                    className={`w-full text-left justify-center sm:justify-start min-w-[110px] ${
+                      installerDownloaded === a.api_token ? "text-risk-green" : "text-risk-green"
+                    }`}
+                    onClick={() => downloadInstaller(a.api_token)}
                   >
-                    {copied === a.api_token ? `✅ ${t("btnCopy")}` : t("btnCopy")}
+                    {installerDownloaded === a.api_token ? `✅ ${t("installerReady")}` : `⚡ ${t("downloadInstaller")}`}
                   </Button>
                   <Button
                     variant="danger"
