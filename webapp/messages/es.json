@@ -889,6 +889,10 @@
       "improvement": "Mejora"
     },
     "entries": {
+      "zero_friction": {
+        "title": "Onboarding Zero-Fricción",
+        "body": "Instalación del Service y Dashboard directamente desde el Auto-Instalador, sin configuraciones manuales. El entorno se encripta de forma transparente."
+      },
       "humanizer_v1": {
         "title": "Motor Bayesiano humanizado",
         "body": "El veredicto del motor ahora habla en lenguaje claro. Riesgo Ciego como métrica protagonista, frases humanas en cada gauge de riesgo y señales de alerta priorizadas."

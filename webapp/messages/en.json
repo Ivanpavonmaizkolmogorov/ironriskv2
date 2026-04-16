@@ -889,6 +889,10 @@
       "improvement": "Improvement"
     },
     "entries": {
+      "zero_friction": {
+        "title": "Zero-Friction Onboarding",
+        "body": "Install the Service and Dashboard directly from the Auto-Installer with zero manual configuration. The workspace is seamlessly encrypted."
+      },
       "humanizer_v1": {
         "title": "Humanized Bayesian Engine",
         "body": "The engine verdict now speaks in plain language. Blind Risk as the main metric, human phrases on every risk gauge, and prioritized alert signals."
