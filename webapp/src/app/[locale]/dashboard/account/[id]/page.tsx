@@ -34,7 +34,6 @@ import InteractiveDistribution from "@/components/features/charts/InteractiveDis
 import AlertsDrawer from "@/components/features/AlertsDrawer";
 import ChangelogButton from "@/components/ui/ChangelogButton";
 import EmailVerificationBanner from "@/components/ui/EmailVerificationBanner";
-import SQXToolsDropdown from "@/components/ui/SQXToolsDropdown";
 import UserProfileDropdown from "@/components/ui/UserProfileDropdown";
 import api from "@/services/api";
 
@@ -449,13 +448,6 @@ export default function DashboardPage() {
             </span>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {account && (
-              <SQXToolsDropdown
-                apiToken={account.api_token}
-                onCopyToken={copyToken}
-                copied={copied}
-              />
-            )}
 
             {/* Global Import Progress Bar */}
             {isBatchImporting && (
@@ -553,12 +545,14 @@ export default function DashboardPage() {
                 }}
                 onOpenSettings={() => setIsWorkspaceSettingsOpen(true)}
                 onOpenTheme={() => {
-                  // Programmatically click the hidden ThemeSelector button
                   const anchor = document.getElementById("theme-trigger-anchor");
                   const btn = anchor?.querySelector("button");
                   btn?.click();
                 }}
                 showBayesSandbox={!!account}
+                apiToken={account?.api_token}
+                onCopyToken={copyToken}
+                copied={copied}
               />
             </div>
           </div>

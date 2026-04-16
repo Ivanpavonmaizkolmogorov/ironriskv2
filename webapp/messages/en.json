@@ -894,8 +894,8 @@
         "body": "Your avatar with initials now groups Theme, Language, Settings, and Sign out into a single dropdown. Fewer buttons, same functionality."
       },
       "sqx_tools_center": {
-        "title": "SQX Tools Center",
-        "body": "New 🔧 SQX button in the navbar that centralizes snippet downloads (Uploader, MagicAssigner, Dashboard EA) and token copy in one place."
+        "title": "Tools Center",
+        "body": "Downloads (Dashboard EA, Uploader, MagicAssigner), token copy, and tools — all accessible from your profile avatar in one click."
       },
       "vps_hostname": {
         "title": "VPS/Computer Visibility",
