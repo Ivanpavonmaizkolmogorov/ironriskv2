@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     SMTP_EMAIL: str | None = None
     SMTP_PASSWORD: str | None = None
     TELEGRAM_BOT_TOKEN: str | None = None
+    ADMIN_TELEGRAM_CHAT_ID: str | None = None
     BETA_ACCESS_CODE: str | None = None
 
     class Config:

@@ -13,7 +13,6 @@ import { useThemeStore } from "@/store/useThemeStore";
 import ThemeSelector from "./ThemeSelector";
 import { Pencil } from "lucide-react";
 import { isConnectionAlive, getConnectionMonitor } from "@/services/ConnectionMonitor";
-import { EA_DOWNLOAD_PATH, SERVICE_DOWNLOAD_PATH } from "@/config/ea";
 
 export default function TradingAccountManager() {
   const router = useRouter();
@@ -180,26 +179,6 @@ export default function TradingAccountManager() {
       <Card>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-iron-100">🏦 {t("title")}</h3>
-        <div className="flex items-center gap-2">
-          <a href={SERVICE_DOWNLOAD_PATH} download>
-            <button className="
-              bg-transparent text-iron-500 hover:text-iron-300 hover:bg-surface-elevated px-2.5 py-1.5 text-xs
-              rounded-lg font-medium transition-all duration-200
-              focus:outline-none
-            ">
-              ⬇️ Service .ex5
-            </button>
-          </a>
-          <a href={EA_DOWNLOAD_PATH} download>
-            <button className="
-              bg-transparent text-iron-500 hover:text-iron-300 hover:bg-surface-elevated px-2.5 py-1.5 text-xs
-              rounded-lg font-medium transition-all duration-200
-              focus:outline-none
-            ">
-              ⬇️ Dashboard .ex5
-            </button>
-          </a>
-        </div>
       </div>
       <p className="text-sm text-iron-500 mb-6">
         {t("description")}
@@ -216,38 +195,13 @@ export default function TradingAccountManager() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-            <div className="flex flex-col gap-4 border-l-2 border-iron-800/50 pl-6">
-              <div className="flex items-center gap-2 text-risk-green font-bold text-xs uppercase tracking-widest">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-risk-green/20 text-risk-green">1</span>
-                {t("guidedStep1")}
-              </div>
-              <Input
-                placeholder={t("guidedWorkspacePlaceholder")}
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-              />
-              <Input
-                placeholder={t("guidedBrokerPlaceholder")}
-                value={newBroker}
-                onChange={(e) => setNewBroker(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex flex-col gap-4 border-l-2 border-iron-800/50 pl-6">
-              <div className="flex items-center gap-2 text-risk-yellow font-bold text-xs uppercase tracking-widest">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-risk-yellow/20 text-risk-yellow">2</span>
-                {t("guidedStep2")}
-              </div>
-              <p className="text-xs text-iron-500 -mt-2">
-                {t("guidedStep2Desc")}
-              </p>
-              <Input
-                placeholder={t("guidedMtPlaceholder")}
-                value={newAccountNumber}
-                onChange={(e) => setNewAccountNumber(e.target.value)}
-              />
-            </div>
+          <div className="flex flex-col gap-6 relative z-10 max-w-xl">
+            <Input
+              placeholder={t("guidedWorkspacePlaceholder")}
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="text-lg py-6 shadow-inner"
+            />
           </div>
           
           <div className="flex justify-end mt-4 relative z-10">
@@ -265,28 +219,15 @@ export default function TradingAccountManager() {
       ) : (
         <div className="flex flex-col gap-3 mb-6 bg-surface-secondary border border-iron-800 p-4 rounded-xl">
           <h4 className="text-sm font-medium text-iron-200">➕ {t("addWorkspace")}</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Input
-              placeholder={t("placeholderName")}
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-            />
-            <Input
-              placeholder={t("guidedMtPlaceholder")}
-              value={newAccountNumber}
-              onChange={(e) => setNewAccountNumber(e.target.value)}
-            />
-            <Input
-              placeholder={t("placeholderBroker")}
-              value={newBroker}
-              onChange={(e) => setNewBroker(e.target.value)}
-            />
-          </div>
-          <p className="text-xs text-risk-yellow/80 bg-risk-yellow/5 border border-risk-yellow/10 px-3 py-2 rounded-lg">
-            {t("guidedBindWarning")}
-          </p>
-          <div className="flex justify-end mt-1">
-            <Button onClick={createAccount} isLoading={isCreating} disabled={!newName.trim()} size="md">
+          <div className="flex items-center gap-3 mt-1 pb-1">
+            <div className="flex-1 max-w-sm">
+              <Input
+                placeholder={t("placeholderName")}
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+            </div>
+            <Button onClick={createAccount} isLoading={isCreating} disabled={!newName.trim()} size="md" className="shrink-0">
               {t("btnCreate")}
             </Button>
           </div>
@@ -381,6 +322,7 @@ export default function TradingAccountManager() {
                 ) : a.is_active && !a.has_connected ? (
                   <span className="text-risk-yellow/70 italic">{t("actNumber")}: ⏳ {t("autoDetectPending")}</span>
                 ) : null}
+              </div>
             </div>
             <div className="flex flex-wrap sm:flex-col justify-end gap-2 mt-3 sm:mt-0 sm:ml-4 shrink-0">
               {a.is_active && (

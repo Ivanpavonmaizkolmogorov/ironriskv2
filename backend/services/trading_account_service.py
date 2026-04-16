@@ -10,17 +10,18 @@ from schemas.trading_account import CreateTradingAccountRequest
 logger = logging.getLogger("ironrisk")
 
 def create_trading_account(db: Session, user_id: str, data: CreateTradingAccountRequest) -> TradingAccount:
-    # Prevent duplicate account numbers for the same user
-    existing = db.query(TradingAccount).filter(
-        TradingAccount.user_id == user_id,
-        TradingAccount.account_number == data.account_number,
-        TradingAccount.is_active == True,
-    ).first()
-    if existing:
-        raise HTTPException(
-            status_code=409,
-            detail=f"Account number {data.account_number} already exists in workspace '{existing.name}'"
-        )
+    # Prevent duplicate account numbers for the same user (only if provided)
+    if data.account_number and data.account_number.strip():
+        existing = db.query(TradingAccount).filter(
+            TradingAccount.user_id == user_id,
+            TradingAccount.account_number == data.account_number.strip(),
+            TradingAccount.is_active == True,
+        ).first()
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Account number {data.account_number} already exists in workspace '{existing.name}'"
+            )
 
     account = TradingAccount(
         user_id=user_id,

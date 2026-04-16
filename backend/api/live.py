@@ -10,6 +10,7 @@ from sqlalchemy import func
 from models.database import get_db, SessionLocal
 from schemas.live import HeartbeatRequest, HeartbeatResponse
 from services.trading_account_service import validate_api_token
+from models.trading_account import TradingAccount
 from services.strategy_service import get_strategy_by_magic
 from services.portfolio_service import get_default_portfolio, ensure_default_portfolio
 from services.stats.risk_profile import RiskProfile
@@ -576,12 +577,12 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
     if not account:
         raise HTTPException(status_code=401, detail="Invalid API Token")
 
-    # 1.5 Enforce MT5 Account matching if the workspace is locked to one
+    # 1.5 Auto-bind or enforce MT5 account matching
+    incoming_acc = str(req.account_number).strip() if req.account_number else ""
+    
     if account.account_number:
-        incoming_acc = str(req.account_number).strip() if req.account_number else ""
+        # Workspace already bound → enforce match
         registered_acc = str(account.account_number).strip()
-        
-        # If EA doesn't send it, or sends a different one -> KILL
         if incoming_acc != registered_acc:
             return HeartbeatResponse(
                 status="KILL",
@@ -593,6 +594,31 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
                 kill=True,
                 kill_reason=f"ACCOUNT MISMATCH: Este workspace está bloqueado para la cuenta {registered_acc}, pero MT5 es {incoming_acc or 'desconocida'}.",
             )
+    elif incoming_acc:
+        # Workspace has no account_number yet → AUTO-BIND on first heartbeat
+        # Check that no other active workspace for this user already uses this account number
+        existing = db.query(TradingAccount).filter(
+            TradingAccount.user_id == account.user_id,
+            TradingAccount.account_number == incoming_acc,
+            TradingAccount.is_active == True,
+            TradingAccount.id != account.id,
+        ).first()
+        if existing:
+            return HeartbeatResponse(
+                status="KILL",
+                metrics=[],
+                floor_level=0.0,
+                ceiling_level=0.0,
+                max_drawdown_limit=0.0,
+                daily_loss_limit=0.0,
+                kill=True,
+                kill_reason=f"DUPLICATE: La cuenta MT5 {incoming_acc} ya está vinculada al workspace '{existing.name}'. Cada cuenta MT5 necesita su propio workspace.",
+            )
+        account.account_number = incoming_acc
+        import logging
+        logging.getLogger("ironrisk").info(
+            f"[AUTO-BIND] Workspace '{account.name}' (id={account.id}) bound to MT5 account {incoming_acc}"
+        )
 
     # 1.6 Guardar timestamp de conexión activa
     account.last_heartbeat_at = datetime.now(timezone.utc)
@@ -863,13 +889,25 @@ def sync_trades(payload: SyncTradesPayload, background_tasks: BackgroundTasks, d
     """Ingest real closed deals from the EA to use as Single Source of Truth."""
     account = validate_api_token(db, payload.api_token)
     
-    # Prevent data contamination: reject if MT5 account doesn't match token binding
-    if account.account_number and payload.account_number:
-        if str(account.account_number) != str(payload.account_number):
+    # Auto-bind or enforce account matching (mirrors heartbeat logic)
+    incoming_acc = str(payload.account_number).strip() if payload.account_number else ""
+    if account.account_number:
+        if incoming_acc and str(account.account_number).strip() != incoming_acc:
             raise HTTPException(
                 status_code=403,
-                detail=f"Token bound to MT5 Account {account.account_number}. Received {payload.account_number}"
+                detail=f"Token bound to MT5 Account {account.account_number}. Received {incoming_acc}"
             )
+    elif incoming_acc:
+        # Auto-bind if not yet bound
+        existing = db.query(TradingAccount).filter(
+            TradingAccount.user_id == account.user_id,
+            TradingAccount.account_number == incoming_acc,
+            TradingAccount.is_active == True,
+            TradingAccount.id != account.id,
+        ).first()
+        if not existing:
+            account.account_number = incoming_acc
+            db.commit()
     
     incoming_tickets = [t.ticket for t in payload.trades]
     if not incoming_tickets:

@@ -114,10 +114,11 @@ app.include_router(telegram_router)
 app.include_router(settings_router, prefix="/api/settings", tags=["System Settings"])
 app.include_router(vs_mode_router)
 
-from api import alerts, metrics_schema, waitlist
+from api import alerts, metrics_schema, waitlist, installer_telemetry
 app.include_router(alerts.router)
 app.include_router(metrics_schema.router)
 app.include_router(waitlist.router)
+app.include_router(installer_telemetry.router)
 
 import os
 from datetime import datetime, timezone
