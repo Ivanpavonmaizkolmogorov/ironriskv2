@@ -59,18 +59,45 @@ if ($terminals.Count -eq 0) {
     exit 0
 }
 
-Write-Host ""
-Write-Host "  Select the MetaTrader 5 terminal to REMOVE IronRisk from:" -ForegroundColor Cyan
-Write-Host "  (Type ALL to remove from all terminals)" -ForegroundColor Gray
-Write-Host ""
-foreach ($t in $terminals) {
-    Write-Host "    [$($t.Id)] $($t.BrokerName)" -ForegroundColor White
-}
-Write-Host ""
-
 $selectedTerminals = @()
+$pageSize = 20
+$page = 0
+$totalPages = [math]::Ceiling($terminals.Count / $pageSize)
+
 while ($selectedTerminals.Count -eq 0) {
-    $ans = Read-Host "  Enter number (1-$($terminals.Count)) or 'ALL'"
+    Clear-Host
+    Write-Host ""
+    Write-Host "  -------------------------------------------------" -ForegroundColor DarkGray
+    Write-Host "  🗑️ IRONRISK UNINSTALLER " -ForegroundColor Red
+    Write-Host "  -------------------------------------------------" -ForegroundColor DarkGray
+    Write-Host ""
+    
+    if ($totalPages -gt 1) {
+        Write-Host "  Select the MetaTrader 5 terminal to REMOVE IronRisk from (Page $($page + 1)/$totalPages):" -ForegroundColor Cyan
+    } else {
+        Write-Host "  Select the MetaTrader 5 terminal to REMOVE IronRisk from:" -ForegroundColor Cyan
+    }
+    Write-Host "  (Type ALL to remove from all terminals)" -ForegroundColor Gray
+    Write-Host ""
+    
+    $start = $page * $pageSize
+    $end = [math]::Min($start + $pageSize - 1, $terminals.Count - 1)
+    
+    for ($i = $start; $i -le $end; $i++) {
+        Write-Host "    [$($terminals[$i].Id)] $($terminals[$i].BrokerName)" -ForegroundColor White
+    }
+    Write-Host ""
+
+    if ($totalPages -gt 1) {
+        $ans = Read-Host "  Enter number (1-$($terminals.Count)), 'ALL', or 'N' for next page"
+        if ($ans -match '^[nN]$') {
+            $page = ($page + 1) % $totalPages
+            continue
+        }
+    } else {
+        $ans = Read-Host "  Enter number (1-$($terminals.Count)) or 'ALL'"
+    }
+
     if ($ans.ToUpper() -eq "ALL") {
         $selectedTerminals = $terminals
     } elseif ([int]::TryParse($ans, [ref]0)) {

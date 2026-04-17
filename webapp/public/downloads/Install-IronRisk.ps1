@@ -82,17 +82,45 @@ if ($terminals.Count -eq 0) {
     exit 1
 }
 
-Write-Host ""
-Write-Host "  Please select the MetaTrader 5 terminal to connect:" -ForegroundColor Cyan
-Write-Host ""
-foreach ($t in $terminals) {
-    Write-Host "    [$($t.Id)] $($t.BrokerName)" -ForegroundColor White
-}
-Write-Host ""
-
 $selected = $null
+$pageSize = 20
+$page = 0
+$totalPages = [math]::Ceiling($terminals.Count / $pageSize)
+
 while ($null -eq $selected) {
-    $ans = Read-Host "  Enter number (1-$($terminals.Count))"
+    Clear-Host
+    Write-Host ""
+    Write-Host "  -------------------------------------------------" -ForegroundColor DarkGray
+    Write-Host "  🛡️ IRONRISK AUTO-INSTALLER " -ForegroundColor Cyan
+    Write-Host "  -------------------------------------------------" -ForegroundColor DarkGray
+    Write-Host ""
+    
+    if ($totalPages -gt 1) {
+        Write-Host "  Please select the MetaTrader 5 terminal (Page $($page + 1)/$totalPages):" -ForegroundColor Cyan
+    } else {
+        Write-Host "  Please select the MetaTrader 5 terminal:" -ForegroundColor Cyan
+    }
+    
+    Write-Host ""
+    
+    $start = $page * $pageSize
+    $end = [math]::Min($start + $pageSize - 1, $terminals.Count - 1)
+    
+    for ($i = $start; $i -le $end; $i++) {
+        Write-Host "    [$($terminals[$i].Id)] $($terminals[$i].BrokerName)" -ForegroundColor White
+    }
+    Write-Host ""
+    
+    if ($totalPages -gt 1) {
+        $ans = Read-Host "  Enter number (1-$($terminals.Count)), or 'N' for next page"
+        if ($ans -match '^[nN]$') {
+            $page = ($page + 1) % $totalPages
+            continue
+        }
+    } else {
+        $ans = Read-Host "  Enter number (1-$($terminals.Count))"
+    }
+
     if ([int]::TryParse($ans, [ref]0)) {
         $idx = [int]$ans
         $selected = $terminals | Where-Object Id -eq $idx
