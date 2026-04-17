@@ -100,9 +100,9 @@ if ($ans -match "^[yY]") {
                             $waitTime++
                         }
                         if (-not $procObj.HasExited) {
-                            Write-Host "  [!] MetaTrader está bloqueado y no se puede cerrar suavemente." -ForegroundColor Red
-                            Write-Host "      Operación abortada para proteger tu perfil y tus gráficos abiertos." -ForegroundColor Yellow
-                            Write-Host "      Por favor, cierra pop-ups en MT5 o apágalo manualmente antes de continuar." -ForegroundColor Yellow
+                            Write-Host "  [!] MetaTrader is blocked and cannot close gracefully." -ForegroundColor Red
+                            Write-Host "      Operation aborted to protect your open charts and layouts." -ForegroundColor Yellow
+                            Write-Host "      Please close any blocking pop-ups in MT5 or shut it down manually to proceed." -ForegroundColor Yellow
                             exit 1
                         }
                     }
