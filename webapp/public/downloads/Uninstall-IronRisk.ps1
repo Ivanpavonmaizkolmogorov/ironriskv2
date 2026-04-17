@@ -35,7 +35,10 @@ Get-ChildItem $TerminalBasePath -Directory | ForEach-Object {
         
         # Check if IronRisk is actually in this terminal
         $hasIronRisk = $false
-        if ((Test-Path (Join-Path $folder "MQL5\Services\$ServiceFileName")) -or (Test-Path (Join-Path $folder "MQL5\Experts\$DashboardFileName"))) {
+        $servicesLoc = Get-ChildItem -Path (Join-Path $folder "MQL5\Services") -Filter "*IronRisk*.ex5" -Recurse -ErrorAction SilentlyContinue
+        $expertsLoc = Get-ChildItem -Path (Join-Path $folder "MQL5\Experts") -Filter "*IronRisk*.ex5" -Recurse -ErrorAction SilentlyContinue
+
+        if ($servicesLoc -or $expertsLoc) {
             $hasIronRisk = $true
         }
 
@@ -101,12 +104,12 @@ if ($ans -match "^[yY]") {
         $base = $selected.DataPath
 
         # Delete Service
-        $svcDest = Join-Path $base "MQL5\Services\$ServiceFileName"
-        if (Test-Path $svcDest) { Remove-Item -Path $svcDest -Force -ErrorAction SilentlyContinue }
+        $svcDest = Join-Path $base "MQL5\Services"
+        if (Test-Path $svcDest) { Get-ChildItem -Path $svcDest -Filter "*IronRisk*.ex5" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue }
 
         # Delete Dashboard
-        $expDest = Join-Path $base "MQL5\Experts\$DashboardFileName"
-        if (Test-Path $expDest) { Remove-Item -Path $expDest -Force -ErrorAction SilentlyContinue }
+        $expDest = Join-Path $base "MQL5\Experts"
+        if (Test-Path $expDest) { Get-ChildItem -Path $expDest -Filter "*IronRisk*.ex5" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue }
 
         # Delete Config Folder Entirely
         $cfgDir = Join-Path $base "MQL5\Files\IronRisk"
