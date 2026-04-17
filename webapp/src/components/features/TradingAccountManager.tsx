@@ -104,6 +104,7 @@ export default function TradingAccountManager() {
   const downloadInstaller = (token: string) => {
     const lines = [
       '@echo off',
+      'chcp 65001 >nul',
       'title IronRisk Auto-Installer',
       'setlocal enabledelayedexpansion',
       'mode con: cols=85 lines=25',
