@@ -1,0 +1,37 @@
+name: Deploy Backend to Hetzner
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Copy backend files via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          source: "backend"
+          target: "/var/www/ironrisk/"
+          strip_components: 0 # ensures it copies as /var/www/ironrisk/backend/
+
+      - name: Restart Backend Service via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            systemctl restart ironrisk
+            echo ""
+            echo "--- Service Status ---"
+            systemctl status ironrisk --no-pager
