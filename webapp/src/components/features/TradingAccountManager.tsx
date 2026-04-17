@@ -299,23 +299,30 @@ export default function TradingAccountManager() {
                         let text = "OFFLINE";
                         let pulse = "";
                         
+                        // Calculate exact elapsed time for absolute transparency
+                        let timeString = "";
+                        if (a.last_heartbeat_at) {
+                          const secondsPassed = Math.floor((Date.now() - new Date(a.last_heartbeat_at).getTime()) / 1000);
+                          if (secondsPassed < 60) timeString = ` (hace ${Math.max(0, secondsPassed)}s)`;
+                          else if (secondsPassed < 300) timeString = ` (hace ${Math.floor(secondsPassed/60)}m ${secondsPassed%60}s)`;
+                        }
+                        
                         if (isAlive) {
                            if (isService || !a.default_dashboard_layout?.last_heartbeat_source) {
-                              // Treat as green if service, or if we haven't received a heartbeat yet since DB update
                               bgColor = "bg-risk-green/10 border-risk-green/20 text-risk-green";
                               dotColor = "bg-risk-green";
-                              text = t("connected");
+                              text = t("connected") + timeString;
                               pulse = "shadow-[0_0_8px_rgba(0,230,118,0.8)] animate-pulse";
                            } else {
                               bgColor = "bg-risk-yellow/10 border-risk-yellow/20 text-risk-yellow";
                               dotColor = "bg-risk-yellow";
-                              text = "LEGACY EA";
+                              text = "LEGACY EA" + timeString;
                               pulse = "shadow-[0_0_8px_rgba(255,171,0,0.8)] animate-pulse";
                            }
                         }
 
                         return (
-                          <div title={isAlive && !isService ? "Conexión antigua detectada. Este gráfico debe permanecer abierto para operar." : "Servicio en segundo plano operando."} className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${bgColor}`}>
+                          <div title={isAlive ? `El servidor expira la conexión a los 5 minutos. Si has desinstalado, verás cómo este contador sube hasta apagarse.` : "Desconectado permanentemente."} className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${bgColor}`}>
                             <div className={`w-1.5 h-1.5 rounded-full ${dotColor} ${pulse}`}></div>
                             {text}
                           </div>
