@@ -889,6 +889,10 @@
       "improvement": "Mejora"
     },
     "entries": {
+      "uninstaller_tool": {
+        "title": "Desinstalador Oficial",
+        "body": "Implementado un Auto-Desinstalador seguro que limpia todos los archivos .ex5, registros de configuración y entradas vinculadas a IronRisk de tu MetaTrader en un solo clic."
+      },
       "dual_build_labels": {
         "title": "Doble Etiqueta de Versionado",
         "body": "Ahora puedes distinguir al instante entre la fecha del despliegue del Backend (Hetzner) y del Frontend (Vercel) directamente en la interfaz."

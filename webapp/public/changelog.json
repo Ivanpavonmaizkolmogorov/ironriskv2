@@ -1,5 +1,11 @@
 [
   {
+    "id": "uninstaller_tool",
+    "date": "2026-04-17",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "dual_build_labels",
     "date": "2026-04-17",
     "tag": "feature",

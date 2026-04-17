@@ -889,6 +889,10 @@
       "improvement": "Improvement"
     },
     "entries": {
+      "uninstaller_tool": {
+        "title": "Official Uninstaller",
+        "body": "Implemented a secure Auto-Uninstaller that cleans up all .ex5 files, configuration records, and IronRisk-linked entries from your MetaTrader in a single click."
+      },
       "dual_build_labels": {
         "title": "Dual Build Labels",
         "body": "You can now instantly distinguish between the Backend (Hetzner) and Frontend (Vercel) deployment timestamps directly in the interface."
