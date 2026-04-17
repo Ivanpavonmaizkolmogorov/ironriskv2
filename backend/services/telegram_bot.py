@@ -41,7 +41,7 @@ def _build_status_response(chat_id: str) -> str:
             return "📊 No tienes cuentas de trading activas registradas en IronRisk."
 
         now = datetime.now(timezone.utc)
-        lines = ["🖥️ <b>Estado de conexión EA</b>\n"]
+        lines = ["🖥️ <b>Estado de Nodos (Workspaces)</b>\n"]
 
         for acc in accounts:
             name = acc.name or acc.account_number or str(acc.id)[:8]
@@ -71,7 +71,7 @@ def _build_status_response(chat_id: str) -> str:
 def _build_help_response() -> str:
     return (
         "📌 <b>Comandos IronRisk Bot</b>\n\n"
-        "/status — Comprobar si tu EA sigue conectado\n"
+        "/status — Comprobar si tu Servicio sigue conectado\n"
         "/help — Ver esta lista de comandos\n\n"
         "Las alertas de riesgo se envían automáticamente cuando se activan las reglas configuradas en el Centro de Alertas."
     )
@@ -172,7 +172,7 @@ async def telegram_bot_poller():
                                         "🛡️ <b>IronRisk Shield Activado!</b>\n\n"
                                         "Estás conectado. A partir de ahora recibirás aquí tus notificaciones y alertas de riesgo de IronRisk.\n\n"
                                         "📌 <b>Comandos disponibles:</b>\n"
-                                        "/status — Comprobar si tu EA sigue conectado\n"
+                                        "/status — Comprobar si tu Servicio sigue conectado\n"
                                         "/help — Ver esta lista de comandos"
                                     )
                                     msg_id = await _send_message(bot_token, chat_id, welcome_msg)
