@@ -172,7 +172,7 @@ async def ea_connectivity_watchdog():
         except Exception as e:
             logger.error(f"Heartbeat Watchdog Error: {e}")
 
-from services.telegram_bot import telegram_bot_poller
+from services.telegram_bot import telegram_bot_poller, daily_status_broadcaster
 
 @app.on_event("startup")
 async def startup_event():
@@ -183,3 +183,4 @@ async def startup_event():
     loop.create_task(ea_connectivity_watchdog())
     if settings.ENABLE_TELEGRAM_POLLER:
         loop.create_task(telegram_bot_poller())
+        loop.create_task(daily_status_broadcaster())
