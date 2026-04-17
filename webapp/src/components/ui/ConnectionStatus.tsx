@@ -89,7 +89,7 @@ export default function ConnectionStatus({
           className={`text-[10px] font-semibold uppercase tracking-wider border-b border-dashed border-iron-600/60 hover:border-iron-300 cursor-help select-none transition-colors ${
             workspaceStatus.isAlive ? (workspaceStatus.type === "LEGACY" ? "text-amber-500" : "text-risk-green") : "text-risk-red"
           }`}
-          title={workspaceStatus.isAlive ? "Workspace Service is connected and sending data." : "Workspace is disconnected."}
+          title={workspaceStatus.isAlive ? t("ea_tooltip") : "Workspace is disconnected."}
         >
           {workspaceStatus.type}
         </span>
