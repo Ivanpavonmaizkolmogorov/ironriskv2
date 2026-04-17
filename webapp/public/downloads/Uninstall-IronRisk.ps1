@@ -91,7 +91,18 @@ if ($ans -match "^[yY]") {
             $procsToKill = Get-CimInstance Win32_Process -Filter "Name='terminal64.exe'" -ErrorAction SilentlyContinue
             foreach ($p in $procsToKill) {
                 if ($p.ExecutablePath -and $p.ExecutablePath.ToLower() -eq $targetKillExe) {
-                    Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
+                    $procObj = Get-Process -Id $p.ProcessId -ErrorAction SilentlyContinue
+                    if ($procObj) {
+                        $procObj.CloseMainWindow() | Out-Null
+                        $waitTime = 0
+                        while (-not $procObj.HasExited -and $waitTime -lt 10) {
+                            Start-Sleep -Seconds 1
+                            $waitTime++
+                        }
+                        if (-not $procObj.HasExited) {
+                            Stop-Process -Id $procObj.Id -Force -ErrorAction SilentlyContinue
+                        }
+                    }
                 }
             }
         } catch {}
