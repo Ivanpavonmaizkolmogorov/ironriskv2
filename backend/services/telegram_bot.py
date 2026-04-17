@@ -64,6 +64,17 @@ def _build_status_response(chat_id: str) -> str:
                         lines.append(f"  🔴 <b>{name}</b> — Desconectado ({mins} min)")
             else:
                 lines.append(f"  ⚪ <b>{name}</b> — Sin datos de heartbeat")
+                
+            # Check for duplicate connection warning
+            layout = dict(acc.default_dashboard_layout or {})
+            if layout.get("duplicate_warning"):
+                lines.append("    🚨 <i>ATENCIÓN: Se detectaron múltiples instalaciones simultáneas intentando conectar con esta misma cuenta. Por seguridad, sugerimos mantener el Servicio activo en un solo ordenador.</i>")
+                # Reset flag after warning
+                layout["duplicate_warning"] = False
+                from sqlalchemy.orm.attributes import flag_modified
+                acc.default_dashboard_layout = layout
+                flag_modified(acc, "default_dashboard_layout")
+                db.commit()
 
         return "\n".join(lines)
 

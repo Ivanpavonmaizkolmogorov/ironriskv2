@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str | None = None
     ADMIN_TELEGRAM_CHAT_ID: str | None = None
     BETA_ACCESS_CODE: str | None = None
-    ENABLE_TELEGRAM_POLLER: bool = False
+    ENABLE_TELEGRAM_POLLER: bool = True
 
     class Config:
         env_file = ".env"

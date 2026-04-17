@@ -621,15 +621,29 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
         )
 
     # 1.6 Guardar timestamp de conexión activa + hostname del VPS/ordenador
-    account.last_heartbeat_at = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc)
+    
+    # 1.6.1 Duplicity Detection
+    # If the EA is running concurrently on multiple hostnames, heartbeats will arrive 
+    # overlapping each other from different hostnames frequently.
+    layout = dict(account.default_dashboard_layout or {})
+    dirty = False
+
+    if req.hostname and account.hostname and req.hostname != account.hostname:
+        if account.last_heartbeat_at:
+            delta_seconds = (now - account.last_heartbeat_at).total_seconds()
+            if delta_seconds < 40: # Heartbeats are sent every ~5 seconds. A concurrent terminal will hit this.
+                # Mark as duplicated for the telegram daily broadcaster
+                layout["duplicate_warning"] = True
+                dirty = True
+
+    account.last_heartbeat_at = now
     if req.hostname and req.hostname != account.hostname:
         account.hostname = req.hostname
 
     # Infer source: Only the IronRisk Service EA forwards the 'hostname' payload
     source_type = "service" if req.hostname else "legacy_dashboard"
-    layout = dict(account.default_dashboard_layout or {})
     
-    dirty = False
     if layout.get("last_heartbeat_source") != source_type:
         layout["last_heartbeat_source"] = source_type
         dirty = True
