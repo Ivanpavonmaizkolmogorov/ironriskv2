@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 title IronRisk Connector Installer v1.0
 echo.
 echo   IronRisk Connector Installer v1.0
