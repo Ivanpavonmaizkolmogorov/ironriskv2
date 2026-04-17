@@ -624,6 +624,16 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
     account.last_heartbeat_at = datetime.now(timezone.utc)
     if req.hostname and req.hostname != account.hostname:
         account.hostname = req.hostname
+
+    # Infer source: Only the IronRisk Service EA forwards the 'hostname' payload
+    source_type = "service" if req.hostname else "legacy_dashboard"
+    layout = dict(account.default_dashboard_layout or {})
+    if layout.get("last_heartbeat_source") != source_type:
+        layout["last_heartbeat_source"] = source_type
+        from sqlalchemy.orm.attributes import flag_modified
+        account.default_dashboard_layout = layout
+        flag_modified(account, "default_dashboard_layout")
+
     db.commit()
 
     master_toggles = (account.default_dashboard_layout or {}).get("master_toggles", {}) if account else {}

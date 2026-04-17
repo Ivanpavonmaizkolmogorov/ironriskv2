@@ -290,20 +290,37 @@ export default function TradingAccountManager() {
                         {installerDownloaded === a.api_token ? `✅ ${t("installerReady")}` : `⚡ ${t("downloadInstaller")} ⬇`}
                       </button>
                     ) : (
-                      <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                        isConnectionAlive(a.last_heartbeat_at)
-                          ? "bg-risk-green/10 border-risk-green/20 text-risk-green"
-                          : "bg-iron-800/50 border-iron-700/50 text-iron-500"
-                      }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${
-                          isConnectionAlive(a.last_heartbeat_at)
-                            ? "bg-risk-green shadow-[0_0_8px_rgba(0,230,118,0.8)] animate-pulse"
-                            : "bg-iron-600"
-                        }`}></div>
-                        {isConnectionAlive(a.last_heartbeat_at) 
-                          ? t("connected") 
-                          : "OFFLINE"}
-                      </div>
+                      (() => {
+                        const isAlive = isConnectionAlive(a.last_heartbeat_at);
+                        const isService = a.default_dashboard_layout?.last_heartbeat_source === "service";
+                        
+                        let bgColor = "bg-iron-800/50 border-iron-700/50 text-iron-500";
+                        let dotColor = "bg-iron-600";
+                        let text = "OFFLINE";
+                        let pulse = "";
+                        
+                        if (isAlive) {
+                           if (isService || !a.default_dashboard_layout?.last_heartbeat_source) {
+                              // Treat as green if service, or if we haven't received a heartbeat yet since DB update
+                              bgColor = "bg-risk-green/10 border-risk-green/20 text-risk-green";
+                              dotColor = "bg-risk-green";
+                              text = t("connected");
+                              pulse = "shadow-[0_0_8px_rgba(0,230,118,0.8)] animate-pulse";
+                           } else {
+                              bgColor = "bg-risk-yellow/10 border-risk-yellow/20 text-risk-yellow";
+                              dotColor = "bg-risk-yellow";
+                              text = "LEGACY EA";
+                              pulse = "shadow-[0_0_8px_rgba(255,171,0,0.8)] animate-pulse";
+                           }
+                        }
+
+                        return (
+                          <div title={isAlive && !isService ? "Conexión antigua detectada. Este gráfico debe permanecer abierto para operar." : "Servicio en segundo plano operando."} className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${bgColor}`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${dotColor} ${pulse}`}></div>
+                            {text}
+                          </div>
+                        );
+                      })()
                     )}
                     <div className="scale-90 opacity-80 hover:opacity-100 transition-opacity ml-2">
                       <ThemeSelector 
