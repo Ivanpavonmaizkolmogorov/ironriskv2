@@ -1342,7 +1342,6 @@ def api_uninstall_service(req: UninstallRequest, db: Session = Depends(get_db)):
         return {"status": "ALREADY_UNINSTALLED"}
 
     account.last_heartbeat_at = None
-    account.has_connected = False
     account.api_token = f"irk_" + secrets.token_urlsafe(32)
     
     db.commit()
