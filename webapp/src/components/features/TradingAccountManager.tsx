@@ -303,7 +303,8 @@ export default function TradingAccountManager() {
                         let timeString = "";
                         if (a.last_heartbeat_at) {
                           const secondsPassed = Math.floor((Date.now() - new Date(a.last_heartbeat_at).getTime()) / 1000);
-                          if (secondsPassed < 60) timeString = ` (hace ${Math.max(0, secondsPassed)}s)`;
+                          if (secondsPassed <= 0) timeString = ` (justo ahora)`;
+                          else if (secondsPassed < 60) timeString = ` (hace ${secondsPassed}s)`;
                           else if (secondsPassed < 300) timeString = ` (hace ${Math.floor(secondsPassed/60)}m ${secondsPassed%60}s)`;
                         }
                         

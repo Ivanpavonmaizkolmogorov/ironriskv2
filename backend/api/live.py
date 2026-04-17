@@ -628,8 +628,17 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
     # Infer source: Only the IronRisk Service EA forwards the 'hostname' payload
     source_type = "service" if req.hostname else "legacy_dashboard"
     layout = dict(account.default_dashboard_layout or {})
+    
+    dirty = False
     if layout.get("last_heartbeat_source") != source_type:
         layout["last_heartbeat_source"] = source_type
+        dirty = True
+        
+    if layout.get("last_heartbeat_magic") != req.magic_number:
+        layout["last_heartbeat_magic"] = req.magic_number
+        dirty = True
+        
+    if dirty:
         from sqlalchemy.orm.attributes import flag_modified
         account.default_dashboard_layout = layout
         flag_modified(account, "default_dashboard_layout")
