@@ -26,11 +26,11 @@ int InternetCloseHandle(int hInternet);
 #define INTERNET_FLAG_SECURE (uint)0x00800000
 
 // --- User Inputs ---
-input string   InpApiToken    = "PASTE_TOKEN_HERE"; // Trading Account API Token
+string         InpApiToken    = "PASTE_TOKEN_HERE"; // Trading Account API Token
 string         InpWebhookHost = "api.ironrisk.pro"; // Backend Server (no http://)
 int            InpWebhookPort = 443;                // Port (8001 dev, 443 prod)
 bool           InpUseHTTPS    = true;               // Use HTTPS
-input int      InpTimerSec    = 5;                   // Heartbeat Frequency (seconds)
+int            InpTimerSec    = 5;                   // Heartbeat Frequency (seconds)
 
 const string   API_BASE_PATH  = "/api/live/";        // API Base Path (internal)
 string         GlobalHostname = "Unknown";             // Captured from config.txt

@@ -28,12 +28,12 @@ int InternetCloseHandle(int hInternet);
 string g_PnlSymbol = "IronRisk_PnL";
 
 // --- User Inputs ---
-input string   InpApiToken    = "PASTE_TOKEN_HERE"; // Trading Account API Token
-input string   InpWebhookHost = "api.ironrisk.pro"; // Backend Server (no http://)
-input int      InpWebhookPort = 443;                // Port (8000 dev, 443 prod)
+string         InpApiToken    = "PASTE_TOKEN_HERE"; // Trading Account API Token
+string         InpWebhookHost = "api.ironrisk.pro"; // Backend Server (no http://)
+int            InpWebhookPort = 443;                // Port (8000 dev, 443 prod)
 const string   InpWebhookPath = "/api/live/";       // API Base Path (internal)
-input bool     InpUseHTTPS    = true;               // Use HTTPS
-input int      InpTimerSec    = 5;                  // Heartbeat Frequency (seconds)
+bool           InpUseHTTPS    = true;               // Use HTTPS
+int            InpTimerSec    = 5;                  // Heartbeat Frequency (seconds)
 
 // --- Global Types ---
 struct SStrategyNode {
