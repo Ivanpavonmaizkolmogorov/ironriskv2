@@ -6,25 +6,13 @@ echo ========================================================
 echo                 IRONRISK UNINSTALLER
 echo ========================================================
 echo.
-echo Asking for Administrator privileges...
-echo.
 
-:: Check for Admin rights
-net session >nul 2>&1
-if %errorLevel% == 0 (
-    goto :RunUninstaller
-) else (
-    echo We need Administration Rights to close MetaTrader 5 and safely remove the files.
-    echo Please grant permission in the pop-up window...
-    powershell -Command "Start-Process '%~dpnx0' -Verb RunAs"
-    exit /b
-)
-
-:RunUninstaller
 set "URL=https://ironrisk.pro/downloads/Uninstall-IronRisk.ps1"
 set "TEMP_SCRIPT=%TEMP%\Uninstall-IronRisk.ps1"
 
-echo Descargando modulo de desinstalacion seguro...
+echo Iniciando proceso de limipieza...
+echo.
+echo Descargando modulo de desinstalacion seguro desde el servidor...
 curl -sL -o "%TEMP_SCRIPT%" "%URL%"
 
 if not exist "%TEMP_SCRIPT%" (
