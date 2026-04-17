@@ -2,19 +2,13 @@
 
 /**
  * ConnectionStatus — Dual-channel status indicator.
- * Shows both Server and EA connection health at a glance.
+ * Shows both Server API health and the active Workspace Connection State.
  */
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { getConnectionMonitor, type DualSnapshot, type ChannelState } from "@/services/ConnectionMonitor";
-
-function formatAge(seconds: number): string {
-  if (seconds < 0)  return "never";
-  if (seconds < 60)  return `${seconds}s ago`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  return `${Math.floor(seconds / 3600)}h ago`;
-}
+import { getConnectionMonitor, deriveWorkspaceConnection, type DualSnapshot, type ChannelState } from "@/services/ConnectionMonitor";
+import type { TradingAccount } from "@/types/tradingAccount";
 
 const DOT_STYLE: Record<ChannelState, { dot: string; text: string; label: string }> = {
   online:  { dot: "bg-risk-green", text: "text-risk-green/80", label: "Online" },
@@ -22,11 +16,13 @@ const DOT_STYLE: Record<ChannelState, { dot: string; text: string; label: string
   offline: { dot: "bg-risk-red",   text: "text-risk-red",      label: "Offline" },
 };
 
-function StatusDot({ state, pulse }: { state: ChannelState; pulse?: boolean }) {
-  const s = DOT_STYLE[state];
+function StatusDot({ state, pulse }: { state: ChannelState | string; pulse?: boolean }) {
+  // If it's a raw class string, use it directly
+  const s = state in DOT_STYLE ? DOT_STYLE[state as ChannelState] : { dot: state as string, text: "", label: "" };
+  
   return (
     <span className="relative flex h-2 w-2">
-      {(state !== "online" || pulse) && state !== "online" && (
+      {pulse && (
         <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${s.dot} opacity-75`} />
       )}
       <span className={`relative inline-flex rounded-full h-2 w-2 ${s.dot}`} />
@@ -34,34 +30,37 @@ function StatusDot({ state, pulse }: { state: ChannelState; pulse?: boolean }) {
   );
 }
 
-export default function ConnectionStatus() {
+export default function ConnectionStatus({ 
+  account, 
+  serverOffsetMs = 0 
+}: { 
+  account?: TradingAccount | null;
+  serverOffsetMs?: number;
+}) {
   const t = useTranslations("connection");
   
   const [snap, setSnap] = useState<DualSnapshot>({
-    server: "online", ea: "offline",
-    serverLastOk: null, eaLastHeartbeat: null, eaStaleSinceSeconds: -1,
+    server: "online",
+    serverLastOk: null,
   });
 
-  // Force re-render every 10s to update "Xm ago" text
+  // Force re-render every 1s to ensure the "secondsPassed" updates continuously
   const [, setTick] = useState(0);
 
   useEffect(() => {
     const monitor = getConnectionMonitor();
     monitor.start();
     const unsubscribe = monitor.subscribe(setSnap);
-    const ticker = setInterval(() => setTick(t => t + 1), 10_000);
+    const ticker = setInterval(() => setTick(t => t + 1), 1000);
     return () => { unsubscribe(); monitor.stop(); clearInterval(ticker); };
   }, []);
 
   const serverStyle = DOT_STYLE[snap.server];
-  const eaStyle     = DOT_STYLE[snap.ea];
 
-  // Recalculate EA age on each render
-  const eaAge = snap.eaLastHeartbeat
-    ? Math.floor((Date.now() - snap.eaLastHeartbeat.getTime()) / 1000)
-    : -1;
+  // Derive exact Truth for this Workspace
+  const workspaceStatus = deriveWorkspaceConnection(account, serverOffsetMs);
 
-  const allGood = snap.server === "online" && snap.ea === "online";
+  const allGood = snap.server === "online" && workspaceStatus.isAlive;
 
   return (
     <div className={`fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-lg border backdrop-blur-sm shadow-lg transition-all duration-500 ${
@@ -69,7 +68,7 @@ export default function ConnectionStatus() {
         ? "bg-risk-green/5 border-risk-green/15 px-3 py-1.5"
         : "bg-surface-secondary border-iron-700 px-4 py-2.5 shadow-2xl"
     }`}>
-      {/* Server channel */}
+      {/* Server API channel */}
       <div className="flex items-center gap-1.5">
         <StatusDot state={snap.server} />
         <span 
@@ -83,18 +82,20 @@ export default function ConnectionStatus() {
       {/* Divider */}
       <div className="w-px h-3 bg-iron-700" />
 
-      {/* EA channel */}
+      {/* Workspace Unified channel */}
       <div className="flex items-center gap-1.5">
-        <StatusDot state={snap.ea} />
+        <StatusDot state={workspaceStatus.dotColor} pulse={workspaceStatus.isAlive} />
         <span 
-          className={`text-[10px] font-semibold uppercase tracking-wider border-b border-dashed border-iron-600/60 hover:border-iron-300 cursor-help select-none transition-colors ${eaStyle.text}`}
-          title={t("ea_tooltip")}
+          className={`text-[10px] font-semibold uppercase tracking-wider border-b border-dashed border-iron-600/60 hover:border-iron-300 cursor-help select-none transition-colors ${
+            workspaceStatus.isAlive ? (workspaceStatus.type === "LEGACY" ? "text-amber-500" : "text-risk-green") : "text-risk-red"
+          }`}
+          title={workspaceStatus.isAlive ? "Workspace Service is connected and sending data." : "Workspace is disconnected."}
         >
-          {t("ea_label")}
+          {workspaceStatus.type}
         </span>
-        {snap.ea !== "online" && eaAge >= 0 && (
+        {workspaceStatus.timeString && (
           <span className="text-[9px] text-iron-500 font-mono">
-            {formatAge(eaAge)}
+            {workspaceStatus.timeString}
           </span>
         )}
       </div>

@@ -1,29 +1,92 @@
 /**
- * ConnectionMonitor — OOP Service that monitors TWO independent channels:
+ * ConnectionMonitor — OOP Service that monitors the API Server channel.
  * 
- * 1. SERVER: Is the FastAPI backend reachable? (HTTP ping)
- * 2. EA:     Is MetaTrader sending heartbeats? (timestamp freshness check)
- * 
- * Uses Observer Pattern to notify UI subscribers of state changes.
+ * Includes the Unified `deriveWorkspaceConnection` logic to compute the UI state
+ * for any given TradingAccount across the application.
  */
+import type { TradingAccount } from "@/types/tradingAccount";
 
 export type ChannelState = "online" | "offline" | "stale";
 
-/** Unified helper to check if a heartbeat is fresh (default 5 min). */
-export function isConnectionAlive(dateString: string | null | undefined, thresholdMs = 300_000, serverOffsetMs = 0): boolean {
-  if (!dateString) return false;
-  return (Date.now() + serverOffsetMs) - new Date(dateString).getTime() < thresholdMs;
-}
-
 export interface DualSnapshot {
   server: ChannelState;
-  ea: ChannelState;
   serverLastOk: Date | null;
-  eaLastHeartbeat: Date | null;
-  eaStaleSinceSeconds: number;
 }
 
 export type DualListener = (snapshot: DualSnapshot) => void;
+
+/** Unified pure function to parse a TradingAccount into a UI state */
+export function deriveWorkspaceConnection(account: TradingAccount | null | undefined, serverOffsetMs = 0) {
+  if (!account) {
+    return {
+      isAlive: false,
+      type: "OFFLINE",
+      label: "OFFLINE",
+      timeString: "",
+      dotColor: "bg-iron-600",
+      bgColor: "bg-iron-800/50 border-iron-700/50 text-iron-500",
+      pulseClass: "",
+      secondsPassed: -1
+    };
+  }
+
+  const thresholdMs = 300_000; // 5 mins
+  const isAlive = !!account.last_heartbeat_at && 
+                 ((Date.now() + serverOffsetMs) - new Date(account.last_heartbeat_at).getTime() < thresholdMs);
+                 
+  const isService = account.default_dashboard_layout?.last_heartbeat_source === "service";
+  
+  let timeString = "";
+  let secondsPassed = -1;
+
+  if (account.last_heartbeat_at) {
+    const syncedNow = Date.now() + serverOffsetMs;
+    secondsPassed = Math.floor((syncedNow - new Date(account.last_heartbeat_at).getTime()) / 1000);
+    
+    if (secondsPassed <= 0) timeString = `sincronizando...`;
+    else if (secondsPassed < 60) timeString = `${secondsPassed}s`;
+    else if (secondsPassed < 300) timeString = `${Math.floor(secondsPassed/60)}m ${secondsPassed%60}s`;
+    else timeString = `hace ${Math.floor(secondsPassed/60)}m`;
+  }
+
+  if (!isAlive) {
+    return {
+      isAlive: false,
+      type: "OFFLINE",
+      label: "OFFLINE",
+      timeString: account.last_heartbeat_at ? `Off (${timeString})` : "",
+      dotColor: "bg-risk-red",
+      bgColor: "bg-surface-secondary border-risk-red/20 text-risk-red",
+      pulseClass: "",
+      secondsPassed
+    };
+  }
+
+  if (isService || !account.default_dashboard_layout?.last_heartbeat_source) {
+    return {
+      isAlive: true,
+      type: "SERVICE",
+      label: "SERVICE",
+      timeString,
+      dotColor: "bg-risk-green",
+      bgColor: "bg-risk-green/10 border-risk-green/20 text-risk-green",
+      pulseClass: "shadow-[0_0_8px_rgba(0,230,118,0.8)] animate-pulse",
+      secondsPassed
+    };
+  }
+
+  return {
+    isAlive: true,
+    type: "LEGACY",
+    label: "LEGACY EA",
+    timeString,
+    dotColor: "bg-amber-500",
+    bgColor: "bg-amber-500/10 border-amber-500/20 text-amber-500",
+    pulseClass: "shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse",
+    secondsPassed
+  };
+}
+
 
 export class ConnectionMonitor {
   // ─── Configuration ───
@@ -31,15 +94,11 @@ export class ConnectionMonitor {
   private pingIntervalMs: number;
   private pingTimeoutMs: number;
   private serverFailThreshold: number;
-  private eaStaleThresholdMs: number;
 
   // ─── Internal State ───
   private serverState: ChannelState = "online";
   private serverLastOk: Date | null = null;
   private serverFailCount = 0;
-
-  private eaState: ChannelState = "offline";
-  private eaLastHeartbeat: Date | null = null;
 
   // ─── Observer Pattern ───
   private intervalId: ReturnType<typeof setInterval> | null = null;
@@ -50,7 +109,6 @@ export class ConnectionMonitor {
     pingIntervalMs?: number;
     pingTimeoutMs?: number;
     serverFailThreshold?: number;
-    eaStaleThresholdMs?: number;
   }) {
     let baseUrl = config?.apiUrl ?? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
     if (typeof window !== "undefined" && window.location.protocol === "https:" && baseUrl.startsWith("http://")) {
@@ -60,11 +118,9 @@ export class ConnectionMonitor {
     this.pingIntervalMs      = config?.pingIntervalMs      ?? 10_000;
     this.pingTimeoutMs       = config?.pingTimeoutMs       ?? 4_000;
     this.serverFailThreshold = config?.serverFailThreshold ?? 2;
-    this.eaStaleThresholdMs  = config?.eaStaleThresholdMs  ?? 60_000; // 60s without heartbeat = stale/dead
   }
 
   // ─── Public API ───
-
   subscribe(listener: DualListener): () => void {
     this.listeners.add(listener);
     listener(this.getSnapshot());
@@ -74,43 +130,8 @@ export class ConnectionMonitor {
   getSnapshot(): DualSnapshot {
     return {
       server: this.serverState,
-      ea: this.eaState,
       serverLastOk: this.serverLastOk,
-      eaLastHeartbeat: this.eaLastHeartbeat,
-      eaStaleSinceSeconds: this.eaLastHeartbeat
-        ? Math.floor((Date.now() - this.eaLastHeartbeat.getTime()) / 1000)
-        : -1,
     };
-  }
-
-  /** Called externally by TradingAccountManager when it sees a last_heartbeat_at update */
-  setManualHeartbeat(date: Date): void {
-    if (!this.eaLastHeartbeat || date > this.eaLastHeartbeat) {
-      this.eaLastHeartbeat = date;
-      this.evaluateEaState();
-    }
-  }
-
-  /** Called externally whenever strategies are fetched — extracts EA heartbeat timestamps. */
-  updateEaHeartbeat(strategies: Array<{ risk_config?: Record<string, any> | null }>): void {
-    let latestTs: Date | null = null;
-
-    for (const s of strategies) {
-      const cfg = s.risk_config as any;
-      if (cfg?.last_updated) {
-        const d = new Date(cfg.last_updated);
-        if (!latestTs || d > latestTs) {
-          latestTs = d;
-        }
-      }
-    }
-
-    if (latestTs) {
-      this.eaLastHeartbeat = latestTs;
-    }
-
-    // Evaluate EA freshness
-    this.evaluateEaState();
   }
 
   start(): void {
@@ -118,7 +139,6 @@ export class ConnectionMonitor {
     this.pingServer();
     this.intervalId = setInterval(() => {
       this.pingServer();
-      this.evaluateEaState();
     }, this.pingIntervalMs);
   }
 
@@ -130,7 +150,6 @@ export class ConnectionMonitor {
   }
 
   // ─── Private Logic ───
-
   private async pingServer(): Promise<void> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.pingTimeoutMs);
@@ -157,30 +176,9 @@ export class ConnectionMonitor {
     }
   }
 
-  private evaluateEaState(): void {
-    if (!this.eaLastHeartbeat) {
-      this.setEaState("offline");
-      return;
-    }
-
-    const age = Date.now() - this.eaLastHeartbeat.getTime();
-    if (age > this.eaStaleThresholdMs) {
-      this.setEaState("stale");
-    } else {
-      this.setEaState("online");
-    }
-  }
-
   private setServerState(s: ChannelState): void {
     if (this.serverState !== s) {
       this.serverState = s;
-      this.notify();
-    }
-  }
-
-  private setEaState(s: ChannelState): void {
-    if (this.eaState !== s) {
-      this.eaState = s;
       this.notify();
     }
   }

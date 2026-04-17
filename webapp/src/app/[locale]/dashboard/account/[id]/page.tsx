@@ -216,13 +216,7 @@ export default function DashboardPage() {
     }
   }, [mounted, isAuthenticated, router, loadUser, fetchStrategies, accountId]);
 
-  // Feed EA heartbeat timestamps to the ConnectionMonitor
-  useEffect(() => {
-    if (strategies.length > 0) {
-      getConnectionMonitor().updateEaHeartbeat(strategies);
-    }
-  }, [strategies]);
-
+  // EA heartbeat timestamps are now derived centrally from the TradingAccount directly.
   // Fetch live equity curve when active asset is selected
   useEffect(() => {
     if (!activeAsset || !account?.api_token) {
@@ -945,7 +939,7 @@ export default function DashboardPage() {
           }}
         />
       )}
-      <ConnectionStatus />
+      <ConnectionStatus account={account} />
     </main>
   );
 }
