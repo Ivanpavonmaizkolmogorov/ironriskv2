@@ -105,12 +105,13 @@ Write-Host "  Installing files..." -ForegroundColor Yellow
 
 # --- Install Files ---
 $base = $selected.DataPath
+$cacheBuster = [int][double]::Parse((Get-Date -UFormat %s))
 
 # Download Service
 $svcDir = Join-Path $base "MQL5\Services"
 if (-not (Test-Path $svcDir)) { New-Item -ItemType Directory -Path $svcDir -Force | Out-Null }
 $svcDest = Join-Path $svcDir $ServiceFileName
-Invoke-WebRequest -Uri "$Server/$ServiceFileName" -OutFile $svcDest -UseBasicParsing
+Invoke-WebRequest -Uri "$Server/$ServiceFileName?v=$cacheBuster" -OutFile $svcDest -UseBasicParsing
 
 # Download Dashboard (optional)
 if (-not $SkipDashboard) {
@@ -118,7 +119,7 @@ if (-not $SkipDashboard) {
     if (-not (Test-Path $expDir)) { New-Item -ItemType Directory -Path $expDir -Force | Out-Null }
     $expDest = Join-Path $expDir $DashboardFileName
     try {
-        Invoke-WebRequest -Uri "$Server/$DashboardFileName" -OutFile $expDest -UseBasicParsing
+        Invoke-WebRequest -Uri "$Server/$DashboardFileName?v=$cacheBuster" -OutFile $expDest -UseBasicParsing
     } catch {
         Write-Host "  [!] Dashboard not found on server, continuing without it." -ForegroundColor DarkGray
     }
