@@ -138,7 +138,8 @@ if ($ans -match "^[yY]") {
         # Restart the terminal
         $exePath = Join-Path $selected.BrokerPath "terminal64.exe"
         if (Test-Path $exePath) {
-            Start-Process $exePath
+            Write-Host "  [SYSTEM] Respawning MetaTrader 5..." -ForegroundColor Yellow
+            Start-Process -FilePath $exePath -WorkingDirectory $selected.BrokerPath
         }
     }
     

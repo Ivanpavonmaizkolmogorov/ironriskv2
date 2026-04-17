@@ -185,7 +185,8 @@ if ($ans -match "^[yY]") {
     
     $exePath = Join-Path $selected.BrokerPath "terminal64.exe"
     if (Test-Path $exePath) {
-        Start-Process $exePath
+        Write-Host "  [SYSTEM] Respawning MetaTrader 5..." -ForegroundColor Yellow
+        Start-Process -FilePath $exePath -WorkingDirectory $selected.BrokerPath
     }
 } else {
     Write-Host "OK! To connect later, manually open MT5, go to Navigator -> Services, and DOUBLE-CLICK IronRisk_Service." -ForegroundColor Yellow
