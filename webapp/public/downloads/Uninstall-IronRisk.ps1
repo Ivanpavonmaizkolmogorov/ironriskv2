@@ -133,6 +133,7 @@ if ($ans -match "^[yY]") {
                 $extToken = (Get-Content $cfgFile -Raw).Trim()
                 $body = @{ api_token = $extToken; magic_number = 0 } | ConvertTo-Json
                 Invoke-RestMethod -Uri "https://api.ironrisk.pro/api/live.py/uninstall" -Method Post -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
+                Invoke-RestMethod -Uri "http://127.0.0.1:8001/api/live.py/uninstall" -Method Post -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
                 Write-Host "  [+] Connection cleanly severed from server." -ForegroundColor Green
             } catch {}
         }
