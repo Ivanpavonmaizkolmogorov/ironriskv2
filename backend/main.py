@@ -181,4 +181,5 @@ async def startup_event():
         
     loop = asyncio.get_running_loop()
     loop.create_task(ea_connectivity_watchdog())
-    loop.create_task(telegram_bot_poller())
+    if settings.ENABLE_TELEGRAM_POLLER:
+        loop.create_task(telegram_bot_poller())

@@ -85,6 +85,7 @@ def deploy():
     env_content = f"""DATABASE_URL=postgresql://ironrisk_user:{DB_PASSWORD}@localhost:5432/ironrisk
 JWT_SECRET=super-secret-key-123
 FRONTEND_URL=https://{DOMAIN}
+ENABLE_TELEGRAM_POLLER=true
 """
     run_cmd(ssh, f"cat << 'EOF' > /var/www/ironrisk/backend/.env\n{env_content}EOF")
 
