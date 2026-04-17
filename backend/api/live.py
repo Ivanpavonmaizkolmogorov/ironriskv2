@@ -631,7 +631,10 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
 
     if req.hostname and account.hostname and req.hostname != account.hostname:
         if account.last_heartbeat_at:
-            delta_seconds = (now - account.last_heartbeat_at).total_seconds()
+            last_hb = account.last_heartbeat_at
+            if last_hb.tzinfo is None:
+                last_hb = last_hb.replace(tzinfo=timezone.utc)
+            delta_seconds = (now - last_hb).total_seconds()
             if delta_seconds < 40: # Heartbeats are sent every ~5 seconds. A concurrent terminal will hit this.
                 # Mark as duplicated for the telegram daily broadcaster
                 layout["duplicate_warning"] = True
