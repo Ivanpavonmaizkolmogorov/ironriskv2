@@ -263,8 +263,8 @@ export default function TradingAccountManager() {
                       className="text-lg text-iron-100 font-bold bg-transparent border-b border-risk-green/50 focus:outline-none focus:border-risk-green px-0 py-0 w-full truncate"
                     />
                   ) : (
-                    <div className="group flex items-center gap-2 w-full">
-                      <p className="text-lg text-iron-100 font-bold break-all leading-tight">
+                    <div className="group flex items-center gap-2 min-w-0 w-full">
+                      <p className="text-lg text-iron-100 font-bold break-words leading-tight">
                         {a.name}
                       </p>
                       <button
