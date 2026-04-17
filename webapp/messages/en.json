@@ -889,6 +889,14 @@
       "improvement": "Improvement"
     },
     "entries": {
+      "dual_build_labels": {
+        "title": "Dual Build Labels",
+        "body": "You can now instantly distinguish between the Backend (Hetzner) and Frontend (Vercel) deployment timestamps directly in the interface."
+      },
+      "zero_touch_silent": {
+        "title": "Fully Silent Zero-Touch",
+        "body": "Removed the MT5 parameter dialog popup when attaching the bot. The Auto-Installer now drives the Dashboard in a completely seamless, transparent way."
+      },
       "user_profile_avatar": {
         "title": "User Profile in Navbar",
         "body": "Your avatar with initials now groups Theme, Language, Settings, and Sign out into a single dropdown. Fewer buttons, same functionality."

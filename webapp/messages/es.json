@@ -889,6 +889,14 @@
       "improvement": "Mejora"
     },
     "entries": {
+      "dual_build_labels": {
+        "title": "Doble Etiqueta de Versionado",
+        "body": "Ahora puedes distinguir al instante entre la fecha del despliegue del Backend (Hetzner) y del Frontend (Vercel) directamente en la interfaz."
+      },
+      "zero_touch_silent": {
+        "title": "Zero-Touch Completamente Silencioso",
+        "body": "Eliminado el cuadro de diálogo de parámetros de MT5 al arrastrar el bot. El Auto-Instalador ahora controla el Dashboard de forma limpia y transparente."
+      },
       "user_profile_avatar": {
         "title": "Perfil de usuario en la barra",
         "body": "Tu avatar con iniciales ahora agrupa Tema, Idioma, Configuración y Cerrar Sesión en un solo menú desplegable. Menos botones, misma potencia."
