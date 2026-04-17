@@ -263,8 +263,8 @@ export default function TradingAccountManager() {
                       className="text-lg text-iron-100 font-bold bg-transparent border-b border-risk-green/50 focus:outline-none focus:border-risk-green px-0 py-0 w-full truncate"
                     />
                   ) : (
-                    <div className="group flex items-center gap-2 min-w-0">
-                      <p className="text-lg text-iron-100 font-bold truncate">
+                    <div className="group flex items-center gap-2 min-w-0 w-full">
+                      <p className="text-lg text-iron-100 font-bold break-words line-clamp-2">
                         {a.name}
                       </p>
                       <button
@@ -323,17 +323,17 @@ export default function TradingAccountManager() {
 
               {/* Row 2: Strict Data Columns (Broker, Account, VPS) */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2 mt-auto pt-2 text-[11px] text-iron-500 border-t border-iron-800/40">
-                <div className="truncate">
+                <div className="break-words">
                   {a.broker && <span>{t("actBroker")}: <br className="hidden sm:block"/><span className="text-iron-300 font-medium inline-block sm:mt-0.5">{a.broker}</span></span>}
                 </div>
-                <div className="truncate">
+                <div className="break-words">
                   {a.account_number ? (
                     <span>{t("actNumber")}: <br className="hidden sm:block"/><span className="text-iron-300 font-medium font-mono inline-block sm:mt-0.5">{a.account_number}</span></span>
                   ) : a.is_active && !a.has_connected ? (
                     <span className="text-risk-yellow/70 italic flex flex-col sm:mt-0.5"><span className="hidden sm:block">{t("actNumber")}:</span> ⏳ {t("autoDetectPending")}</span>
                   ) : null}
                 </div>
-                <div className="truncate">
+                <div className="break-words">
                   {a.hostname && <span>VPS / RDP: <br className="hidden sm:block"/><span className="text-iron-300 font-medium inline-block sm:mt-0.5" title={a.hostname}>{a.hostname}</span></span>}
                 </div>
               </div>
