@@ -248,11 +248,11 @@ export default function TradingAccountManager() {
             {/* Left Box: Titles and Meta */}
             <div className="flex flex-col min-w-0 pr-0 md:pr-4">
               
-              {/* Row 1: Strict alignment of Title, Buttons, and Status Badge */}
-              <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 w-full mb-4">
+              {/* Row 1: Flex alignment of Title, Buttons, and Status Badge */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full mb-4">
                 
                 {/* 1. Account Name Input/Text */}
-                <div className="min-w-0 pr-2">
+                <div className="flex-1 min-w-0 pr-2 w-full">
                   {editingId === a.id ? (
                     <input
                       autoFocus
@@ -263,8 +263,8 @@ export default function TradingAccountManager() {
                       className="text-lg text-iron-100 font-bold bg-transparent border-b border-risk-green/50 focus:outline-none focus:border-risk-green px-0 py-0 w-full truncate"
                     />
                   ) : (
-                    <div className="group flex items-center gap-2 min-w-0 w-full">
-                      <p className="text-lg text-iron-100 font-bold break-words line-clamp-2">
+                    <div className="group flex items-center gap-2 w-full">
+                      <p className="text-lg text-iron-100 font-bold break-words leading-tight">
                         {a.name}
                       </p>
                       <button
@@ -278,8 +278,8 @@ export default function TradingAccountManager() {
                   )}
                 </div>
 
-                {/* 2. Intelligent Connection Badge */}
-                <div className="shrink-0 flex items-center justify-end min-w-[120px]">
+                {/* 2. Intelligent Connection Badge & Theme Selector */}
+                <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
                   {a.is_active && (
                     <>
                       {!a.has_connected ? (
@@ -310,7 +310,7 @@ export default function TradingAccountManager() {
                 </div>
 
                 {/* 3. Theme Selector */}
-                <div className="shrink-0 scale-90 opacity-80 hover:opacity-100 transition-opacity flex justify-end">
+                <div className="shrink-0 scale-90 opacity-80 hover:opacity-100 transition-opacity">
                   {a.is_active && (
                     <ThemeSelector 
                       mode="inline" 
@@ -321,11 +321,8 @@ export default function TradingAccountManager() {
                 </div>
               </div>
 
-              {/* Row 2: Strict Data Columns (Broker, Account, VPS) */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2 mt-auto pt-2 text-[11px] text-iron-500 border-t border-iron-800/40">
-                <div className="break-words">
-                  {a.broker && <span>{t("actBroker")}: <br className="hidden sm:block"/><span className="text-iron-300 font-medium inline-block sm:mt-0.5">{a.broker}</span></span>}
-                </div>
+              {/* Row 2: Strict Data Columns (Account, VPS) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 mt-auto pt-2 text-[11px] text-iron-500 border-t border-iron-800/40">
                 <div className="break-words">
                   {a.account_number ? (
                     <span>{t("actNumber")}: <br className="hidden sm:block"/><span className="text-iron-300 font-medium font-mono inline-block sm:mt-0.5">{a.account_number}</span></span>
