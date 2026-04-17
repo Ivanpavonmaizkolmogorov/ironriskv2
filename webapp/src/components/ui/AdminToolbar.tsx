@@ -139,8 +139,14 @@ export default function AdminToolbar() {
         </button>
 
         {apiVersion && (
-          <span className="px-4 py-2 rounded-full bg-surface-elevated border border-risk-green/40 font-mono text-sm font-bold text-risk-green shadow-lg shadow-risk-green/10 select-all" title="Versión desplegada en Hetzner">
+          <span className="px-4 py-2 rounded-full bg-surface-elevated border border-risk-green/40 font-mono text-sm font-bold text-risk-green shadow-lg shadow-risk-green/10 select-all" title="Versión desplegada en Hetzner (Backend)">
             🚀 {apiVersion}
+          </span>
+        )}
+
+        {process.env.NEXT_PUBLIC_FRONTEND_BUILD_TIME && (
+          <span className="px-4 py-2 rounded-full bg-surface-elevated border border-cyan-400/40 font-mono text-sm font-bold text-cyan-400 shadow-lg shadow-cyan-400/10 select-all" title="Versión desplegada en Vercel (Frontend)">
+            🌐 Build {process.env.NEXT_PUBLIC_FRONTEND_BUILD_TIME}
           </span>
         )}
       </div>

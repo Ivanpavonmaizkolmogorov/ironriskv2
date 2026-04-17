@@ -1,5 +1,11 @@
 [
   {
+    "id": "dual_build_labels",
+    "date": "2026-04-17",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "zero_touch_silent",
     "date": "2026-04-17",
     "tag": "feature",
