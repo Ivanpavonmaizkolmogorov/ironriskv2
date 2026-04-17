@@ -7,10 +7,12 @@ $ServiceFileName   = "IronRisk_Service.ex5"
 $DashboardFileName = "IronRisk_Dashboard.ex5"
 $TerminalBasePath  = Join-Path $env:APPDATA "MetaQuotes\Terminal"
 
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
 # --- UI ---
 Write-Host ""
 Write-Host "  ========================================================" -ForegroundColor DarkRed
-Write-Host "                 IRONRISK SETUP UNINSTALLER               " -ForegroundColor Red
+Write-Host "                IRONRISK SETUP UNINSTALLER                " -ForegroundColor Red
 Write-Host "  ========================================================" -ForegroundColor DarkRed
 Write-Host ""
 
@@ -43,10 +45,24 @@ Get-ChildItem $TerminalBasePath -Directory | ForEach-Object {
         }
 
         if ($hasIronRisk) {
+            # Check if terminal is currently running
+            $isRunning = $false
+            $targetExe = (Join-Path $brokerPath "terminal64.exe").ToLower()
+            try {
+                $runningProcs = Get-CimInstance Win32_Process -Filter "Name='terminal64.exe'" -ErrorAction SilentlyContinue
+                foreach ($p in $runningProcs) {
+                    if ($p.ExecutablePath -and $p.ExecutablePath.ToLower() -eq $targetExe) {
+                        $isRunning = $true
+                        break
+                    }
+                }
+            } catch {}
+            $runText = if ($isRunning) { "(RUNNING)" } else { "" }
+
             $terminals += [PSCustomObject]@{
                 Id         = $terminals.Count + 1
                 DataPath   = $folder
-                BrokerName = $brokerName
+                BrokerName = "$brokerName $runText"
                 BrokerPath = $brokerPath
             }
         }

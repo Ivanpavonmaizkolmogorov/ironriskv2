@@ -18,6 +18,7 @@ param(
 $ServiceFileName   = "IronRisk_Service.ex5"
 $DashboardFileName = "IronRisk_Dashboard.ex5"
 $TerminalBasePath  = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 # --- UI ---
 Write-Host ""
