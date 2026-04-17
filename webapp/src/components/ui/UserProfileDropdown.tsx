@@ -57,6 +57,12 @@ const DOWNLOADS: DownloadItem[] = [
     file: "/downloads/IronRisk_SQX_MagicAssigner.java",
     icon: "🔢",
   },
+  {
+    name: "IronRisk Uninstaller",
+    desc: { es: "Limpia de forma segura los archivos MT5", en: "Safely purges IronRisk from MT5" },
+    file: "/downloads/Uninstall-IronRisk.bat",
+    icon: "🗑️",
+  },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────
