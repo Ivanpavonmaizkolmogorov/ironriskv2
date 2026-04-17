@@ -264,7 +264,7 @@ export default function TradingAccountManager() {
                     />
                   ) : (
                     <div className="group flex items-center gap-2 w-full">
-                      <p className="text-lg text-iron-100 font-bold break-words leading-tight">
+                      <p className="text-lg text-iron-100 font-bold break-all leading-tight">
                         {a.name}
                       </p>
                       <button
