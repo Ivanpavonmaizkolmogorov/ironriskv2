@@ -493,6 +493,14 @@ public:
    
    bool Send(long magic, double pnl, double dd, int trades, string floatingMapJSON)
      {
+      // Dynamic Kill-Switch: If the uninstaller deletes config.txt while we are running in RAM, stop sending.
+      if(!FileIsExist("IronRisk\\config.txt"))
+        {
+         if(!m_killed) Print("[IronRisk Service] Uninstallation detected (config.txt missing). Silencing telemetry globally.");
+         m_killed = true;
+         return false;
+        }
+
       string json = "{\"api_token\":\"" + m_token + "\""
                   + ",\"account_number\":\"" + IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN)) + "\""
                   + ",\"hostname\":\"" + GlobalHostname + "\""
