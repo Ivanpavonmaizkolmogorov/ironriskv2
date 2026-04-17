@@ -69,6 +69,17 @@ export default function TradingAccountManager() {
     }
   };
 
+  const handleForceDisconnect = async (id: string) => {
+    if (window.confirm("¿Estás seguro de que deseas forzar la desconexión? Esto invalidará el token actual y matará cualquier fantasma en tu VPS remotamente.")) {
+      try {
+        await tradingAccountAPI.rotateToken(id);
+        await loadAccounts();
+      } catch {
+        alert("Error al forzar la desconexión.");
+      }
+    }
+  };
+
   const createAccount = async () => {
     if (!newName.trim()) return;
     setIsCreating(true);
@@ -333,9 +344,20 @@ export default function TradingAccountManager() {
                         }
 
                         return (
-                          <div title={isAlive ? `El servidor expira la conexión a los 5 minutos. Si has desinstalado, verás cómo este contador sube hasta apagarse.` : "Desconectado permanentemente."} className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${bgColor}`}>
-                            <div className={`w-1.5 h-1.5 rounded-full ${dotColor} ${pulse}`}></div>
-                            {text}
+                          <div className="flex items-center gap-2">
+                            <div title={isAlive ? `El servidor expira la conexión a los 5 minutos. Si has desinstalado, verás cómo este contador sube hasta apagarse.` : "Desconectado permanentemente."} className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${bgColor}`}>
+                              <div className={`w-1.5 h-1.5 rounded-full ${dotColor} ${pulse}`}></div>
+                              {text}
+                            </div>
+                            {isAlive && (
+                              <button
+                                onClick={() => handleForceDisconnect(a.id)}
+                                title="Forzar desconexión inmediata (Mata el bot remotamente)"
+                                className="text-[10px] bg-red-900/40 text-red-400 border border-red-800/50 hover:bg-red-800/60 hover:text-red-200 px-2 py-0.5 rounded-full transition-colors flex items-center gap-1"
+                              >
+                                <span>🛑</span> Apagar
+                              </button>
+                            )}
                           </div>
                         );
                       })()

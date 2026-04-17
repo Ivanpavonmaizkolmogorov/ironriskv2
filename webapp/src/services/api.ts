@@ -76,6 +76,8 @@ export const tradingAccountAPI = {
   list: () => api.get("/api/trading-accounts/"),
   revoke: (accountId: string) =>
     api.delete(`/api/trading-accounts/${accountId}`),
+  rotateToken: (accountId: string) =>
+    api.post(`/api/trading-accounts/${accountId}/rotate-token`),
   updateSettings: (accountId: string, data: { default_dashboard_layout?: any; theme?: string | null; name?: string }) =>
     api.patch(`/api/trading-accounts/${accountId}/settings`, data),
 };
