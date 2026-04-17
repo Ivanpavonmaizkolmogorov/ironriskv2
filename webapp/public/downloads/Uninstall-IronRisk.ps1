@@ -130,12 +130,29 @@ if ($ans -match "^[yY]") {
         $cfgFile = Join-Path $cfgDir "config.txt"
         if (Test-Path $cfgFile) {
             try {
-                $extToken = (Get-Content $cfgFile -Raw).Trim()
-                $body = @{ api_token = $extToken; magic_number = 0 } | ConvertTo-Json
-                Invoke-RestMethod -Uri "https://api.ironrisk.pro/api/live.py/uninstall" -Method Post -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
-                Invoke-RestMethod -Uri "http://127.0.0.1:8001/api/live.py/uninstall" -Method Post -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
-                Write-Host "  [+] Connection cleanly severed from server." -ForegroundColor Green
-            } catch {}
+                # Parse the token= line from config.txt (multi-line format: token=xxx, hostname=xxx, host=xxx...)
+                $cfgLines = Get-Content $cfgFile
+                $tokenLine = $cfgLines | Where-Object { $_ -match '^token=' } | Select-Object -First 1
+                if ($tokenLine) {
+                    $extToken = ($tokenLine -replace '^token=','').Trim()
+                    $body = @{ api_token = $extToken; magic_number = 0 } | ConvertTo-Json
+                    # Parse server host from config to know where to send the kill signal
+                    $cfgHost = ($cfgLines | Where-Object { $_ -match '^host=' } | Select-Object -First 1) -replace '^host=',''
+                    $cfgPort = ($cfgLines | Where-Object { $_ -match '^port=' } | Select-Object -First 1) -replace '^port=',''
+                    $cfgHttps = ($cfgLines | Where-Object { $_ -match '^https=' } | Select-Object -First 1) -replace '^https=',''
+                    if ($cfgHost) {
+                        $scheme = if ($cfgHttps -eq 'true') { 'https' } else { 'http' }
+                        $targetUrl = "${scheme}://${cfgHost}:${cfgPort}/api/live/uninstall"
+                    } else {
+                        $targetUrl = "https://api.ironrisk.pro/api/live/uninstall"
+                    }
+                    Write-Host "  [*] Sending kill signal to $targetUrl..." -ForegroundColor Yellow
+                    Invoke-RestMethod -Uri $targetUrl -Method Post -Body $body -ContentType "application/json" -TimeoutSec 10 -ErrorAction Stop | Out-Null
+                    Write-Host "  [+] Connection cleanly severed from server." -ForegroundColor Green
+                }
+            } catch {
+                Write-Host "  [!] Kill signal failed: $_" -ForegroundColor DarkYellow
+            }
         }
 
         # Delete Config Folder Entirely

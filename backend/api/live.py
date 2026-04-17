@@ -1325,24 +1325,24 @@ def get_live_equity_curve_portfolio(api_token: str, portfolio_id: str, db: Sessi
     }
 
 
+from pydantic import BaseModel as _BaseModel
+
+class UninstallRequest(_BaseModel):
+    api_token: str
+
 @router.post("/uninstall")
-def api_uninstall_service(req: HeartbeatRequest, db: Session = Depends(get_db)):
+def api_uninstall_service(req: UninstallRequest, db: Session = Depends(get_db)):
     """Receives a final farewell payload from the PowerShell uninstaller script.
     Instantly zeroes the connection history to immediately flip the UI grey,
     and rotates the token to permanently sever access for any remaining immortal RAM ghosts."""
     import secrets
-    from models.trading_account import TradingAccount
-    from fastapi import HTTPException
     
     account = db.query(TradingAccount).filter(TradingAccount.api_token == req.api_token).first()
     if not account:
-        # Silently succeed so the uninstaller doesn't alarm the user if already killed
         return {"status": "ALREADY_UNINSTALLED"}
 
-    # Detach the frontend UI immediately
     account.last_heartbeat_at = None
     account.has_connected = False
-    # Rotate the token to guarantee irreversible blockage of ghost terminals
     account.api_token = f"irk_" + secrets.token_urlsafe(32)
     
     db.commit()
