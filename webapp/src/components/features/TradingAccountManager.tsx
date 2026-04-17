@@ -27,6 +27,7 @@ export default function TradingAccountManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [installerDownloaded, setInstallerDownloaded] = useState<string | null>(null);
+  const [serverTimeOffset, setServerTimeOffset] = useState<number>(0);
   const t = useTranslations("workspaceManager");
 
   useEffect(() => {
@@ -39,6 +40,13 @@ export default function TradingAccountManager() {
   const loadAccounts = async () => {
     try {
       const res = await tradingAccountAPI.list();
+      
+      // Sync master clock with Hetzner server to bypass hardware clock skewed futures
+      if (res.headers && res.headers['date']) {
+         const serverMs = new Date(res.headers['date']).getTime();
+         setServerTimeOffset(serverMs - Date.now());
+      }
+      
       const sorted = [...res.data].sort(
         (a: TradingAccount, b: TradingAccount) =>
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
@@ -291,7 +299,7 @@ export default function TradingAccountManager() {
                       </button>
                     ) : (
                       (() => {
-                        const isAlive = isConnectionAlive(a.last_heartbeat_at);
+                        const isAlive = isConnectionAlive(a.last_heartbeat_at, 300000, serverTimeOffset);
                         const isService = a.default_dashboard_layout?.last_heartbeat_source === "service";
                         
                         let bgColor = "bg-iron-800/50 border-iron-700/50 text-iron-500";
@@ -302,8 +310,10 @@ export default function TradingAccountManager() {
                         // Calculate exact elapsed time for absolute transparency
                         let timeString = "";
                         if (a.last_heartbeat_at) {
-                          const secondsPassed = Math.floor((Date.now() - new Date(a.last_heartbeat_at).getTime()) / 1000);
-                          if (secondsPassed <= 0) timeString = ` (justo ahora)`;
+                          const syncedNow = Date.now() + serverTimeOffset;
+                          const secondsPassed = Math.floor((syncedNow - new Date(a.last_heartbeat_at).getTime()) / 1000);
+                          
+                          if (secondsPassed <= 0) timeString = ` (sincronizando...)`;
                           else if (secondsPassed < 60) timeString = ` (hace ${secondsPassed}s)`;
                           else if (secondsPassed < 300) timeString = ` (hace ${Math.floor(secondsPassed/60)}m ${secondsPassed%60}s)`;
                         }

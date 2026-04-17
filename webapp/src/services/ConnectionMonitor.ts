@@ -10,9 +10,9 @@
 export type ChannelState = "online" | "offline" | "stale";
 
 /** Unified helper to check if a heartbeat is fresh (default 5 min). */
-export function isConnectionAlive(dateString: string | null | undefined, thresholdMs = 300_000): boolean {
+export function isConnectionAlive(dateString: string | null | undefined, thresholdMs = 300_000, serverOffsetMs = 0): boolean {
   if (!dateString) return false;
-  return Date.now() - new Date(dateString).getTime() < thresholdMs;
+  return (Date.now() + serverOffsetMs) - new Date(dateString).getTime() < thresholdMs;
 }
 
 export interface DualSnapshot {
