@@ -58,6 +58,10 @@ if ($terminals.Count -eq 0) {
     Read-Host "Press Enter to exit"
     exit 0
 }
+$terminals = $terminals | Sort-Object BrokerName
+for ($i=0; $i -lt $terminals.Count; $i++) {
+    $terminals[$i].Id = $i + 1
+}
 
 $selectedTerminals = @()
 $pageSize = 20
