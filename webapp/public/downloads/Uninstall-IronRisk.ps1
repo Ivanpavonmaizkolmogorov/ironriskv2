@@ -125,8 +125,19 @@ if ($ans -match "^[yY]") {
         $expDest = Join-Path $base "MQL5\Experts"
         if (Test-Path $expDest) { Get-ChildItem -Path $expDest -Filter "*IronRisk*.ex5" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue }
 
-        # Delete Config Folder Entirely
+        # Send Final Uninstall Signal to Sever the Green Connection
         $cfgDir = Join-Path $base "MQL5\Files\IronRisk"
+        $cfgFile = Join-Path $cfgDir "config.txt"
+        if (Test-Path $cfgFile) {
+            try {
+                $extToken = (Get-Content $cfgFile -Raw).Trim()
+                $body = @{ api_token = $extToken; magic_number = 0 } | ConvertTo-Json
+                Invoke-RestMethod -Uri "https://api.ironrisk.pro/api/live.py/uninstall" -Method Post -Body $body -ContentType "application/json" -ErrorAction SilentlyContinue | Out-Null
+                Write-Host "  [+] Connection cleanly severed from server." -ForegroundColor Green
+            } catch {}
+        }
+
+        # Delete Config Folder Entirely
         if (Test-Path $cfgDir) { Remove-Item -Path $cfgDir -Recurse -Force -ErrorAction SilentlyContinue }
 
         # Remove Auto-start entry
