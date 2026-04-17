@@ -1,5 +1,11 @@
 [
   {
+    "id": "zero_touch_silent",
+    "date": "2026-04-17",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "user_profile_avatar",
     "date": "2026-04-16",
     "tag": "feature",
