@@ -150,6 +150,8 @@
     "actToken": "Token",
     "btnEnter": "Entrar al Workspace",
     "btnEntering": "Entrando al Sector...",
+    "btnDownloaded": "Descargado",
+    "btnReinstall": "Re-Instalador",
     "btnCopy": "Copiar Token",
     "btnDelete": "Eliminar Cuenta",
     "confirmDeleteTitle": "⚠️ ¿Eliminar Cuenta?",

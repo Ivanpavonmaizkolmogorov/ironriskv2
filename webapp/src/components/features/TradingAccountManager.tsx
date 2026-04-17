@@ -352,7 +352,7 @@ export default function TradingAccountManager() {
                     }}
                   >
                     <span className={!a.has_connected ? "opacity-50" : ""}>
-                      {a.has_connected ? `Entrar ➔` : `🔒 ${t("btnEnter")}`}
+                      {a.has_connected ? `${t("btnEnter")} ➔` : `🔒 ${t("btnEnter")}`}
                     </span>
                   </Button>
                   <Button
@@ -363,7 +363,7 @@ export default function TradingAccountManager() {
                     }`}
                     onClick={() => downloadInstaller(a.api_token)}
                   >
-                    {installerDownloaded === a.api_token ? `✅ Descargado` : `⚡ Re-Instalador`}
+                    {installerDownloaded === a.api_token ? `✅ ${t("btnDownloaded")}` : `⚡ ${t("btnReinstall")}`}
                   </Button>
                   <Button
                     variant="danger"
