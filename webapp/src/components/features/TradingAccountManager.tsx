@@ -238,93 +238,115 @@ export default function TradingAccountManager() {
             key={a.id}
             style={getCardThemeStyles(a.theme)}
             className={`
-              flex flex-col p-3 sm:p-4 rounded-lg border
+              grid grid-cols-1 md:grid-cols-[1fr_160px] gap-4 p-4 rounded-xl border transition-all
               ${a.is_active
-                ? "bg-surface-tertiary border-iron-700 text-iron-100"
-                : "bg-surface-primary border-iron-800 opacity-50 text-iron-100"
+                ? "bg-surface-tertiary border-iron-700 text-iron-100 hover:border-iron-600 shadow-sm"
+                : "bg-surface-primary border-iron-800 opacity-60 text-iron-100 grayscale-[0.2]"
               }
             `}
           >
-            {/* Top Row: Account Details & Actions */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-              <div className="flex-1 min-w-0 mb-3 sm:mb-0">
-                <div className="flex items-center gap-3">
-                {editingId === a.id ? (
-                  <input
-                    autoFocus
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    onBlur={() => renameAccount(a.id)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') renameAccount(a.id); if (e.key === 'Escape') setEditingId(null); }}
-                    className="text-base text-iron-200 font-semibold bg-transparent border-b border-risk-green/50 focus:outline-none focus:border-risk-green px-0 py-0 w-40"
-                  />
-                ) : (
-                  <div className="group flex items-center gap-1.5">
-                    <p className="text-base text-iron-200 font-semibold">
-                      {a.name}
-                    </p>
-                    <button
-                      onClick={() => { setEditingId(a.id); setEditingName(a.name); }}
-                      className="opacity-0 group-hover:opacity-100 text-iron-500 hover:text-risk-green transition-all p-0.5 rounded"
-                      title={t('dblClickRename')}
-                    >
-                      <Pencil className="w-3 h-3" />
-                    </button>
-                  </div>
-                )}
-                {a.is_active && (
-                  <>
-                    {!a.has_connected ? (
+            {/* Left Box: Titles and Meta */}
+            <div className="flex flex-col min-w-0 pr-0 md:pr-4">
+              
+              {/* Row 1: Strict alignment of Title, Buttons, and Status Badge */}
+              <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 w-full mb-4">
+                
+                {/* 1. Account Name Input/Text */}
+                <div className="min-w-0 pr-2">
+                  {editingId === a.id ? (
+                    <input
+                      autoFocus
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onBlur={() => renameAccount(a.id)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') renameAccount(a.id); if (e.key === 'Escape') setEditingId(null); }}
+                      className="text-lg text-iron-100 font-bold bg-transparent border-b border-risk-green/50 focus:outline-none focus:border-risk-green px-0 py-0 w-full truncate"
+                    />
+                  ) : (
+                    <div className="group flex items-center gap-2 min-w-0">
+                      <p className="text-lg text-iron-100 font-bold truncate">
+                        {a.name}
+                      </p>
                       <button
-                        onClick={() => downloadInstaller(a.api_token)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all duration-300 ${
-                          installerDownloaded === a.api_token
-                            ? "bg-risk-green/20 border border-risk-green/40 text-risk-green"
-                            : "bg-risk-yellow/10 border border-risk-yellow/20 text-risk-yellow animate-pulse hover:bg-risk-yellow/20"
-                        }`}
+                        onClick={() => { setEditingId(a.id); setEditingName(a.name); }}
+                        className="opacity-0 group-hover:opacity-100 text-iron-500 hover:text-risk-green transition-all p-1 rounded-md shrink-0 bg-iron-800/50"
+                        title={t('dblClickRename')}
                       >
-                        <div className={`w-1.5 h-1.5 rounded-full ${installerDownloaded === a.api_token ? "bg-risk-green" : "bg-risk-yellow"}`}></div>
-                        {installerDownloaded === a.api_token ? `✅ ${t("installerReady")}` : `⚡ ${t("downloadInstaller")} ⬇`}
+                        <Pencil className="w-3.5 h-3.5" />
                       </button>
-                    ) : (
-                      (() => {
-                        const status = deriveWorkspaceConnection(a, serverTimeOffset);
-                        
-                        return (
-                          <div title={status.isAlive ? `El servidor expira la conexión a los 5 minutos. Si has desinstalado, verás cómo este contador sube hasta apagarse.` : "Desconectado permanentemente."} className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${status.bgColor}`}>
-                            <div className={`w-1.5 h-1.5 rounded-full ${status.dotColor} ${status.pulseClass}`}></div>
-                            {status.label} {status.timeString && `(${status.timeString})`}
-                          </div>
-                        );
-                      })()
-                    )}
-                    <div className="scale-90 opacity-80 hover:opacity-100 transition-opacity ml-2">
-                      <ThemeSelector 
-                        mode="inline" 
-                        activeThemeOverride={a.theme} 
-                        onThemeSelect={(t) => updateAccountTheme(a.id, t)} 
-                      />
                     </div>
-                  </>
-                )}
+                  )}
+                </div>
+
+                {/* 2. Intelligent Connection Badge */}
+                <div className="shrink-0 flex items-center justify-end min-w-[120px]">
+                  {a.is_active && (
+                    <>
+                      {!a.has_connected ? (
+                        <button
+                          onClick={() => downloadInstaller(a.api_token)}
+                          className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold cursor-pointer transition-all duration-300 shadow-inner ${
+                            installerDownloaded === a.api_token
+                              ? "bg-risk-green/20 border border-risk-green/40 text-risk-green"
+                              : "bg-risk-yellow/10 border border-risk-yellow/20 text-risk-yellow animate-pulse hover:bg-risk-yellow/20"
+                          }`}
+                        >
+                          <div className={`w-1.5 h-1.5 rounded-full ${installerDownloaded === a.api_token ? "bg-risk-green" : "bg-risk-yellow"}`}></div>
+                          <span>{installerDownloaded === a.api_token ? `✅ ${t("installerReady")}` : `⚡ ${t("downloadInstaller")}`}</span>
+                        </button>
+                      ) : (
+                        (() => {
+                          const status = deriveWorkspaceConnection(a, serverTimeOffset);
+                          return (
+                            <div title={status.isAlive ? `Conexión detectada.` : "Desconectado permanentemente."} className={`flex items-center justify-center gap-1.5 px-3 py-1 md:py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm w-full md:w-auto overflow-hidden whitespace-nowrap ${status.bgColor}`}>
+                              <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${status.dotColor} ${status.pulseClass}`}></div>
+                              <span className="truncate">{status.label}{status.timeString ? ` ${status.timeString}` : ""}</span>
+                            </div>
+                          );
+                        })()
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* 3. Theme Selector */}
+                <div className="shrink-0 scale-90 opacity-80 hover:opacity-100 transition-opacity flex justify-end">
+                  {a.is_active && (
+                    <ThemeSelector 
+                      mode="inline" 
+                      activeThemeOverride={a.theme} 
+                      onThemeSelect={(t) => updateAccountTheme(a.id, t)} 
+                    />
+                  )}
+                </div>
               </div>
-              <div className="flex gap-4 mt-1 text-xs text-iron-500">
-                {a.broker && <span>{t("actBroker")}: <span className="text-iron-300">{a.broker}</span></span>}
-                {a.account_number ? (
-                  <span>{t("actNumber")}: <span className="text-iron-300">{a.account_number}</span></span>
-                ) : a.is_active && !a.has_connected ? (
-                  <span className="text-risk-yellow/70 italic">{t("actNumber")}: ⏳ {t("autoDetectPending")}</span>
-                ) : null}
-                {a.hostname && <span>🖥️ VPS: <span className="text-iron-300">{a.hostname}</span></span>}
+
+              {/* Row 2: Strict Data Columns (Broker, Account, VPS) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2 mt-auto pt-2 text-[11px] text-iron-500 border-t border-iron-800/40">
+                <div className="truncate">
+                  {a.broker && <span>{t("actBroker")}: <br className="hidden sm:block"/><span className="text-iron-300 font-medium inline-block sm:mt-0.5">{a.broker}</span></span>}
+                </div>
+                <div className="truncate">
+                  {a.account_number ? (
+                    <span>{t("actNumber")}: <br className="hidden sm:block"/><span className="text-iron-300 font-medium font-mono inline-block sm:mt-0.5">{a.account_number}</span></span>
+                  ) : a.is_active && !a.has_connected ? (
+                    <span className="text-risk-yellow/70 italic flex flex-col sm:mt-0.5"><span className="hidden sm:block">{t("actNumber")}:</span> ⏳ {t("autoDetectPending")}</span>
+                  ) : null}
+                </div>
+                <div className="truncate">
+                  {a.hostname && <span>VPS / RDP: <br className="hidden sm:block"/><span className="text-iron-300 font-medium inline-block sm:mt-0.5" title={a.hostname}>{a.hostname}</span></span>}
+                </div>
               </div>
             </div>
-            <div className="flex flex-wrap sm:flex-col justify-end gap-2 mt-3 sm:mt-0 sm:ml-4 shrink-0">
+
+            {/* Right Box: Strict Action Buttons Stack */}
+            <div className="flex sm:flex-row md:flex-col justify-center items-stretch gap-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t md:border-t-0 md:border-l border-iron-800 md:pl-4 shrink-0">
               {a.is_active && (
                 <>
                   <Button
                     variant="primary"
                     size="sm"
-                    className="w-full text-left justify-center sm:justify-start mb-2"
+                    className="flex-1 md:flex-none justify-center group shadow-[0_0_15px_rgba(0,180,250,0.1)] hover:shadow-[0_0_20px_rgba(0,180,250,0.2)] transition-shadow"
                     disabled={!a.has_connected}
                     title={!a.has_connected ? t("lockedTooltip") : ""}
                     onClick={() => {
@@ -332,22 +354,24 @@ export default function TradingAccountManager() {
                       router.push(`/dashboard/account/${a.id}`);
                     }}
                   >
-                    {a.has_connected ? `→ ${t("btnEnter")}` : `🔒 ${t("btnEnter")}`}
+                    <span className={!a.has_connected ? "opacity-50" : ""}>
+                      {a.has_connected ? `Entrar ➔` : `🔒 ${t("btnEnter")}`}
+                    </span>
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className={`w-full text-left justify-center sm:justify-start min-w-[110px] ${
-                      installerDownloaded === a.api_token ? "text-risk-green" : "text-risk-green"
+                    className={`flex-1 md:flex-none justify-center text-[11px] ${
+                      installerDownloaded === a.api_token ? "text-risk-green bg-risk-green/5" : "text-risk-green hover:bg-white/5"
                     }`}
                     onClick={() => downloadInstaller(a.api_token)}
                   >
-                    {installerDownloaded === a.api_token ? `✅ ${t("installerReady")}` : `⚡ ${t("downloadInstaller")}`}
+                    {installerDownloaded === a.api_token ? `✅ Descargado` : `⚡ Re-Instalador`}
                   </Button>
                   <Button
                     variant="danger"
                     size="sm"
-                    className="w-full text-left justify-center sm:justify-start"
+                    className="flex-1 md:flex-none justify-center text-[10px] w-auto border border-risk-red/20 opacity-80 hover:opacity-100"
                     onClick={() => {
                       if (confirm(t("confirmDeleteDesc"))) {
                         revokeAccount(a.id);
@@ -361,7 +385,6 @@ export default function TradingAccountManager() {
               {!a.is_active && (
                 <span className="text-xs text-iron-600 self-end">{t("archived")}</span>
               )}
-            </div>
             </div>
 
             {/* Inline Onboarding Tutorial for Disconnected Accounts */}

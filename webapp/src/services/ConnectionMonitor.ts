@@ -42,8 +42,7 @@ export function deriveWorkspaceConnection(account: TradingAccount | null | undef
   if (account.last_heartbeat_at) {
     const syncedNow = Date.now() + serverOffsetMs;
     secondsPassed = Math.floor((syncedNow - new Date(account.last_heartbeat_at).getTime()) / 1000);
-    
-    if (secondsPassed <= 0) timeString = `sincronizando...`;
+    if (secondsPassed <= 0) timeString = ``;
     else if (secondsPassed < 60) timeString = `${secondsPassed}s`;
     else if (secondsPassed < 300) timeString = `${Math.floor(secondsPassed/60)}m ${secondsPassed%60}s`;
     else timeString = `hace ${Math.floor(secondsPassed/60)}m`;
