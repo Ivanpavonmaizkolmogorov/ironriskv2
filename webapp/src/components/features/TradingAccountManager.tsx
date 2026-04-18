@@ -301,11 +301,11 @@ export default function TradingAccountManager() {
                           return (
                             <div className="flex flex-col items-end sm:items-center gap-1.5">
                               {a.default_dashboard_layout?.duplicate_warning && (
-                                <div title="Se han detectado varios terminales enviando datos a la vez." className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-risk-red/10 text-risk-red border border-risk-red/30 animate-pulse">
+                                <div title={`⚠️ Se han detectado heartbeats simultáneos desde distintos ordenadores para este workspace (${a.hostname || 'desconocido'}). Mantén el servicio activo en un solo nodo.`} className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-risk-red/10 text-risk-red border border-risk-red/30 animate-pulse">
                                   ⚠️ Colisión Nodos
                                 </div>
                               )}
-                              <div title={status.isAlive ? `Conexión detectada.` : "Desconectado permanentemente."} className={`flex items-center justify-center gap-1.5 px-3 py-1 md:py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm w-full md:w-auto overflow-hidden whitespace-nowrap ${status.bgColor}`}>
+                              <div title={status.isAlive ? `✅ Conexión activa desde: ${a.hostname || 'desconocido'} · Último latido: ${status.timeString || 'ahora'}` : `🔴 Sin conexión · Último nodo: ${a.hostname || 'nunca conectado'}`} className={`flex items-center justify-center gap-1.5 px-3 py-1 md:py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm w-full md:w-auto overflow-hidden whitespace-nowrap ${status.bgColor}`}>
                                 <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${status.dotColor} ${status.pulseClass}`}></div>
                                 <span className="truncate">{status.label}{status.timeString ? ` ${status.timeString}` : ""}</span>
                               </div>

@@ -29,7 +29,38 @@ def _build_status_response(chat_id: str) -> str:
         ).first()
 
         if not prefs:
-            return "⚠️ Tu cuenta de Telegram no está vinculada a ninguna cuenta de IronRisk."
+            return "⚠️ Tu cuenta de Telegram no está vinculada a ninguna cuenta de IronRisk.\n⚠️ Your Telegram account is not linked to any IronRisk account."
+
+        lang = getattr(prefs, "locale", "es") or "es"
+
+        # i18n strings
+        T = {
+            "es": {
+                "title": "🖥️ <b>Estado de Nodos (Workspaces)</b>\n",
+                "no_accounts": "📊 No tienes cuentas de trading activas registradas en IronRisk.",
+                "active": "Activo",
+                "ago": "hace",
+                "min": "min",
+                "no_signal": "Sin señal",
+                "disconnected": "Desconectado",
+                "no_heartbeat": "Sin datos de heartbeat",
+                "node": "Nodo",
+                "dup_warn": "🚨 <i>ATENCIÓN: Se detectaron múltiples instalaciones simultáneas intentando conectar con esta misma cuenta. Por seguridad, sugerimos mantener el Servicio activo en un solo ordenador.</i>",
+            },
+            "en": {
+                "title": "🖥️ <b>Node Status (Workspaces)</b>\n",
+                "no_accounts": "📊 You have no active trading accounts registered in IronRisk.",
+                "active": "Active",
+                "ago": "",
+                "min": "min ago",
+                "no_signal": "No signal",
+                "disconnected": "Disconnected",
+                "no_heartbeat": "No heartbeat data",
+                "node": "Node",
+                "dup_warn": "🚨 <i>WARNING: Multiple simultaneous installations detected trying to connect with this account. For safety, keep the Service active on a single computer only.</i>",
+            },
+        }
+        t = T.get(lang, T["es"])
 
         # Find all trading accounts for this user
         accounts = db.query(TradingAccount).filter(
@@ -38,13 +69,15 @@ def _build_status_response(chat_id: str) -> str:
         ).all()
 
         if not accounts:
-            return "📊 No tienes cuentas de trading activas registradas en IronRisk."
+            return t["no_accounts"]
 
         now = datetime.now(timezone.utc)
-        lines = ["🖥️ <b>Estado de Nodos (Workspaces)</b>\n"]
+        lines = [t["title"]]
 
         for acc in accounts:
             name = acc.name or acc.account_number or str(acc.id)[:8]
+            host_tag = f"  [{acc.hostname}]" if acc.hostname else ""
+
             if acc.last_heartbeat_at:
                 last_hb = acc.last_heartbeat_at
                 if last_hb.tzinfo is None:
@@ -53,22 +86,25 @@ def _build_status_response(chat_id: str) -> str:
                 mins = int(elapsed / 60)
 
                 if mins < 5:
-                    lines.append(f"  ✅ <b>{name}</b> — Activo (hace {mins} min)")
+                    if lang == "en":
+                        lines.append(f"  ✅ <b>{name}</b> — {t['active']} ({mins} {t['min']}){host_tag}")
+                    else:
+                        lines.append(f"  ✅ <b>{name}</b> — {t['active']} ({t['ago']} {mins} {t['min']}){host_tag}")
                 elif mins < 30:
-                    lines.append(f"  ⚠️ <b>{name}</b> — Sin señal ({mins} min)")
+                    lines.append(f"  ⚠️ <b>{name}</b> — {t['no_signal']} ({mins} min){host_tag}")
                 else:
                     hours = mins // 60
                     if hours > 0:
-                        lines.append(f"  🔴 <b>{name}</b> — Desconectado ({hours}h {mins % 60}m)")
+                        lines.append(f"  🔴 <b>{name}</b> — {t['disconnected']} ({hours}h {mins % 60}m){host_tag}")
                     else:
-                        lines.append(f"  🔴 <b>{name}</b> — Desconectado ({mins} min)")
+                        lines.append(f"  🔴 <b>{name}</b> — {t['disconnected']} ({mins} min){host_tag}")
             else:
-                lines.append(f"  ⚪ <b>{name}</b> — Sin datos de heartbeat")
+                lines.append(f"  ⚪ <b>{name}</b> — {t['no_heartbeat']}")
                 
             # Check for duplicate connection warning
             layout = dict(acc.default_dashboard_layout or {})
             if layout.get("duplicate_warning"):
-                lines.append("    🚨 <i>ATENCIÓN: Se detectaron múltiples instalaciones simultáneas intentando conectar con esta misma cuenta. Por seguridad, sugerimos mantener el Servicio activo en un solo ordenador.</i>")
+                lines.append(f"    {t['dup_warn']}")
                 # Reset flag after warning
                 layout["duplicate_warning"] = False
                 from sqlalchemy.orm.attributes import flag_modified
