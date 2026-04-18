@@ -131,9 +131,12 @@ export default function UserProfileDropdown({
   const toggleLanguage = useCallback(() => {
     const nextLocale = locale === "en" ? "es" : "en";
     // Sync locale to backend for Telegram i18n — use fetch+keepalive to survive page navigation
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token = typeof window !== "undefined" ? localStorage.getItem("ironrisk_jwt") : null;
     if (token) {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
+      let apiBase = process.env.NEXT_PUBLIC_API_URL || "";
+      if (typeof window !== "undefined" && window.location.protocol === "https:" && apiBase.startsWith("http:")) {
+        apiBase = apiBase.replace("http:", "https:");
+      }
       fetch(`${apiBase}/api/user/preferences/locale`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
