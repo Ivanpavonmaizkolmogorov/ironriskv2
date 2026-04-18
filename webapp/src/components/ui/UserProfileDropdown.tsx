@@ -129,10 +129,11 @@ export default function UserProfileDropdown({
     return () => document.removeEventListener("keydown", handler);
   }, [isOpen, showTools]);
 
-  const toggleLanguage = useCallback(() => {
+  const toggleLanguage = useCallback(async () => {
     const nextLocale = locale === "en" ? "es" : "en";
-    // Sync locale to backend for Telegram i18n
-    preferencesAPI.updateLocale(nextLocale).catch(() => {});
+    // Sync locale to backend for Telegram i18n — must complete BEFORE navigation
+    // because router.replace with a new locale causes a full page reload
+    try { await preferencesAPI.updateLocale(nextLocale); } catch {}
     startTransition(() => {
       const params = searchParams.toString();
       const query = params ? `?${params}` : "";
