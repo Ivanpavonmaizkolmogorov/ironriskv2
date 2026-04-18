@@ -435,7 +435,7 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <Link href="/dashboard" className="text-xs sm:text-sm text-iron-400 hover:text-iron-200 transition-colors shrink-0">
-              ← {tWorkspace("navWorkspaces")}
+              {tWorkspace("navWorkspaces")}
             </Link>
             <span className="text-sm font-semibold text-iron-100 truncate">
               {account ? account.name : "..."}
