@@ -893,7 +893,8 @@
     "tags": {
       "feature": "Nueva función",
       "fix": "Corrección",
-      "improvement": "Mejora"
+      "improvement": "Mejora",
+      "refactor": "Refactorización"
     },
     "entries": {
       "bayes_math_ui_cleanup": {

@@ -893,7 +893,8 @@
     "tags": {
       "feature": "New Feature",
       "fix": "Bug Fix",
-      "improvement": "Improvement"
+      "improvement": "Improvement",
+      "refactor": "Refactor"
     },
     "entries": {
       "bayes_math_ui_cleanup": {
