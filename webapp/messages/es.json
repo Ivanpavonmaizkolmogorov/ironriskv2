@@ -717,7 +717,7 @@
     "green_label": "CONSISTENTE",
     "green_desc": "Terreno conocido — Sin alertas de riesgo",
     "fatal_human": "Has superado el límite de dolor que tú mismo definiste en frío.",
-    "red_human": "Ahora mismo, tu estrategia se está desviando significativamente de lo esperado.",
+    "red_human": "Lo que tu sistema está viviendo ahora ya no se parece a lo que vivió en tu backtest.",
     "amber_human": "Algo empieza a desviarse — podría ser variación normal, pero ya no es trivial.",
     "green_human": "Todo encaja con lo esperado. Tu estrategia se comporta como en tu backtest.",
     "fatal_guidance": "Has cruzado tu propio muro. La decisión que tomaste en frío aplica ahora.",

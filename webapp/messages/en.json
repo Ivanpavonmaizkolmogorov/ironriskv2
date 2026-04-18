@@ -717,7 +717,7 @@
     "green_label": "CONSISTENT",
     "green_desc": "Known territory — No risk alerts",
     "fatal_human": "You have exceeded the pain limit you defined with a cool head.",
-    "red_human": "Right now, your strategy is deviating significantly from what was expected.",
+    "red_human": "What your system is going through right now no longer resembles what it went through in your backtest.",
     "amber_human": "Something is starting to drift — could be normal variation, but it's no longer trivial.",
     "green_human": "Everything matches expectations. Your strategy is behaving like its backtest.",
     "fatal_guidance": "You crossed your own wall. The decision you made with a cool head applies now.",
