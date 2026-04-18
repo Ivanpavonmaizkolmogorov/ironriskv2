@@ -242,7 +242,12 @@ async def telegram_bot_poller():
 
 
 async def daily_status_broadcaster():
-    """Background task that broadcasts the EA Status to all registered users daily at 06:00 UTC (08:00 CET)."""
+    """Background task that broadcasts the EA Status to all registered users daily at 06:00 UTC (08:00 CET).
+    
+    Resilient to service restarts: if the service starts between 06:00-06:30 UTC
+    and the broadcast hasn't been sent yet today, it fires immediately.
+    Uses a DB marker column to prevent duplicate broadcasts.
+    """
     bot_token = await _get_bot_token()
     if not bot_token:
         logger.warning("TELEGRAM_BOT_TOKEN not set — daily broadcaster disabled.")
@@ -253,36 +258,89 @@ async def daily_status_broadcaster():
     while True:
         try:
             now = datetime.now(timezone.utc)
-            # Find the next 06:00:00 UTC
-            target = now.replace(hour=6, minute=0, second=0, microsecond=0)
+            target_hour = 6  # 06:00 UTC = 08:00 CET
+
+            # Check if we're in the "catch-up" window (06:00 - 06:30 UTC)
+            # This handles the case where apt-daily-upgrade restarts the service
+            # right at 06:00, killing the sleeping broadcaster.
+            in_catchup_window = now.hour == target_hour and now.minute < 30
             
-            # If it's already past 06:00 today, schedule for tomorrow
+            if in_catchup_window:
+                # Check if we already sent today's broadcast
+                today_str = now.strftime("%Y-%m-%d")
+                already_sent = False
+                try:
+                    with SessionLocal() as db:
+                        from models.system_settings import SystemSetting
+                        marker = db.query(SystemSetting).filter(SystemSetting.key == "last_daily_broadcast").first()
+                        if marker and marker.value == today_str:
+                            already_sent = True
+                except Exception:
+                    pass  # If the check fails, proceed with broadcast (better duplicate than missing)
+
+                if not already_sent:
+                    logger.info(f"🌅 Catch-up broadcast! Service restarted during broadcast window. Firing now.")
+                    await _execute_broadcast(bot_token)
+                    # Mark as sent
+                    try:
+                        with SessionLocal() as db:
+                            from models.system_settings import SystemSetting
+                            marker = db.query(SystemSetting).filter(SystemSetting.key == "last_daily_broadcast").first()
+                            if marker:
+                                marker.value = today_str
+                            else:
+                                db.add(SystemSetting(key="last_daily_broadcast", value=today_str, description="Date of last daily Telegram broadcast"))
+                            db.commit()
+                    except Exception as e:
+                        logger.error(f"Failed to save broadcast marker: {e}")
+                else:
+                    logger.info(f"Broadcast already sent today ({today_str}), skipping catch-up.")
+
+            # Calculate next 06:00 UTC
+            target = now.replace(hour=target_hour, minute=0, second=0, microsecond=0)
             if now >= target:
                 target += timedelta(days=1)
-                
+
             sleep_seconds = (target - now).total_seconds()
             logger.info(f"Daily broadcaster sleeping for {sleep_seconds/3600:.2f} hours until {target.isoformat()}")
-            
+
             await asyncio.sleep(sleep_seconds)
-            
+
             # WAKING UP - It's 06:00 UTC!
-            logger.info("Executing Daily Telegram Broadcast!")
-            
-            with SessionLocal() as db:
-                prefs = db.query(UserPreferences).filter(UserPreferences.telegram_chat_id.isnot(None)).all()
-                for pref in prefs:
-                    chat_id = pref.telegram_chat_id
-                    if chat_id:
-                        status_msg = _build_status_response(chat_id)
-                        # Prepend a 'Morning Briefing' header
-                        full_msg = f"🌅 <b>IRONRISK MORNING BRIEFING</b>\n\n{status_msg}"
-                        await _send_message(bot_token, chat_id, full_msg)
-                        
-                        # Anti-spam API safe limit (2 messages per second max)
-                        await asyncio.sleep(0.5)
-                        
+            logger.info("⏰ Executing scheduled Daily Telegram Broadcast!")
+            await _execute_broadcast(bot_token)
+
+            # Mark as sent
+            try:
+                today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                with SessionLocal() as db:
+                    from models.system_settings import SystemSetting
+                    marker = db.query(SystemSetting).filter(SystemSetting.key == "last_daily_broadcast").first()
+                    if marker:
+                        marker.value = today_str
+                    else:
+                        db.add(SystemSetting(key="last_daily_broadcast", value=today_str, description="Date of last daily Telegram broadcast"))
+                    db.commit()
+            except Exception as e:
+                logger.error(f"Failed to save broadcast marker: {e}")
+
         except asyncio.CancelledError:
             break
         except Exception as e:
             logger.error(f"Daily broadcaster error: {e}")
-            await asyncio.sleep(60) # Wait a bit before trying to recover the loop
+            await asyncio.sleep(60)
+
+
+async def _execute_broadcast(bot_token: str):
+    """Send the morning briefing to all users with Telegram linked."""
+    with SessionLocal() as db:
+        prefs = db.query(UserPreferences).filter(UserPreferences.telegram_chat_id.isnot(None)).all()
+        for pref in prefs:
+            chat_id = pref.telegram_chat_id
+            if chat_id:
+                status_msg = _build_status_response(chat_id)
+                full_msg = f"🌅 <b>IRONRISK MORNING BRIEFING</b>\n\n{status_msg}"
+                await _send_message(bot_token, chat_id, full_msg)
+                await asyncio.sleep(0.5)
+    logger.info(f"Daily broadcast complete. Sent to {len(prefs)} users.")
+

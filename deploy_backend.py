@@ -9,15 +9,30 @@ ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect(HOST, username=USER, password=PASSWORD)
 
 sftp = ssh.open_sftp()
-print("Uploading preferences.py (locale endpoint)...")
-sftp.put(r"backend\api\preferences.py", "/var/www/ironrisk/backend/api/preferences.py")
+
+files = [
+    (r"backend\services\telegram_bot.py", "/var/www/ironrisk/backend/services/telegram_bot.py"),
+    (r"backend\api\preferences.py", "/var/www/ironrisk/backend/api/preferences.py"),
+]
+
+for local, remote in files:
+    print(f"Uploading {local}...")
+    sftp.put(local, remote)
 
 sftp.close()
 
 print("Restarting ironrisk service...")
 stdin, stdout, stderr = ssh.exec_command("systemctl restart ironrisk")
-print("STDOUT:", stdout.read().decode())
-print("STDERR:", stderr.read().decode())
+stdout.read()
+stderr.read()
+
+import time
+time.sleep(2)
+
+# Verify broadcaster initialized
+stdin, stdout, stderr = ssh.exec_command("journalctl -u ironrisk --no-pager -n 10 | grep -i 'broadcast\\|poller\\|started'")
+print("Post-restart logs:")
+print(stdout.read().decode('ascii', errors='replace').strip())
 
 ssh.close()
-print("Deployment to Hetzner complete.")
+print("\nDeployment complete.")
