@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { usePathname } from '@/i18n/routing';
 import { useFeatureAccess } from '@/store/useFeatureAccess';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Settings, Users, HeartPulse, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Settings, Users, HeartPulse, Loader2, CheckCircle2, XCircle, Send } from 'lucide-react';
 import Link from 'next/link';
 
 let API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -23,6 +23,7 @@ export default function AdminToolbar() {
   const [mounted, setMounted] = useState(false);
   const [apiVersion, setApiVersion] = useState<string | null>(null);
   const [healthStatus, setHealthStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
+  const [broadcastStatus, setBroadcastStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
 
   // Fix Next.js hydration mismatch for Zustand stores
   useEffect(() => {
@@ -86,6 +87,23 @@ export default function AdminToolbar() {
     setTimeout(() => setHealthStatus('idle'), 5000);
   };
 
+  const handleTriggerBroadcast = async () => {
+    setBroadcastStatus('loading');
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/trigger-broadcast`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('ironrisk_jwt') : ''}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      setBroadcastStatus(res.ok ? 'ok' : 'error');
+    } catch {
+      setBroadcastStatus('error');
+    }
+    setTimeout(() => setBroadcastStatus('idle'), 5000);
+  };
+
   // Only show the Admin Toolbar in protected core app areas.
   const isCoreAppRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
   
@@ -120,6 +138,27 @@ export default function AdminToolbar() {
               <><XCircle className="w-4 h-4" /> ❌ Error</>
             ) : (
               <><HeartPulse className="w-4 h-4 text-cyan-400" /> Test Server</>
+            )}
+          </button>
+          <button
+            onClick={handleTriggerBroadcast}
+            disabled={broadcastStatus === 'loading'}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full shadow-2xl font-mono font-bold text-sm transition-all border ${
+              broadcastStatus === 'ok'
+                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50'
+                : broadcastStatus === 'error'
+                ? 'bg-red-500/20 text-red-400 border-red-500/50'
+                : 'bg-surface-secondary text-iron-100 border-iron-600 hover:text-white hover:border-amber-400 hover:shadow-[0_0_15px_rgba(255,180,0,0.2)]'
+            }`}
+          >
+            {broadcastStatus === 'loading' ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
+            ) : broadcastStatus === 'ok' ? (
+              <><CheckCircle2 className="w-4 h-4" /> ✅ Broadcast enviado</>
+            ) : broadcastStatus === 'error' ? (
+              <><XCircle className="w-4 h-4" /> ❌ Error</>
+            ) : (
+              <><Send className="w-4 h-4 text-amber-400" /> Telegram Broadcast</>
             )}
           </button>
         </>

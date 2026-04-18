@@ -278,3 +278,22 @@ def test_uptime(
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
+
+# ─────────────────────────────────────────────
+# Trigger Daily Broadcast (Admin-only)
+# ─────────────────────────────────────────────
+
+@router.post("/trigger-broadcast")
+async def trigger_broadcast(
+    admin: User = Depends(get_admin_user),
+):
+    """Admin-only: Manually trigger the Telegram morning briefing right now."""
+    from services.telegram_bot import _execute_broadcast, _get_bot_token
+
+    bot_token = await _get_bot_token()
+    if not bot_token:
+        raise HTTPException(status_code=500, detail="TELEGRAM_BOT_TOKEN not configured.")
+
+    await _execute_broadcast(bot_token)
+    return {"status": "ok", "detail": "Morning briefing sent to all linked Telegram users."}
+
