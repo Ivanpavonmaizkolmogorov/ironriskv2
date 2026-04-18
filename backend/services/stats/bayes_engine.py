@@ -96,6 +96,7 @@ class EVDecomposition:
     n_live_wins: int
     n_live_losses: int
     eff_bt_wins: float      # n_bt_wins / bt_discount
+    eff_bt_losses: float    # n_bt_losses / bt_discount
     def to_dict(self) -> dict:
         """Serialize to dict, sanitizing numpy types."""
         def _clean(v):
