@@ -891,6 +891,10 @@
       "improvement": "Mejora"
     },
     "entries": {
+      "alert_testing_fixes": {
+        "title": "Nuevas alertas de test",
+        "body": "Añadida la simulación de alerta de transición del estado de riesgo. Además, se han arreglado traducciones duras en notificaciones."
+      },
       "telegram_i18n_hostname": {
         "title": "Telegram Bilingüe + Nodos Visibles",
         "body": "El bot de Telegram ahora responde en tu idioma (ES/EN) y muestra el nombre del servidor (hostname) de cada workspace para identificar de un vistazo desde dónde está conectado."

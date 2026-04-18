@@ -9,7 +9,11 @@ TRANSLATIONS = {
         "alert_title_risk": "🚨 <b>IronRisk Alerta de Riesgo ({target_type_upper})</b>",
         "alert_metric_line": "Métrica: <code>{metric_key}</code> {operator} {threshold_value}",
         "alert_value_line": "Valor Actual: <b>{current_value}</b>",
-        "alert_id_line": "🎯 <b>Objetivo:</b> {target_name}\n💼 <b>Cuenta:</b> {account_name}"
+        "alert_id_line": "🎯 <b>Objetivo:</b> {target_name}\n💼 <b>Cuenta:</b> {account_name}",
+        "help_title": "📌 <b>Comandos IronRisk Bot</b>",
+        "help_body": "/status — Comprobar si tu Servicio sigue conectado\n/help — Ver esta lista de comandos\n\nLas alertas de riesgo se envían automáticamente cuando se activan las reglas configuradas en el Centro de Alertas.",
+        "transition_title": "🚦 <b>Transición de Riesgo: Portfolio '{portfolio_name}'</b>",
+        "transition_reasons": "⚠️ <b>QUÉ ESTÁ PASANDO</b>"
     },
     "en": {
         "welcome_title": "🛡️ <b>IronRisk Shield Activated!</b>",
@@ -19,7 +23,11 @@ TRANSLATIONS = {
         "alert_title_risk": "🚨 <b>IronRisk Risk Alert ({target_type_upper})</b>",
         "alert_metric_line": "Metric: <code>{metric_key}</code> {operator} {threshold_value}",
         "alert_value_line": "Current Value: <b>{current_value}</b>",
-        "alert_id_line": "🎯 <b>Target:</b> {target_name}\n💼 <b>Account:</b> {account_name}"
+        "alert_id_line": "🎯 <b>Target:</b> {target_name}\n💼 <b>Account:</b> {account_name}",
+        "help_title": "📌 <b>IronRisk Bot Commands</b>",
+        "help_body": "/status — Check if your Service is still connected\n/help — Show this command list\n\nRisk alerts are sent automatically when rules configured in the Alert Center are triggered.",
+        "transition_title": "🚦 <b>Risk Transition: Portfolio '{portfolio_name}'</b>",
+        "transition_reasons": "⚠️ <b>WHAT IS HAPPENING</b>"
     }
 }
 

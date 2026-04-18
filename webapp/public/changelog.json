@@ -1,5 +1,11 @@
 [
   {
+    "id": "alert_testing_fixes",
+    "date": "2026-04-18",
+    "tag": "fix",
+    "internal": false
+  },
+  {
     "id": "telegram_i18n_hostname",
     "date": "2026-04-18",
     "tag": "feature",

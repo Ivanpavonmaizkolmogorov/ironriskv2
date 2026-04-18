@@ -323,7 +323,7 @@ async def trigger_alert(
         if not chat_id:
             raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
         bot_token = await _get_bot_token()
-        response = _build_help_response()
+        response = _build_help_response(chat_id)
         await _send_message(bot_token, chat_id, response)
         return {"status": "ok", "detail": "Help message sent to your Telegram."}
 
@@ -331,13 +331,10 @@ async def trigger_alert(
         if not chat_id:
             raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
         bot_token = await _get_bot_token()
-        welcome_msg = (
-            "🛡️ <b>IronRisk Shield Activado!</b>\n\n"
-            "Estás conectado. A partir de ahora recibirás aquí tus notificaciones y alertas de riesgo de IronRisk.\n\n"
-            "📌 <b>Comandos disponibles:</b>\n"
-            "/status — Comprobar si tu Servicio sigue conectado\n"
-            "/help — Ver esta lista de comandos"
-        )
+        from services.translations import get_text
+        title = get_text(locale, "welcome_title")
+        body = get_text(locale, "welcome_body")
+        welcome_msg = f"{title}\n\n{body}"
         await _send_message(bot_token, chat_id, welcome_msg)
         return {"status": "ok", "detail": "Welcome message sent to your Telegram."}
 
@@ -362,6 +359,27 @@ async def trigger_alert(
             msg = "🚨 <b>INSTALACIÓN DUPLICADA DETECTADA</b>\n\n⚠️ El nodo <b>DemoAccount</b> está siendo accedido desde múltiples máquinas simultáneamente:\n  • <b>VPS-1</b>\n  • <b>LOCAL-PC</b>\n\nPor seguridad, mantén el Servicio activo en un solo ordenador."
         await _send_message(bot_token, chat_id, msg)
         return {"status": "ok", "detail": "Duplicate warning sent to your Telegram."}
+
+    elif alert_type == "transition":
+        if not chat_id:
+            raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
+        bot_token = await _get_bot_token()
+        from services.humanizer import PythonHumanizer
+        hum = PythonHumanizer(locale=locale)
+        headline = hum.verdict_headline("amber")
+        
+        from services.translations import get_text
+        title = get_text(locale, "transition_title", portfolio_name="Demo Portfolio")
+        reasons_title = get_text(locale, "transition_reasons")
+        
+        msg = f"{title}\n\n"
+        msg += f"<b>AMBER</b> — <i>{headline}</i>\n\n"
+        msg += f"{reasons_title}\n"
+        msg += "• " + hum.gauge_narrative("consec_losses", "WARN", 5, 87.5) + "\n"
+        msg += "• " + hum.gauge_narrative("stagnation_days", "WARN", 12, 91.2) + "\n"
+        
+        await _send_message(bot_token, chat_id, msg)
+        return {"status": "ok", "detail": "Transition alert sent to your Telegram."}
 
     # ── PACTO DE ULISES (ULYSSES PACT) ALERTS ──
     elif alert_type == "ulises_drawdown":
@@ -396,7 +414,7 @@ async def trigger_alert(
         bot_token = await _get_bot_token()
         from services.translations import get_text
         title = get_text(locale, "alert_title_risk", target_type_upper="PORTFOLIO")
-        metric_line = get_text(locale, "alert_metric_line", metric_key="margin_level", operator="<", threshold_value=200.0)
+        metric_line = get_text(locale, "alert_metric_line", metric_key="margin_level", operator="&lt;", threshold_value=200.0)
         value_line = get_text(locale, "alert_value_line", current_value=180.5)
         id_line = get_text(locale, "alert_id_line", target_name="Swing Trading", account_name="Darwinex")
         message = f"{title}\n\n{metric_line}\n{value_line}\n\n{id_line}"
@@ -429,6 +447,21 @@ async def trigger_alert(
         # Reuse the test-uptime logic — already handled by /test-uptime
         return {"status": "ok", "detail": "Use the 'Test Server' button for health check emails."}
 
-    else:
-        raise HTTPException(status_code=400, detail=f"Unknown alert_type: {alert_type}")
+    raise HTTPException(status_code=400, detail=f"Unknown alert_type: {alert_type}")
 
+
+@router.post("/purge_alert_history")
+def purge_alert_history(admin: User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    """Deletes all alert history (cooldown locks) for the admin, allowing immediate re-testing of proactive alerts."""
+    from models.user_alert_config import UserAlertHistory, UserAlertConfig
+    
+    # Get all configs for this user
+    configs = db.query(UserAlertConfig).filter(UserAlertConfig.user_id == admin.id).all()
+    config_ids = [c.id for c in configs]
+    
+    if config_ids:
+        deleted = db.query(UserAlertHistory).filter(UserAlertHistory.config_id.in_(config_ids)).delete(synchronize_session=False)
+        db.commit()
+        return {"status": "ok", "detail": f"Purgados {deleted} registros de historial de alertas para tu usuario."}
+    
+    return {"status": "ok", "detail": "No hay historial de alertas que purgar."}

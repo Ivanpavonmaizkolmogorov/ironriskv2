@@ -13,6 +13,8 @@ interface AlertKey {
 }
 
 const ALERTS: AlertKey[] = [
+  // ── Acciones de Admin ──
+  { id: "purge_history",    label: "Purge History",    icon: "🧹", channel: "telegram", color: "emerald", description: "Borrar candados de historial para testar alertas" },
   // ── Telegram ──
   { id: "morning_briefing", label: "Morning Briefing", icon: "🌅", channel: "telegram", color: "amber", description: "Resumen diario con estado de todos los nodos" },
   { id: "status",           label: "/status",          icon: "🖥️", channel: "telegram", color: "cyan", description: "Estado actual de los workspaces" },
@@ -20,6 +22,7 @@ const ALERTS: AlertKey[] = [
   { id: "welcome",          label: "Welcome",          icon: "🛡️", channel: "telegram", color: "emerald", description: "Mensaje de bienvenida al vincular" },
   { id: "disconnect_warning", label: "Desconexión", icon: "🔴", channel: "telegram", color: "red", description: "Alerta de nodo sin señal 15min" },
   { id: "duplicate_warning", label: "Duplicado",    icon: "🚨", channel: "telegram", color: "orange", description: "Alerta de instalación duplicada" },
+  { id: "transition",       label: "Transición",   icon: "🚦", channel: "telegram", color: "orange", description: "Alerta de Transición cualitativa de Riesgo" },
   { id: "ulises_drawdown",  label: "Ulises: Drawdown", icon: "📉", channel: "telegram", color: "red", description: "Pacto de Ulises: Exceso de Drawdown" },
   { id: "ulises_consec_losses", label: "Ulises: Pérdidas", icon: "🩸", channel: "telegram", color: "red", description: "Pacto de Ulises: Pérdidas Consecutivas" },
   { id: "ulises_margin",    label: "Ulises: Margen", icon: "⚠️", channel: "telegram", color: "red", description: "Pacto de Ulises: Nivel de Margen Crítico" },
@@ -48,7 +51,12 @@ export default function AlertPiano({ apiBase }: { apiBase: string }) {
     setFiring(alertId);
     setResults((prev) => { const n = { ...prev }; delete n[alertId]; return n; });
     try {
-      const res = await fetch(`${apiBase}/api/admin/trigger-alert?alert_type=${alertId}`, {
+      const isPurge = alertId === "purge_history";
+      const url = isPurge 
+        ? `${apiBase}/api/admin/purge_alert_history`
+        : `${apiBase}/api/admin/trigger-alert?alert_type=${alertId}`;
+
+      const res = await fetch(url, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("ironrisk_jwt") || ""}`,

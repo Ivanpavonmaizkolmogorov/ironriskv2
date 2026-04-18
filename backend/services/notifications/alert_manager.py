@@ -62,133 +62,151 @@ class AlertEngine:
         if not configs:
             return # No rules defined
 
-        # We will need the user preferences if we fire an alert to know their Chat ID/Email
+        # ── INTERCEPT SYSTEM ALERTS ──
         prefs = self.db.execute(select(UserPreferences).where(UserPreferences.user_id == user_id)).scalar_one_or_none()
-        
+        locale = prefs.locale if prefs else "es"
+        channel_id = prefs.telegram_chat_id if prefs else None
         now = datetime.now(timezone.utc)
+        
+        if "duplicate_installation" in metrics_snapshot and metrics_snapshot["duplicate_installation"] == 1:
+            if channel_id and "telegram" in self.channels:
+                host_a = metrics_snapshot.get("host_a", "N/A")
+                host_b = metrics_snapshot.get("host_b", "N/A")
+                if locale == "en":
+                    msg = f"🚨 <b>DUPLICATE INSTALLATION DETECTED</b>\n\n⚠️ Node is being accessed from multiple machines simultaneously:\n  • <b>{host_a}</b>\n  • <b>{host_b}</b>\n\nFor safety, keep the Service active on a single computer only."
+                else:
+                    msg = f"🚨 <b>INSTALACIÓN DUPLICADA DETECTADA</b>\n\n⚠️ El nodo está siendo accedido desde múltiples máquinas simultáneamente:\n  • <b>{host_a}</b>\n  • <b>{host_b}</b>\n\nPor seguridad, mantén el Servicio activo en un solo ordenador."
+                await self.channels["telegram"].send(channel_id, msg)
+            return
 
+        if "transition_alert" in metrics_snapshot:
+            if channel_id and "telegram" in self.channels:
+                await self.channels["telegram"].send(channel_id, metrics_snapshot["transitionalert_text"])
+            return
+
+        # ── USER DEFINED ALERTS (PACTO DE ULISES) ──
         for config in configs:
-            # Check if the required metric is present in the snapshot
             if config.metric_key not in metrics_snapshot:
                 continue
             
             current_value = float(metrics_snapshot[config.metric_key])
 
-            # Check if threshold breached
-            with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"Evaluating {config.metric_key}: {current_value} vs {config.threshold_value} (op: {config.operator})\n")
-            if self._evaluate_condition(config.operator, current_value, config.threshold_value):
+            is_breached = self._evaluate_condition(config.operator, current_value, config.threshold_value)
+            
+            config_lock = _get_alert_lock(config.id)
+            with config_lock:
+                # Fetch last trigger history
+                last_hist_stmt = select(UserAlertHistory).where(
+                    UserAlertHistory.config_id == config.id
+                ).order_by(UserAlertHistory.triggered_at.desc()).limit(1)
+                
+                last_hist = self.db.execute(last_hist_stmt).scalar_one_or_none()
+                
+                # INCIDENT RECOVERY (Auto-Rearm)
+                # If the metric is no longer breached, and there is an existing lock (history), clear it!
+                if not is_breached:
+                    if last_hist:
+                        self.db.delete(last_hist)
+                        self.db.commit()
+                        with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Incident resolved for {config.metric_key}, history cleared.\n")
+                    continue
+                
                 # Trigger Condition Met! Check Anti-Spam (Cooldown)
                 with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Condition met! Checking cooldown lock...\n")
                 
-                # Prevent duplicate dispatches from concurrent Metatrader heartbeats
-                config_lock = _get_alert_lock(config.id)
-                with config_lock:
-                    # Fetch last trigger history
-                    last_hist_stmt = select(UserAlertHistory).where(
-                        UserAlertHistory.config_id == config.id
-                    ).order_by(UserAlertHistory.triggered_at.desc()).limit(1)
-                    
-                    last_hist = self.db.execute(last_hist_stmt).scalar_one_or_none()
-                    
-                    
-                    if last_hist:
-                        triggered_at = last_hist.triggered_at
-                        if triggered_at.tzinfo is None:
-                            triggered_at = triggered_at.replace(tzinfo=timezone.utc)
-                            
-                        elapsed = (now - triggered_at).total_seconds() / 60.0
-                        with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Last hist found. Elapsed: {elapsed} mins. Cooldown: {config.cooldown_minutes}\n")
+                if last_hist:
+                    triggered_at = last_hist.triggered_at
+                    if triggered_at.tzinfo is None:
+                        triggered_at = triggered_at.replace(tzinfo=timezone.utc)
                         
-                        if config.cooldown_minutes == 0:
-                            with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Aborted: Cooldown is 0 (1-time alert).\n")
-                            continue # Fire once and never again
-                            
-                        if elapsed < config.cooldown_minutes:
-                            with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Aborted: Still in cooldown period.\n")
-                            continue # Still in cooldown period
-                    else:
-                        with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> No previous history found.\n")
-
-                    with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> We can fire the alert!\n")
-                    # We can fire the alert!
-                    locale = prefs.locale if prefs else "es"
+                    elapsed = (now - triggered_at).total_seconds() / 60.0
                     
-                    # Handling custom EA disconnect alert message
-                    if config.metric_key == "ea_disconnect_minutes":
-                        title = get_text(locale, "alert_title_ea_disconnect")
-                        body = get_text(locale, "alert_body_ea_disconnect", minutes=int(current_value))
-                        message = f"{title}\n\n{body}"
-                    else:
-                        # Generic Threshold breached template
-                        title = get_text(locale, "alert_title_risk", target_type_upper=target_type.upper())
-                        metric_line = get_text(locale, "alert_metric_line", metric_key=config.metric_key, operator=config.operator, threshold_value=config.threshold_value)
-                        value_line = get_text(locale, "alert_value_line", current_value=current_value)
+                    if config.cooldown_minutes == 0:
+                        continue # Fire once per incident. If we are here, the incident hasn't been cleared yet.
                         
-                        message = f"{title}\n\n{metric_line}\n{value_line}"
+                    if elapsed < config.cooldown_minutes:
+                        continue # Still in cooldown period
                         
-                    if target_id:
-                        try:
-                            target_name = "Desconocido"
-                            account_name = "N/A"
-                            from models.trading_account import TradingAccount
-                            
-                            if target_type == "strategy":
-                                from models.strategy import Strategy
-                                strat = self.db.query(Strategy).filter(Strategy.id == target_id).first()
-                                if strat:
-                                    target_name = strat.name
-                                    acc = self.db.query(TradingAccount).filter(TradingAccount.id == strat.trading_account_id).first()
-                                    if acc: account_name = acc.name or acc.broker or acc.id[:6]
-                            elif target_type == "portfolio":
-                                from models.portfolio import Portfolio
-                                port = self.db.query(Portfolio).filter(Portfolio.id == target_id).first()
-                                if port:
-                                    target_name = port.name
-                                    acc = self.db.query(TradingAccount).filter(TradingAccount.id == port.trading_account_id).first()
-                                    if acc: account_name = acc.name or acc.broker or acc.id[:6]
-                            elif target_type == "account":
-                                acc = self.db.query(TradingAccount).filter(TradingAccount.id == target_id).first()
-                                if acc:
-                                    target_name = "Nivel de Cuenta"
-                                    account_name = acc.name or acc.broker or acc.id[:6]
-                                    
-                            id_line = get_text(locale, "alert_id_line", target_name=target_name, account_name=account_name)
-                            message += f"\n\n{id_line}"
-                        except Exception as e:
-                            with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> EXCEPTION building message: {e}\n")
-
-                    # Send via selected channel
-                    channel = self.channels.get(config.channel)
-                    if not channel:
-                        logger.error(f"Alert configuration uses unknown channel: {config.channel}")
-                        continue
+                # We can fire the alert!
+                
+                # Handling custom EA disconnect alert message
+                if config.metric_key == "ea_disconnect_minutes":
+                    title = get_text(locale, "alert_title_ea_disconnect")
+                    body = get_text(locale, "alert_body_ea_disconnect", minutes=int(current_value))
+                    message = f"{title}\n\n{body}"
+                else:
+                    # Generic Threshold breached template
+                    title = get_text(locale, "alert_title_risk", target_type_upper=target_type.upper())
                     
-                    # Resolve recipient
-                    recipient = None
-                    if config.channel == "telegram" and prefs and prefs.telegram_chat_id:
-                        recipient = prefs.telegram_chat_id
-                    elif config.channel == "email":
-                        # Assume user email is tied to preferences via relationships or we'd fetch the user
-                        recipient = getattr(prefs.user, "email", "unknown@email.com") if prefs else None
+                    safe_operator = config.operator.replace("<", "&lt;").replace(">", "&gt;")
+                    metric_line = get_text(locale, "alert_metric_line", metric_key=config.metric_key, operator=safe_operator, threshold_value=config.threshold_value)
+                    value_line = get_text(locale, "alert_value_line", current_value=current_value)
                     
-                    if not recipient:
-                        logger.warning(f"Could not resolve recipient ID for user {user_id} on channel {config.channel}")
-                        continue
+                    message = f"{title}\n\n{metric_line}\n{value_line}"
+                    
+                if target_id:
+                    try:
+                        target_name = "Desconocido"
+                        account_name = "N/A"
+                        from models.trading_account import TradingAccount
+                        
+                        if target_type == "strategy":
+                            from models.strategy import Strategy
+                            strat = self.db.query(Strategy).filter(Strategy.id == target_id).first()
+                            if strat:
+                                target_name = strat.name
+                                acc = self.db.query(TradingAccount).filter(TradingAccount.id == strat.trading_account_id).first()
+                                if acc: account_name = acc.name or acc.broker or acc.id[:6]
+                        elif target_type == "portfolio":
+                            from models.portfolio import Portfolio
+                            port = self.db.query(Portfolio).filter(Portfolio.id == target_id).first()
+                            if port:
+                                target_name = port.name
+                                acc = self.db.query(TradingAccount).filter(TradingAccount.id == port.trading_account_id).first()
+                                if acc: account_name = acc.name or acc.broker or acc.id[:6]
+                        elif target_type == "account":
+                            acc = self.db.query(TradingAccount).filter(TradingAccount.id == target_id).first()
+                            if acc:
+                                target_name = "Nivel de Cuenta"
+                                account_name = acc.name or acc.broker or acc.id[:6]
+                                
+                        id_line = get_text(locale, "alert_id_line", target_name=target_name, account_name=account_name)
+                        message += f"\n\n{id_line}"
+                    except Exception as e:
+                        with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> EXCEPTION building message: {e}\n")
 
-                    with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Sending message via {config.channel} to {recipient}\n")
-                    # Fire and forget
-                    success = await channel.send(recipient, message)
-                    with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Send success: {success}\n")
+                # Send via selected channel
+                channel = self.channels.get(config.channel)
+                if not channel:
+                    logger.error(f"Alert configuration uses unknown channel: {config.channel}")
+                    continue
+                
+                # Resolve recipient
+                recipient = None
+                if config.channel == "telegram" and prefs and prefs.telegram_chat_id:
+                    recipient = prefs.telegram_chat_id
+                elif config.channel == "email":
+                    # Assume user email is tied to preferences via relationships or we'd fetch the user
+                    recipient = getattr(prefs.user, "email", "unknown@email.com") if prefs else None
+                
+                if not recipient:
+                    logger.warning(f"Could not resolve recipient ID for user {user_id} on channel {config.channel}")
+                    continue
+
+                with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Sending message via {config.channel} to {recipient}\n")
+                # Fire and forget
+                success = await channel.send(recipient, message)
+                with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Send success: {success}\n")
 
 
-                    # Append history
-                    if success:
-                        history_entry = UserAlertHistory(
-                            user_id=user_id,
-                            config_id=config.id,
-                            triggered_at=now,
-                            value_at_trigger=current_value,
-                            message_sent=message
-                        )
-                        self.db.add(history_entry)
-                        self.db.commit()
+                # Append history
+                if success:
+                    history_entry = UserAlertHistory(
+                        user_id=user_id,
+                        config_id=config.id,
+                        triggered_at=now,
+                        value_at_trigger=current_value,
+                        message_sent=message
+                    )
+                    self.db.add(history_entry)
+                    self.db.commit()

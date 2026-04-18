@@ -641,10 +641,18 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
             delta_seconds = (now - last_hb).total_seconds()
             logger.info(f"[DUP-CHECK] HOSTNAME MISMATCH! delta={delta_seconds:.1f}s (threshold=40s)")
             if delta_seconds < 40:
-                # Mark as duplicated for the telegram daily broadcaster
+                # Mark as duplicated for the telegram daily broadcaster (optional, keep it)
                 layout["duplicate_warning"] = True
                 dirty = True
                 logger.warning(f"[DUP-CHECK] >>> DUPLICATE DETECTED <<< account={account.name} req={req.hostname} vs db={account.hostname}")
+                
+                # Real-time Proactive Alert
+                dispatch_alerts_background(
+                    user_id=account.user_id,
+                    target_type="account",
+                    target_id=account.id,
+                    metrics={"duplicate_installation": 1, "host_a": account.hostname, "host_b": req.hostname}
+                )
             else:
                 logger.info(f"[DUP-CHECK] Hostname changed but delta={delta_seconds:.1f}s > 40s, not a collision (normal migration)")
         else:
@@ -741,6 +749,47 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
 
         verdict_reasons = build_verdict_reasons(risk_context, portfolio.metrics_snapshot, req.language)
 
+        # ── RISK TRANSITION CHECK (SEMAFORO PORTFOLIO) ──
+        try:
+            last_verdict = (portfolio.metrics_snapshot or {}).get("last_master_verdict", "CONSISTENTE")
+            if verdict_text != last_verdict:
+                if portfolio.metrics_snapshot is None:
+                    portfolio.metrics_snapshot = {}
+                new_snap = dict(portfolio.metrics_snapshot)
+                new_snap["last_master_verdict"] = verdict_text
+                
+                from sqlalchemy.orm.attributes import flag_modified
+                portfolio.metrics_snapshot = new_snap
+                flag_modified(portfolio, "metrics_snapshot")
+                db.commit()
+
+                from services.humanizer import PythonHumanizer
+                hum = PythonHumanizer(locale=req.language or "es")
+                status_map = {"CONSISTENTE": "green", "DEGRADADO": "amber", "EN PELIGRO": "red", "HALT": "fatal"}
+                v_status = status_map.get(verdict_text, "green")
+                headline = hum.verdict_headline(v_status)
+                
+                from services.translations import get_text
+                title = get_text(req.language or "es", "transition_title", portfolio_name=portfolio.name)
+                reasons_title = get_text(req.language or "es", "transition_reasons")
+                
+                msg = f"{title}\n\n"
+                msg += f"<b>{verdict_text}</b> — <i>{headline}</i>\n\n"
+                if verdict_reasons:
+                    msg += f"{reasons_title}\n"
+                    for r in verdict_reasons:
+                        msg += f"• {r}\n"
+                        
+                dispatch_alerts_background(
+                    user_id=account.user_id,
+                    target_type="portfolio",
+                    target_id=str(portfolio.id),
+                    metrics={"transition_alert": 1, "transitionalert_text": msg}
+                )
+        except Exception as e:
+            import logging
+            logging.getLogger("ironrisk").error(f"Failed to dispatch portfolio transition alert: {e}")
+
         return HeartbeatResponse(
             **response,
             max_drawdown_limit=portfolio.max_drawdown_limit,
@@ -822,6 +871,43 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
             verdict_text = "DEGRADADO"
 
         verdict_reasons = build_verdict_reasons(risk_context, portfolio.metrics_snapshot, req.language)
+
+        # ── RISK TRANSITION CHECK (SEMAFORO PORTFOLIO) ──
+        try:
+            last_verdict = (portfolio.metrics_snapshot or {}).get("last_master_verdict", "CONSISTENTE")
+            if verdict_text != last_verdict:
+                if portfolio.metrics_snapshot is None:
+                    portfolio.metrics_snapshot = {}
+                new_snap = dict(portfolio.metrics_snapshot)
+                new_snap["last_master_verdict"] = verdict_text
+                
+                from sqlalchemy.orm.attributes import flag_modified
+                portfolio.metrics_snapshot = new_snap
+                flag_modified(portfolio, "metrics_snapshot")
+                db.commit()
+
+                from services.humanizer import PythonHumanizer
+                hum = PythonHumanizer(locale=req.language or "es")
+                status_map = {"CONSISTENTE": "green", "DEGRADADO": "amber", "EN PELIGRO": "red", "HALT": "fatal"}
+                v_status = status_map.get(verdict_text, "green")
+                headline = hum.verdict_headline(v_status)
+                
+                msg = f"🚦 <b>Transición de Riesgo: Portfolio '{portfolio.name}'</b>\n\n"
+                msg += f"<b>{verdict_text}</b> — <i>{headline}</i>\n\n"
+                if verdict_reasons:
+                    msg += "⚠️ <b>QUÉ ESTÁ PASANDO</b>\n"
+                    for r in verdict_reasons:
+                        msg += f"• {r}\n"
+                        
+                dispatch_alerts_background(
+                    user_id=account.user_id,
+                    target_type="portfolio",
+                    target_id=str(portfolio.id),
+                    metrics={"transition_alert": 1, "transitionalert_text": msg}
+                )
+        except Exception as e:
+            import logging
+            logging.getLogger("ironrisk").error(f"Failed to dispatch portfolio transition alert: {e}")
 
         return HeartbeatResponse(
             **response,
@@ -906,6 +992,50 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
         verdict_text = "DEGRADADO"
 
     verdict_reasons = build_verdict_reasons(risk_context, strategy.metrics_snapshot, req.language)
+
+    # ── RISK TRANSITION CHECK (SEMAFORO) ──
+    try:
+        last_verdict = (strategy.metrics_snapshot or {}).get("last_master_verdict", "CONSISTENTE")
+        if verdict_text != last_verdict:
+            # Save new verdict
+            if strategy.metrics_snapshot is None:
+                strategy.metrics_snapshot = {}
+            new_snap = dict(strategy.metrics_snapshot)
+            new_snap["last_master_verdict"] = verdict_text
+            
+            from sqlalchemy.orm.attributes import flag_modified
+            strategy.metrics_snapshot = new_snap
+            flag_modified(strategy, "metrics_snapshot")
+            db.commit()
+
+            # Build humanized message
+            from services.humanizer import PythonHumanizer
+            hum = PythonHumanizer(locale=req.language or "es")
+            
+            # Map verdict to status (for translation key)
+            status_map = {"CONSISTENTE": "green", "DEGRADADO": "amber", "EN PELIGRO": "red", "HALT": "fatal"}
+            v_status = status_map.get(verdict_text, "green")
+            
+            # Get headline
+            headline = hum.verdict_headline(v_status)
+            
+            msg = f"🚦 <b>Transición de Riesgo: {strategy.name}</b>\n\n"
+            msg += f"<b>{verdict_text}</b> — <i>{headline}</i>\n\n"
+            
+            if verdict_reasons:
+                msg += "⚠️ <b>QUÉ ESTÁ PASANDO</b>\n"
+                for r in verdict_reasons:
+                    msg += f"• {r}\n"
+                    
+            dispatch_alerts_background(
+                user_id=account.user_id,
+                target_type="strategy",
+                target_id=str(strategy.id),
+                metrics={"transition_alert": 1, "transitionalert_text": msg}
+            )
+    except Exception as e:
+        import logging
+        logging.getLogger("ironrisk").error(f"Failed to dispatch transition alert: {e}")
 
     return HeartbeatResponse(
         **response,

@@ -115,13 +115,14 @@ def _build_status_response(chat_id: str) -> str:
         return "\n".join(lines)
 
 
-def _build_help_response() -> str:
-    return (
-        "📌 <b>Comandos IronRisk Bot</b>\n\n"
-        "/status — Comprobar si tu Servicio sigue conectado\n"
-        "/help — Ver esta lista de comandos\n\n"
-        "Las alertas de riesgo se envían automáticamente cuando se activan las reglas configuradas en el Centro de Alertas."
-    )
+def _build_help_response(chat_id: str) -> str:
+    with SessionLocal() as db:
+        prefs = db.query(UserPreferences).filter(UserPreferences.telegram_chat_id == chat_id).first()
+        locale = getattr(prefs, "locale", "es") if prefs else "es"
+    from services.translations import get_text
+    title = get_text(locale, "help_title")
+    body = get_text(locale, "help_body")
+    return f"{title}\n\n{body}"
 
 
 async def _send_message(bot_token: str, chat_id: str, text: str):
@@ -201,7 +202,7 @@ async def telegram_bot_poller():
                         response = _build_status_response(chat_id)
                         await _send_message(bot_token, chat_id, response)
                     elif cmd == "/help":
-                        response = _build_help_response()
+                        response = _build_help_response(chat_id)
                         await _send_message(bot_token, chat_id, response)
                     elif cmd == "/start":
                         parts = text.split()
@@ -212,16 +213,15 @@ async def telegram_bot_poller():
                                 if prefs:
                                     prefs.telegram_chat_id = chat_id
                                     prefs.telegram_sync_token = None
+                                    locale = prefs.locale
                                     db.commit()
                                     
                                     # Custom Welcome Message
-                                    welcome_msg = (
-                                        "🛡️ <b>IronRisk Shield Activado!</b>\n\n"
-                                        "Estás conectado. A partir de ahora recibirás aquí tus notificaciones y alertas de riesgo de IronRisk.\n\n"
-                                        "📌 <b>Comandos disponibles:</b>\n"
-                                        "/status — Comprobar si tu Servicio sigue conectado\n"
-                                        "/help — Ver esta lista de comandos"
-                                    )
+                                    from services.translations import get_text
+                                    title = get_text(locale, "welcome_title")
+                                    body = get_text(locale, "welcome_body")
+                                    welcome_msg = f"{title}\n\n{body}"
+                                    
                                     msg_id = await _send_message(bot_token, chat_id, welcome_msg)
                                     if msg_id:
                                         await _pin_message(bot_token, chat_id, msg_id)
