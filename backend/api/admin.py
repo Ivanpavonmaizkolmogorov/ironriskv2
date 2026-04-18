@@ -283,17 +283,112 @@ def test_uptime(
 # Trigger Daily Broadcast (Admin-only)
 # ─────────────────────────────────────────────
 
-@router.post("/trigger-broadcast")
-async def trigger_broadcast(
+@router.post("/trigger-alert")
+async def trigger_alert(
+    alert_type: str,
     admin: User = Depends(get_admin_user),
+    db: Session = Depends(get_db),
 ):
-    """Admin-only: Manually trigger the Telegram morning briefing right now."""
-    from services.telegram_bot import _execute_broadcast, _get_bot_token
+    """Admin-only: Fire a specific alert type for testing.
+    
+    alert_type options:
+      Telegram: morning_briefing, status, help, welcome
+      Email: welcome_email, password_reset, waitlist, health_check
+    """
+    from services.telegram_bot import _execute_broadcast, _get_bot_token, _build_status_response, _build_help_response, _send_message
+    from models.user_preferences import UserPreferences
 
-    bot_token = await _get_bot_token()
-    if not bot_token:
-        raise HTTPException(status_code=500, detail="TELEGRAM_BOT_TOKEN not configured.")
+    # Get admin's Telegram chat_id
+    prefs = db.query(UserPreferences).filter(UserPreferences.user_id == admin.id).first()
+    chat_id = prefs.telegram_chat_id if prefs else None
+    locale = prefs.locale if prefs else "es"
 
-    await _execute_broadcast(bot_token)
-    return {"status": "ok", "detail": "Morning briefing sent to all linked Telegram users."}
+    # ── TELEGRAM ALERTS ──
+    if alert_type == "morning_briefing":
+        bot_token = await _get_bot_token()
+        if not bot_token:
+            raise HTTPException(status_code=500, detail="TELEGRAM_BOT_TOKEN not configured.")
+        await _execute_broadcast(bot_token)
+        return {"status": "ok", "detail": "Morning briefing sent to all linked users."}
+
+    elif alert_type == "status":
+        if not chat_id:
+            raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
+        bot_token = await _get_bot_token()
+        response = _build_status_response(chat_id)
+        await _send_message(bot_token, chat_id, response)
+        return {"status": "ok", "detail": "Status sent to your Telegram."}
+
+    elif alert_type == "help":
+        if not chat_id:
+            raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
+        bot_token = await _get_bot_token()
+        response = _build_help_response()
+        await _send_message(bot_token, chat_id, response)
+        return {"status": "ok", "detail": "Help message sent to your Telegram."}
+
+    elif alert_type == "welcome":
+        if not chat_id:
+            raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
+        bot_token = await _get_bot_token()
+        welcome_msg = (
+            "🛡️ <b>IronRisk Shield Activado!</b>\n\n"
+            "Estás conectado. A partir de ahora recibirás aquí tus notificaciones y alertas de riesgo de IronRisk.\n\n"
+            "📌 <b>Comandos disponibles:</b>\n"
+            "/status — Comprobar si tu Servicio sigue conectado\n"
+            "/help — Ver esta lista de comandos"
+        )
+        await _send_message(bot_token, chat_id, welcome_msg)
+        return {"status": "ok", "detail": "Welcome message sent to your Telegram."}
+
+    elif alert_type == "disconnect_warning":
+        if not chat_id:
+            raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
+        bot_token = await _get_bot_token()
+        if locale == "en":
+            msg = "🔴 <b>DISCONNECTION ALERT</b>\n\n⚠️ Node <b>DemoAccount</b> has been offline for <b>15 minutes</b>.\n\nCheck your MT5 terminal and IronRisk Service."
+        else:
+            msg = "🔴 <b>ALERTA DE DESCONEXIÓN</b>\n\n⚠️ El nodo <b>DemoAccount</b> lleva <b>15 minutos</b> sin señal.\n\nRevisa tu terminal MT5 y el Servicio de IronRisk."
+        await _send_message(bot_token, chat_id, msg)
+        return {"status": "ok", "detail": "Disconnect warning sent to your Telegram."}
+
+    elif alert_type == "duplicate_warning":
+        if not chat_id:
+            raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
+        bot_token = await _get_bot_token()
+        if locale == "en":
+            msg = "🚨 <b>DUPLICATE INSTALLATION DETECTED</b>\n\n⚠️ Node <b>DemoAccount</b> is being accessed from multiple machines simultaneously:\n  • <b>VPS-1</b>\n  • <b>LOCAL-PC</b>\n\nFor safety, keep the Service active on a single computer only."
+        else:
+            msg = "🚨 <b>INSTALACIÓN DUPLICADA DETECTADA</b>\n\n⚠️ El nodo <b>DemoAccount</b> está siendo accedido desde múltiples máquinas simultáneamente:\n  • <b>VPS-1</b>\n  • <b>LOCAL-PC</b>\n\nPor seguridad, mantén el Servicio activo en un solo ordenador."
+        await _send_message(bot_token, chat_id, msg)
+        return {"status": "ok", "detail": "Duplicate warning sent to your Telegram."}
+
+    # ── EMAIL ALERTS ──
+    elif alert_type == "welcome_email":
+        svc = EmailService()
+        if not svc.is_configured():
+            raise HTTPException(status_code=500, detail="Email service not configured.")
+        svc.send_welcome_email(admin.email, locale)
+        return {"status": "ok", "detail": f"Welcome email sent to {admin.email}."}
+
+    elif alert_type == "password_reset":
+        svc = EmailService()
+        if not svc.is_configured():
+            raise HTTPException(status_code=500, detail="Email service not configured.")
+        svc.send_password_reset_email(admin.email, "TEST_TOKEN_12345", locale)
+        return {"status": "ok", "detail": f"Password reset email sent to {admin.email}."}
+
+    elif alert_type == "waitlist":
+        svc = EmailService()
+        if not svc.is_configured():
+            raise HTTPException(status_code=500, detail="Email service not configured.")
+        svc.send_waitlist_confirmation(admin.email, locale)
+        return {"status": "ok", "detail": f"Waitlist confirmation email sent to {admin.email}."}
+
+    elif alert_type == "health_check":
+        # Reuse the test-uptime logic — already handled by /test-uptime
+        return {"status": "ok", "detail": "Use the 'Test Server' button for health check emails."}
+
+    else:
+        raise HTTPException(status_code=400, detail=f"Unknown alert_type: {alert_type}")
 
