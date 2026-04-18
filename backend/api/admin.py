@@ -363,6 +363,46 @@ async def trigger_alert(
         await _send_message(bot_token, chat_id, msg)
         return {"status": "ok", "detail": "Duplicate warning sent to your Telegram."}
 
+    # ── PACTO DE ULISES (ULYSSES PACT) ALERTS ──
+    elif alert_type == "ulises_drawdown":
+        if not chat_id:
+            raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
+        bot_token = await _get_bot_token()
+        from services.translations import get_text
+        title = get_text(locale, "alert_title_risk", target_type_upper="ESTRATEGIA")
+        metric_line = get_text(locale, "alert_metric_line", metric_key="max_drawdown", operator=">", threshold_value=15.0)
+        value_line = get_text(locale, "alert_value_line", current_value=16.5)
+        id_line = get_text(locale, "alert_id_line", target_name="Golden Crossover V2", account_name="FTMO Challenge")
+        message = f"{title}\n\n{metric_line}\n{value_line}\n\n{id_line}"
+        await _send_message(bot_token, chat_id, message)
+        return {"status": "ok", "detail": "Ulysses Drawdown alert sent to your Telegram."}
+
+    elif alert_type == "ulises_consec_losses":
+        if not chat_id:
+            raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
+        bot_token = await _get_bot_token()
+        from services.translations import get_text
+        title = get_text(locale, "alert_title_risk", target_type_upper="CUENTA")
+        metric_line = get_text(locale, "alert_metric_line", metric_key="consec_losses", operator=">=", threshold_value=5.0)
+        value_line = get_text(locale, "alert_value_line", current_value=5.0)
+        id_line = get_text(locale, "alert_id_line", target_name="Nivel de Cuenta", account_name="MyForexFunds")
+        message = f"{title}\n\n{metric_line}\n{value_line}\n\n{id_line}"
+        await _send_message(bot_token, chat_id, message)
+        return {"status": "ok", "detail": "Ulysses Consecutive Losses alert sent to your Telegram."}
+
+    elif alert_type == "ulises_margin":
+        if not chat_id:
+            raise HTTPException(status_code=400, detail="No Telegram chat linked to your account.")
+        bot_token = await _get_bot_token()
+        from services.translations import get_text
+        title = get_text(locale, "alert_title_risk", target_type_upper="PORTFOLIO")
+        metric_line = get_text(locale, "alert_metric_line", metric_key="margin_level", operator="<", threshold_value=200.0)
+        value_line = get_text(locale, "alert_value_line", current_value=180.5)
+        id_line = get_text(locale, "alert_id_line", target_name="Swing Trading", account_name="Darwinex")
+        message = f"{title}\n\n{metric_line}\n{value_line}\n\n{id_line}"
+        await _send_message(bot_token, chat_id, message)
+        return {"status": "ok", "detail": "Ulysses Margin Level alert sent to your Telegram."}
+
     # ── EMAIL ALERTS ──
     elif alert_type == "welcome_email":
         svc = EmailService()

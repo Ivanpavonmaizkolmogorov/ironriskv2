@@ -6,9 +6,7 @@ ssh.connect('62.238.19.114', username='root', password='IronRisk_Production_2026
 
 sftp = ssh.open_sftp()
 files = [
-    (r"backend\services\telegram_bot.py", "/var/www/ironrisk/backend/services/telegram_bot.py"),
     (r"backend\api\admin.py", "/var/www/ironrisk/backend/api/admin.py"),
-    (r"backend\api\preferences.py", "/var/www/ironrisk/backend/api/preferences.py"),
 ]
 for local, remote in files:
     print(f"  {local}")

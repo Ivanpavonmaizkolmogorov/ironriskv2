@@ -20,6 +20,9 @@ const ALERTS: AlertKey[] = [
   { id: "welcome",          label: "Welcome",          icon: "🛡️", channel: "telegram", color: "emerald", description: "Mensaje de bienvenida al vincular" },
   { id: "disconnect_warning", label: "Desconexión", icon: "🔴", channel: "telegram", color: "red", description: "Alerta de nodo sin señal 15min" },
   { id: "duplicate_warning", label: "Duplicado",    icon: "🚨", channel: "telegram", color: "orange", description: "Alerta de instalación duplicada" },
+  { id: "ulises_drawdown",  label: "Ulises: Drawdown", icon: "📉", channel: "telegram", color: "red", description: "Pacto de Ulises: Exceso de Drawdown" },
+  { id: "ulises_consec_losses", label: "Ulises: Pérdidas", icon: "🩸", channel: "telegram", color: "red", description: "Pacto de Ulises: Pérdidas Consecutivas" },
+  { id: "ulises_margin",    label: "Ulises: Margen", icon: "⚠️", channel: "telegram", color: "red", description: "Pacto de Ulises: Nivel de Margen Crítico" },
   // ── Email ──
   { id: "welcome_email",   label: "Welcome Email",     icon: "✉️", channel: "email", color: "emerald", description: "Email de bienvenida a nuevo usuario" },
   { id: "password_reset",  label: "Password Reset",    icon: "🔑", channel: "email", color: "violet", description: "Email de restablecimiento de contraseña" },
