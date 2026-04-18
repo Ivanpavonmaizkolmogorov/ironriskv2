@@ -131,24 +131,21 @@ export default function UserProfileDropdown({
 
   const toggleLanguage = useCallback(async () => {
     const nextLocale = locale === "en" ? "es" : "en";
-    console.log("TOGGLE LANGUAGE STARTED:", { locale, nextLocale });
+    // Sync locale to backend for Telegram i18n — must complete BEFORE navigation
+    // because router.replace with a new locale causes a full page reload
     try { 
-      const res = await preferencesAPI.updateLocale(nextLocale); 
-      console.log("LOCALE SYNC SUCCESS:", res.data);
-    } catch (err: any) {
-      console.error("LOCALE SYNC FAILED:", err);
-      // Give the user a visual clue in dev
-      alert(`Locale API failed: ${err?.message || 'Unknown error'}`);
+      await preferencesAPI.updateLocale(nextLocale); 
+      // ONLY navigate if the backend successfully stored the new language
+      startTransition(() => {
+        const params = searchParams.toString();
+        const query = params ? `?${params}` : "";
+        router.replace(`${pathname}${query}`, { locale: nextLocale, scroll: false });
+      });
+    } catch (error) {
+      console.error("Failed to sync locale to backend, aborting UI language change:", error);
+      // Give a visual indication so the user isn't stuck wondering why it didn't click
+      alert("No se pudo cambiar el idioma en el servidor. Reintenta en unos segundos.");
     }
-    
-    // Pause for 1 second just to ensure we can see logs before navigation
-    await new Promise(r => setTimeout(r, 1000));
-    
-    startTransition(() => {
-      const params = searchParams.toString();
-      const query = params ? `?${params}` : "";
-      router.replace(`${pathname}${query}`, { locale: nextLocale, scroll: false });
-    });
     setIsOpen(false);
   }, [locale, router, pathname, searchParams]);
 

@@ -629,16 +629,30 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
     layout = dict(account.default_dashboard_layout or {})
     dirty = False
 
+    import logging
+    logger = logging.getLogger("uvicorn.error")
+    logger.info(f"[DUP-CHECK] account={account.name} | req.hostname={repr(req.hostname)} | db.hostname={repr(account.hostname)} | last_hb={account.last_heartbeat_at}")
+
     if req.hostname and account.hostname and req.hostname != account.hostname:
         if account.last_heartbeat_at:
             last_hb = account.last_heartbeat_at
             if last_hb.tzinfo is None:
                 last_hb = last_hb.replace(tzinfo=timezone.utc)
             delta_seconds = (now - last_hb).total_seconds()
-            if delta_seconds < 40: # Heartbeats are sent every ~5 seconds. A concurrent terminal will hit this.
+            logger.info(f"[DUP-CHECK] HOSTNAME MISMATCH! delta={delta_seconds:.1f}s (threshold=40s)")
+            if delta_seconds < 40:
                 # Mark as duplicated for the telegram daily broadcaster
                 layout["duplicate_warning"] = True
                 dirty = True
+                logger.warning(f"[DUP-CHECK] >>> DUPLICATE DETECTED <<< account={account.name} req={req.hostname} vs db={account.hostname}")
+            else:
+                logger.info(f"[DUP-CHECK] Hostname changed but delta={delta_seconds:.1f}s > 40s, not a collision (normal migration)")
+        else:
+            logger.info(f"[DUP-CHECK] No previous heartbeat, skipping")
+    elif req.hostname and account.hostname and req.hostname == account.hostname:
+        logger.debug(f"[DUP-CHECK] Same hostname, no collision")
+    elif not req.hostname:
+        logger.debug(f"[DUP-CHECK] No hostname in request (legacy EA)")
 
     account.last_heartbeat_at = now
     if req.hostname and req.hostname != account.hostname:
