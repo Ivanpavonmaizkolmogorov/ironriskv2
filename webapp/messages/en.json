@@ -891,6 +891,10 @@
       "improvement": "Improvement"
     },
     "entries": {
+      "telegram_i18n_hostname": {
+        "title": "Bilingual Telegram + Visible Nodes",
+        "body": "The Telegram bot now responds in your language (ES/EN) and shows the server name (hostname) of each workspace so you can identify at a glance where it's connected from."
+      },
       "uninstaller_tool": {
         "title": "Official Uninstaller",
         "body": "Implemented a secure Auto-Uninstaller that cleans up all .ex5 files, configuration records, and IronRisk-linked entries from your MetaTrader in a single click."

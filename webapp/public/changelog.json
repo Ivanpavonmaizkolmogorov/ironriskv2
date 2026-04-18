@@ -1,5 +1,11 @@
 [
   {
+    "id": "telegram_i18n_hostname",
+    "date": "2026-04-18",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "uninstaller_tool",
     "date": "2026-04-17",
     "tag": "feature",
