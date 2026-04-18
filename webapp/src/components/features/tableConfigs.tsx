@@ -795,9 +795,11 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
     align: "right",
     sortValue: (s) => calcBlindRisk(s.bayesian_breakdown?.decomposition?.p_positive ?? 1),
     renderCell: (s) => {
+      if (s.bayesian_breakdown === undefined) return <div className="flex items-center justify-end gap-1.5"><div className="h-3 w-12 bg-iron-700/60 rounded animate-pulse" /></div>;
+      
       const d = s.bayesian_breakdown?.decomposition;
       const p = d?.p_positive;
-      if (p === undefined) return <div className="flex items-center justify-end gap-1.5"><div className="h-3 w-12 bg-iron-700/60 rounded animate-pulse" /></div>;
+      if (p === undefined) return <span className="text-iron-600 font-mono" title="Insuficientes trades evaluables (<30)">—</span>;
       
       const { pct, style } = resolveBlindRisk(p);
       const isRed = style.textColor.includes("red");
