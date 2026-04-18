@@ -46,7 +46,7 @@ interface BayesMathBreakdownProps {
 }
 
 export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakdownProps) {
-  const tMath = useTranslations("math");
+  const tMath = useTranslations("bayesMath");
 
   // Formatters used locally within the math block
   const usd = (v: number) => `$${v.toFixed(2)}`;
