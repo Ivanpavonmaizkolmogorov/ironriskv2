@@ -130,10 +130,17 @@ export default function UserProfileDropdown({
 
   const toggleLanguage = useCallback(() => {
     const nextLocale = locale === "en" ? "es" : "en";
-    // Sync locale to backend for Telegram i18n
-    import("@/services/api").then(({ preferencesAPI }) => {
-      preferencesAPI.updateLocale(nextLocale).catch(() => {});
-    });
+    // Sync locale to backend for Telegram i18n — use fetch+keepalive to survive page navigation
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (token) {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
+      fetch(`${apiBase}/api/user/preferences/locale`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ locale: nextLocale }),
+        keepalive: true,
+      }).catch(() => {});
+    }
     startTransition(() => {
       const params = searchParams.toString();
       const query = params ? `?${params}` : "";
