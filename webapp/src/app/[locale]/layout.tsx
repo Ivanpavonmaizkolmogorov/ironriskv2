@@ -124,13 +124,15 @@ export default async function RootLayout({
           </ThemeProvider>
         </NextIntlClientProvider>
         {!disableAnalytics && <Analytics />}
-        {/* Service Worker Registration */}
+        {/* Rogue Service Worker Killer */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').catch(function() {});
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  for (let registration of registrations) {
+                    registration.unregister();
+                  }
                 });
               }
             `,
