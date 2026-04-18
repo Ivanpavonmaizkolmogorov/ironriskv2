@@ -145,11 +145,11 @@ export class DashboardLayout {
     public readonly masterToggles: Record<string, boolean> = {
       max_drawdown: true,
       daily_loss: true,
-      consecutive_losses: false,
-      stagnation_days: false,
-      stagnation_trades: false,
+      consecutive_losses: true,
+      stagnation_days: true,
+      stagnation_trades: true,
       master_verdict: true,
-      bayes_p_positive: false
+      bayes_p_positive: true
     }
   ) {}
 
@@ -183,11 +183,11 @@ export class DashboardLayout {
       (data.master_toggles as Record<string, boolean>) ?? {
         max_drawdown: true,
         daily_loss: true,
-        consecutive_losses: false,
-        stagnation_days: false,
-        stagnation_trades: false,
+        consecutive_losses: true,
+        stagnation_days: true,
+        stagnation_trades: true,
         master_verdict: true,
-        bayes_p_positive: false
+        bayes_p_positive: true
       }
     );
   }
