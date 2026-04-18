@@ -197,6 +197,21 @@ export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakd
               );
             })()}
           </div>
+          
+          <details className="mt-2 border border-iron-800 rounded-lg bg-surface-tertiary w-full">
+            <summary className="cursor-pointer text-xs text-iron-400 font-semibold p-2.5 hover:text-iron-200 select-none flex items-center gap-2">
+              <span>💡</span> {tMath("step2.actuarialTitle")}
+            </summary>
+            <div className="px-3 pb-3 pt-1 space-y-2 text-[11px] leading-relaxed text-iron-500 font-sans border-t border-iron-800">
+              <p>{tMath("step2.actuarialP1")}</p>
+              <p>{tMath("step2.actuarialP2")}</p>
+              <p>{tMath("step2.actuarialP3")}</p>
+              <div className="pt-2 border-t border-iron-700/50 mt-2 text-iron-400 italic">
+                {tMath("step2.actuarialQuote")}
+              </div>
+            </div>
+          </details>
+
           <GaussianChart
             mean={d.avg_win_mean}
             std={(d.avg_win_upper - d.avg_win_lower) / (2 * 1.96)}

@@ -533,7 +533,12 @@
       "varianceEff": "← discounting applies here:",
       "varianceEffLive": " + {n} live",
       "varianceNote": "💡 s² measures how much the trades vary from each other (Backtest measures this well), but n_eff reflects how much we trust the Backtest mean ({n_eff} vs {n_bt} real).",
-      "verify": "Verification:"
+      "verify": "Verification:",
+      "actuarialTitle": "💡 Statistical Justification (NIG Modeling)",
+      "actuarialP1": "Assuming a t-Student for a strictly positive metric like PnL is conceptually imperfect, given its (-∞, +∞) support. However, we maintain this parametric model for two fundamental reasons:",
+      "actuarialP2": "1. Degrees of Freedom & CLT: Even if individual trades are not Normal, the Central Limit Theorem ensures their sample mean converges toward a Normal distribution. The t-Student absorbs variance uncertainty with df = n_eff - 1. With an adequate sample size, negative 'heavy tails' become statistically negligible.",
+      "actuarialP3": "2. Analytical Delta Method: Using 0-bounded distributions (e.g., Gamma or Weibull) would break our ability to linearly propagate analytical uncertainty for Expectancy. The NIG model provides 'asymptotically robust statistics' that maximizes clarity and interpretation.",
+      "actuarialQuote": "«All models are wrong, but some are useful.» — George E.P. Box"
     },
     "step3": {
       "title": "Step 3 — L (Average Loss per Trade)",

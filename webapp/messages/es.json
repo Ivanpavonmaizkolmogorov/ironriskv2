@@ -533,7 +533,12 @@
       "varianceEff": "← aquí SÍ se descuenta:",
       "varianceEffLive": " + {n} live",
       "varianceNote": "💡 s² mide cuánto varían los trades entre sí (eso el Backtest lo mide bien), pero n_eff refleja cuánto confiamos en la media del Backtest ({n_eff} vs {n_bt} reales).",
-      "verify": "Verificación:"
+      "verify": "Verificación:",
+      "actuarialTitle": "💡 Justificación Estadística (Modelado NIG)",
+      "actuarialP1": "Asumir una t-Student para una métrica estrictamente positiva como el PnL es conceptualmente imperfecto, ya que su soporte es (-∞, +∞). Sin embargo, mantenemos este modelo paramétrico por dos razones fundamentales:",
+      "actuarialP2": "1. Grados de Libertad y el TCL: Aunque las operaciones individuales no sean Normales, el Teorema Central del Límite asegura que su media muestral converge hacia una Normal. La t-Student absorbe la incertidumbre de la varianza con df = n_eff - 1. Con una muestra n adecuada, las 'colas pesadas' negativas se vuelven estadísticamente insignificantes.",
+      "actuarialP3": "2. Método Delta Analítico: Utilizar distribuciones acotadas por 0 (ej. Gamma o Weibull) nos haría perder la capacidad de propagar linealmente la incertidumbre analítica de la Expectancy. El modelo NIG proporciona una 'estadística asintóticamente robusta' que maximiza la claridad e interpretación.",
+      "actuarialQuote": "«Todos los modelos están equivocados, pero algunos son útiles.» — George E.P. Box"
     },
     "step3": {
       "title": "Paso 3 — L (Pérdida Media por Trade)",
