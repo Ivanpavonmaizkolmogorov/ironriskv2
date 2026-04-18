@@ -891,6 +891,10 @@
       "improvement": "Mejora"
     },
     "entries": {
+      "bayes_math_ui_cleanup": {
+        "title": "Motor Matemático Universal",
+        "body": "El desglose bayesiano ha sido reconstruido en un único componente gráfico que se comparte 1:1 entre el Sandbox de Datos y el Panel de Machine Learning."
+      },
       "blind_risk_centralization": {
         "title": "Centralización Absoluta de Riesgo Ciego",
         "body": "El motor Bayesiano del backend de IronRisk ahora es la única frente de verdad para todos los porcentajes, estilos, y límites del sistema."

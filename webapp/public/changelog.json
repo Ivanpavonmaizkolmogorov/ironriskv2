@@ -1,5 +1,11 @@
 [
   {
+    "id": "bayes_math_ui_cleanup",
+    "date": "2026-04-18",
+    "tag": "refactor",
+    "internal": true
+  },
+  {
     "id": "blind_risk_centralization",
     "date": "2026-04-18",
     "tag": "refactor",
