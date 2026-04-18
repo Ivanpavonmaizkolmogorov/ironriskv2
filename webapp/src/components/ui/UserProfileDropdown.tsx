@@ -130,6 +130,10 @@ export default function UserProfileDropdown({
 
   const toggleLanguage = useCallback(() => {
     const nextLocale = locale === "en" ? "es" : "en";
+    // Sync locale to backend for Telegram i18n
+    import("@/services/api").then(({ preferencesAPI }) => {
+      preferencesAPI.updateLocale(nextLocale).catch(() => {});
+    });
     startTransition(() => {
       const params = searchParams.toString();
       const query = params ? `?${params}` : "";

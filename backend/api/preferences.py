@@ -1,4 +1,4 @@
-"""User Preferences API — theme management endpoints."""
+"""User Preferences API — theme management and locale endpoints."""
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -46,6 +46,26 @@ def update_theme(
 
     theme_data = ThemeService.get_theme(prefs.theme, db, user.id)
     return PreferencesResponse(theme=prefs.theme, theme_data=theme_data)
+
+
+from pydantic import BaseModel
+
+class UpdateLocaleRequest(BaseModel):
+    locale: str  # "es" or "en"
+
+@router.patch("/preferences/locale")
+def update_locale(
+    body: UpdateLocaleRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Sync the user's UI language to backend for Telegram notifications."""
+    prefs = ThemeService.get_or_create(db, user.id)
+    valid = ["es", "en"]
+    if body.locale in valid:
+        prefs.locale = body.locale
+        db.commit()
+    return {"locale": prefs.locale}
 
 
 from fastapi import Request
