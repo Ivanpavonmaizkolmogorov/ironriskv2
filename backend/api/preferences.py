@@ -53,6 +53,7 @@ from pydantic import BaseModel
 class UpdateLocaleRequest(BaseModel):
     locale: str  # "es" or "en"
 
+@router.patch("/profile/i18n")
 @router.patch("/preferences/locale")
 def update_locale(
     body: UpdateLocaleRequest,

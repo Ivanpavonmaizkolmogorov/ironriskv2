@@ -198,7 +198,7 @@ export const preferencesAPI = {
   updateTheme: (theme: string, applyToAll: boolean = false) => 
     api.patch("/api/user/preferences/theme", { theme, apply_to_all_workspaces: applyToAll }),
   updateLocale: (locale: string) =>
-    api.patch("/api/user/preferences/locale", { locale }),
+    api.patch("/api/user/profile/i18n", { locale }),
   getThemes: () => api.get("/api/user/themes"),
   createCustomTheme: (data: { label: string, mode: string, colors: Record<string, string> }) => 
     api.post("/api/user/themes/custom", data),
