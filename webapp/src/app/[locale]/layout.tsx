@@ -9,6 +9,7 @@ import ThemeProvider from "@/components/ui/ThemeProvider";
 import { MetricsProvider } from "@/contexts/MetricsContext";
 import AdminToolbar from "@/components/ui/AdminToolbar";
 import BugReportButton from "@/components/ui/BugReportButton";
+import LocaleSync from "@/components/LocaleSync";
 import "../globals.css";
 
 const seoByLocale: Record<string, { title: string; description: string; keywords: string }> = {
@@ -120,6 +121,7 @@ export default async function RootLayout({
               {children}
               <AdminToolbar />
               <BugReportButton />
+              <LocaleSync />
             </MetricsProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

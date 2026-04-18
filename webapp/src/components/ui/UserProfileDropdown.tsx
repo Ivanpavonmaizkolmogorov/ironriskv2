@@ -129,23 +129,15 @@ export default function UserProfileDropdown({
     return () => document.removeEventListener("keydown", handler);
   }, [isOpen, showTools]);
 
-  const toggleLanguage = useCallback(async () => {
+  const toggleLanguage = useCallback(() => {
     const nextLocale = locale === "en" ? "es" : "en";
-    // Sync locale to backend for Telegram i18n — must complete BEFORE navigation
-    // because router.replace with a new locale causes a full page reload
-    try { 
-      await preferencesAPI.updateLocale(nextLocale); 
-      // ONLY navigate if the backend successfully stored the new language
-      startTransition(() => {
-        const params = searchParams.toString();
-        const query = params ? `?${params}` : "";
-        router.replace(`${pathname}${query}`, { locale: nextLocale, scroll: false });
-      });
-    } catch (error) {
-      console.error("Failed to sync locale to backend, aborting UI language change:", error);
-      // Give a visual indication so the user isn't stuck wondering why it didn't click
-      alert("No se pudo cambiar el idioma en el servidor. Reintenta en unos segundos.");
-    }
+    // NOTE: Backend sync is handled automatically by <LocaleSync /> in layout.tsx
+    // which fires after the page re-renders with the new locale.
+    startTransition(() => {
+      const params = searchParams.toString();
+      const query = params ? `?${params}` : "";
+      router.replace(`${pathname}${query}`, { locale: nextLocale, scroll: false });
+    });
     setIsOpen(false);
   }, [locale, router, pathname, searchParams]);
 
