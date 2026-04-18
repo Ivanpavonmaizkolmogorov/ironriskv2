@@ -16,6 +16,7 @@
  */
 
 import { type VerdictStatus } from './VerdictConfig';
+import { getBlindRiskZone } from './blindRisk';
 
 export interface RiskGaugeData {
   current: number;
@@ -26,17 +27,6 @@ export interface RiskGaugeData {
 }
 
 type TranslationFn = (key: string, params?: Record<string, any>) => string;
-
-/**
- * Blind Risk zones — derived from BAYES_THRESHOLDS to stay in sync.
- * These are the only thresholds the Humanizer needs.
- */
-const BLIND_RISK_ZONES = {
-  /** Below this → low risk narrative */
-  LOW_CEILING: 20,
-  /** Above this → critical risk narrative */
-  CRITICAL_FLOOR: 50,
-} as const;
 
 export class Humanizer {
   /** Translation fn for the 'humanizer' namespace (gauge narratives, blind risk) */
@@ -115,16 +105,9 @@ export class Humanizer {
   // BLIND RISK — the protagonist metric
   // ──────────────────────────────────────────────
 
-  /** Determine Blind Risk zone from percentage */
-  private blindRiskZone(blindRiskPct: number): 'low' | 'moderate' | 'critical' {
-    if (blindRiskPct >= BLIND_RISK_ZONES.CRITICAL_FLOOR) return 'critical';
-    if (blindRiskPct >= BLIND_RISK_ZONES.LOW_CEILING) return 'moderate';
-    return 'low';
-  }
-
   /** Narrative phrase for current Blind Risk level */
   blindRiskNarrative(blindRiskPct: number): string {
-    const zone = this.blindRiskZone(blindRiskPct);
+    const zone = getBlindRiskZone(blindRiskPct);
     return this.tH(`blindRisk_${zone}`, { pct: blindRiskPct.toFixed(1) });
   }
 
@@ -133,7 +116,7 @@ export class Humanizer {
     zone: 'low' | 'moderate' | 'critical';
     narrative: string;
   } {
-    const zone = this.blindRiskZone(blindRiskPct);
+    const zone = getBlindRiskZone(blindRiskPct);
     return {
       zone,
       narrative: this.blindRiskNarrative(blindRiskPct),

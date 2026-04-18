@@ -6,6 +6,7 @@ import api from "@/services/api";
 import { useMetrics } from "@/contexts/MetricsContext";
 import { getVerdictStyleFromPercentile } from "@/utils/VerdictConfig";
 import { metricFormatter } from "@/utils/MetricFormatter";
+import { resolveBlindRisk, getBlindRiskZone, getBlindRiskStyle } from "@/utils/blindRisk";
 import type { Strategy, Portfolio } from "@/types/strategy";
 
 /* ═══════════════════════════════════════════════════════════
@@ -281,7 +282,8 @@ function SliderCard({ metricKey, onAdd, alreadyExists, activeRule, onUpdate, onU
           )}
           {!hasBtData && metricKey === "bayes_blind_risk" && (() => {
             const brPct = Math.round(rawValue);
-            const brVerdict = getVerdictStyleFromPercentile(brPct >= 50 ? 95 : brPct >= 20 ? 85 : 50, false);
+            const zone = getBlindRiskZone(brPct);
+            const style = getBlindRiskStyle(zone);
             return (
               <>
                 <input type="range" min={0} max={100} step={1}
@@ -289,8 +291,8 @@ function SliderCard({ metricKey, onAdd, alreadyExists, activeRule, onUpdate, onU
                   onChange={(e) => setRawValue(parseInt(e.target.value, 10))}
                   className="w-full accent-amber-500" />
                 <div className="flex justify-between text-[10px] text-iron-500 font-mono tracking-wider">
-                  <span className={`${brVerdict.textColor} flex items-center gap-1`}>
-                    {brVerdict.icon} {brPct >= 50 ? "ANOMALY" : brPct >= 20 ? (locale === 'es' ? "VIGILANCIA" : "WATCH") : "NORMAL"}
+                  <span className={`${style.textColor} flex items-center gap-1`}>
+                    {style.icon} {zone === 'critical' ? "ANOMALY" : zone === 'moderate' ? (locale === 'es' ? "VIGILANCIA" : "WATCH") : "NORMAL"}
                   </span>
                   <span>0% — 100%</span>
                 </div>

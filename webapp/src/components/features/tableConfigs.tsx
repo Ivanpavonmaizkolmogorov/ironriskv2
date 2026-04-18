@@ -1,6 +1,7 @@
 import React from "react";
 import type { RiskAsset } from "@/types/strategy";
 import { metricFormatter } from "@/utils/MetricFormatter";
+import { resolveBlindRisk, calcBlindRisk } from "@/utils/blindRisk";
 
 /* ─── Interfaces ─── */
 export interface ColumnDef {
@@ -792,24 +793,19 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
     label: "Riesgo Ciego",
     metricKey: "bayes_blind_risk",
     align: "right",
-    sortValue: (s) => 1 - (s.bayesian_breakdown?.decomposition?.p_positive || 1),
+    sortValue: (s) => calcBlindRisk(s.bayesian_breakdown?.decomposition?.p_positive ?? 1),
     renderCell: (s) => {
       const d = s.bayesian_breakdown?.decomposition;
       const p = d?.p_positive;
       if (p === undefined) return <div className="flex items-center justify-end gap-1.5"><div className="h-3 w-12 bg-iron-700/60 rounded animate-pulse" /></div>;
       
-      const blind = 1 - p;
-      const pct = (blind * 100).toFixed(1);
-      
-      let color = "text-iron-500";
-      let icon = "⚪";
-      if (blind >= 0.5) { color = "text-risk-red font-bold"; icon = "🔴"; }
-      else if (blind >= 0.2) { color = "text-amber-400"; icon = "🟡"; }
+      const { pct, style } = resolveBlindRisk(p);
+      const isRed = style.textColor.includes("red");
       
       return (
         <div className="flex items-center justify-end gap-1.5">
-          <span className="text-[10px]">{icon}</span>
-          <span className={`font-mono text-xs ${color}`}>{pct}%</span>
+          <span className="text-[10px]">{style.icon}</span>
+          <span className={`font-mono text-xs ${style.textColor} ${isRed ? 'font-bold' : ''}`}>{pct.toFixed(1)}%</span>
         </div>
       );
     }

@@ -134,25 +134,26 @@ class RiskInfoEngine:
 
         # --- 2. Bayesian signal (Blind Risk = 1 - P) ---
         if p_positive is not None:
-            blind_risk = 1.0 - p_positive
-            blind_pct = f"{blind_risk*100:.1f}"
-            if blind_risk >= 0.50:
+            from services.stats.bayes_engine import BayesEngine
+            blind_risk_val = BayesEngine.blind_risk_from_p_positive(p_positive)
+            blind_pct = f"{blind_risk_val:.1f}"
+            if blind_risk_val >= BayesEngine.BLIND_RISK_CRITICAL * 100.0:
                 report.signals.append(InfoSignal(
                     category="bayesian",
                     severity="warning",
                     title="Riesgo Ciego elevado",
                     detail=f"Blind Risk = {blind_pct}%. High probability your edge does not exist.",
-                    metric_value=blind_risk,
+                    metric_value=blind_risk_val,
                     i18n_key="bayesBlindRiskHigh",
                     i18n_params={"pct": blind_pct},
                 ))
-            elif blind_risk >= 0.20:
+            elif blind_risk_val >= BayesEngine.BLIND_RISK_MODERATE * 100.0:
                 report.signals.append(InfoSignal(
                     category="bayesian",
                     severity="notable",
                     title="Riesgo Ciego moderado",
                     detail=f"Blind Risk = {blind_pct}%. Moderate probability your edge may not exist.",
-                    metric_value=blind_risk,
+                    metric_value=blind_risk_val,
                     i18n_key="bayesBlindRiskModerate",
                     i18n_params={"pct": blind_pct},
                 ))
@@ -172,7 +173,8 @@ class RiskInfoEngine:
         # --- 4. Conflict detection ---
         if p_positive is not None and p_positive >= self.p_positive_high and n_red >= 2:
             report.conflict_detected = True
-            blind_risk_pct = f"{(1.0 - p_positive)*100:.1f}"
+            from services.stats.bayes_engine import BayesEngine
+            blind_risk_pct = f"{BayesEngine.blind_risk_from_p_positive(p_positive):.1f}"
             report.signals.append(InfoSignal(
                 category="conflict",
                 severity="notable",

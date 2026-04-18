@@ -96,8 +96,6 @@ class EVDecomposition:
     n_live_wins: int
     n_live_losses: int
     eff_bt_wins: float      # n_bt_wins / bt_discount
-    eff_bt_losses: float    # n_bt_losses / bt_discount
-
     def to_dict(self) -> dict:
         """Serialize to dict, sanitizing numpy types."""
         def _clean(v):
@@ -109,7 +107,15 @@ class EVDecomposition:
                 return bool(v)
             return v
 
-        return {k: _clean(v) for k, v in self.__dict__.items()}
+        d = {k: _clean(v) for k, v in self.__dict__.items()}
+        # Inject the derived property so endpoints can access it without calling the property getter
+        d["blind_risk"] = self.blind_risk
+        return d
+    
+    @property
+    def blind_risk(self) -> float:
+        """Blind Risk = 1 - P(EV > 0), as percentage."""
+        return round((1.0 - self.p_positive) * 100.0, 2)
 
 
 class BayesEngine:
@@ -124,6 +130,39 @@ class BayesEngine:
             confidence=0.95,
         )
     """
+
+    # ── Blind Risk thresholds (Single Source of Truth) ──
+    BLIND_RISK_MODERATE = 0.20   # >= 20% → moderate zone 
+    BLIND_RISK_CRITICAL = 0.50   # >= 50% → critical zone
+
+    @staticmethod
+    def blind_risk_from_p_positive(p_positive: float) -> float:
+        """Derive Blind Risk percentage from P(EV > 0).
+        If the model changes, update this formula here."""
+        return round((1.0 - p_positive) * 100.0, 2)
+
+    @staticmethod
+    def blind_risk_zone(blind_risk_pct: float) -> str:
+        """Classify: 'critical', 'moderate', or 'low'."""
+        if blind_risk_pct >= BayesEngine.BLIND_RISK_CRITICAL * 100.0:
+            return "critical"
+        if blind_risk_pct >= BayesEngine.BLIND_RISK_MODERATE * 100.0:
+            return "moderate"
+        return "low"
+
+    @staticmethod
+    def blind_risk_from_snapshot(metrics_snapshot: dict | None) -> float:
+        """Extract p_positive from a persisted snapshot → blind risk %.
+        This is the ONLY place that knows how to read the cache for blind risk."""
+        if not metrics_snapshot:
+            return 100.0
+        bayes_cache = metrics_snapshot.get("bayes_cache", {})
+        decomp = bayes_cache.get("decomposition", {})
+        if decomp and "p_positive" in decomp:
+            return BayesEngine.blind_risk_from_p_positive(decomp["p_positive"])
+        # Fallback to older format or 0 if missing
+        p_pos = bayes_cache.get("p_positive", 0.0)
+        return BayesEngine.blind_risk_from_p_positive(p_pos)
 
     def _nig_posterior(
         self,

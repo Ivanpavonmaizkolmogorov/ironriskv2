@@ -1,5 +1,11 @@
 [
   {
+    "id": "blind_risk_centralization",
+    "date": "2026-04-18",
+    "tag": "refactor",
+    "internal": false
+  },
+  {
     "id": "alert_testing_fixes",
     "date": "2026-04-18",
     "tag": "fix",

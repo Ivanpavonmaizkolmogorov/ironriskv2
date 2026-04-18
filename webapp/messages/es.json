@@ -891,6 +891,10 @@
       "improvement": "Mejora"
     },
     "entries": {
+      "blind_risk_centralization": {
+        "title": "Centralización Absoluta de Riesgo Ciego",
+        "body": "El motor Bayesiano del backend de IronRisk ahora es la única frente de verdad para todos los porcentajes, estilos, y límites del sistema."
+      },
       "alert_testing_fixes": {
         "title": "Nuevas alertas de test",
         "body": "Añadida la simulación de alerta de transición del estado de riesgo. Además, se han arreglado traducciones duras en notificaciones."

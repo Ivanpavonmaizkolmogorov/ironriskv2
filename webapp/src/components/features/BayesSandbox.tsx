@@ -9,6 +9,7 @@ import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine, CartesianGrid
 } from "recharts";
 import { metricFormatter } from "@/utils/MetricFormatter";
+import { resolveBlindRisk, BLIND_RISK_THRESHOLDS } from "@/utils/blindRisk";
 
 // --- Log-Gamma (Lanczos approximation) for Beta PDF ---
 function logGamma(z: number): number {
@@ -630,8 +631,8 @@ export default function BayesSandbox() {
   const [threshRedStagT, setThreshRedStagT] = useState<number>(95);
   const [threshAmberStagT, setThreshAmberStagT] = useState<number>(85);
   
-  const [threshRedBayes, setThreshRedBayes] = useState<number>(50);
-  const [threshAmberBayes, setThreshAmberBayes] = useState<number>(80);
+  const [threshRedBayes, setThreshRedBayes] = useState<number>(100 - BLIND_RISK_THRESHOLDS.CRITICAL_FLOOR);
+  const [threshAmberBayes, setThreshAmberBayes] = useState<number>(100 - BLIND_RISK_THRESHOLDS.LOW_CEILING);
   const [threshRedConsist, setThreshRedConsist] = useState<number>(0.02);
   const [threshAmberConsist, setThreshAmberConsist] = useState<number>(0.10);
   const [threshRedLosses, setThreshRedLosses] = useState<number>(95);
@@ -758,9 +759,7 @@ export default function BayesSandbox() {
   const d = data?.decomposition;
 
   const mainColor = d
-    ? d.p_positive > 0.8 ? "text-risk-green"
-      : d.p_positive > 0.5 ? "text-amber-400"
-      : "text-risk-red"
+    ? resolveBlindRisk(d.p_positive).style.textColor
     : "text-iron-400";
 
   return (
@@ -1141,9 +1140,7 @@ export default function BayesSandbox() {
                   <div className="w-full bg-iron-800 rounded-full h-3 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        d.p_positive > 0.8 ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
-                        : d.p_positive > 0.5 ? "bg-gradient-to-r from-amber-600 to-amber-400"
-                        : "bg-gradient-to-r from-red-700 to-red-500"
+                        resolveBlindRisk(d.p_positive).style.barGradient
                       }`}
                       style={{ width: `${d.p_positive * 100}%` }}
                     />

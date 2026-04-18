@@ -4,6 +4,7 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine, LineChart, Line, CartesianGrid } from 'recharts';
 import MetricTooltip from '@/components/ui/MetricTooltip';
+import { resolveBlindRisk } from "@/utils/blindRisk";
 
 interface SimulateChartsProps {
   data: any; // Response from /api/simulate
@@ -42,38 +43,20 @@ export default function SimulateCharts({ data }: SimulateChartsProps) {
   }
 
   const pPositive = decomposition.p_positive;
-  const pFailure = 1 - pPositive;
+  
+  const { pct: blindPct, zone, style } = resolveBlindRisk(pPositive);
 
-  let gaugeColor = 'text-risk-green';
-  let gaugeGlow = 'drop-shadow-[0_0_25px_rgba(0,230,118,0.5)]';
-  let gaugeMessage = t('gaugeMessageGreen');
+  // Survival Gauge styling (derived from zone)
+  const gaugeColor = zone === 'critical' ? 'text-red-500' : zone === 'moderate' ? 'text-amber-500' : 'text-risk-green';
+  const gaugeGlow = zone === 'critical' ? 'drop-shadow-[0_0_25px_rgba(239,68,68,0.5)]' : zone === 'moderate' ? 'drop-shadow-[0_0_25px_rgba(245,158,11,0.5)]' : 'drop-shadow-[0_0_25px_rgba(0,230,118,0.5)]';
+  const gaugeMessage = zone === 'critical' ? t('gaugeMessageRed') : zone === 'moderate' ? t('gaugeMessageOrange') : t('gaugeMessageGreen');
 
   // Blind risk tier colors/messages
-  let blindRiskColor = 'text-amber-400';
-  let blindRiskBorder = 'border-amber-500/30';
-  let blindRiskBg = 'bg-amber-500/5';
-  let blindRiskGlow = 'bg-amber-500/8';
-  let blindRiskMessage = t('blindRiskLow');
-
-  if (pPositive < 0.5) {
-    gaugeColor = 'text-red-500';
-    gaugeGlow = 'drop-shadow-[0_0_25px_rgba(239,68,68,0.5)]';
-    gaugeMessage = t('gaugeMessageRed');
-    blindRiskColor = 'text-red-400';
-    blindRiskBorder = 'border-red-500/40';
-    blindRiskBg = 'bg-red-500/5';
-    blindRiskGlow = 'bg-red-500/10';
-    blindRiskMessage = t('blindRiskCritical');
-  } else if (pPositive < 0.8) {
-    gaugeColor = 'text-orange-500';
-    gaugeGlow = 'drop-shadow-[0_0_25px_rgba(249,115,22,0.5)]';
-    gaugeMessage = t('gaugeMessageOrange');
-    blindRiskColor = 'text-orange-400';
-    blindRiskBorder = 'border-orange-500/30';
-    blindRiskBg = 'bg-orange-500/5';
-    blindRiskGlow = 'bg-orange-500/8';
-    blindRiskMessage = t('blindRiskMedium');
-  }
+  const blindRiskColor = style.textColor;
+  const blindRiskBorder = style.borderAccent || 'border-iron-800/20';
+  const blindRiskBg = style.bgAccent || 'bg-iron-800/10';
+  const blindRiskGlow = style.glowColor;
+  const blindRiskMessage = zone === 'critical' ? t('blindRiskCritical') : zone === 'moderate' ? t('blindRiskMedium') : t('blindRiskLow');
 
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -120,7 +103,7 @@ export default function SimulateCharts({ data }: SimulateChartsProps) {
             </div>
             <div className="flex flex-col items-end">
               <span className={`text-3xl md:text-4xl font-bold tracking-tight ${blindRiskColor} drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]`}>
-                {formatPct(pFailure)}
+                {formatPct(blindPct / 100)}
               </span>
               <span className="text-[10px] text-iron-600 mt-0.5">{t('blindRiskOf')} {t('blindRiskScenarios')}</span>
             </div>

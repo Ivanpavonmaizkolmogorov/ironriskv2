@@ -16,6 +16,7 @@ import { useSimulatorStore } from '@/store/useSimulatorStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useOnboardingStore, type TraderRiskConfig } from '@/store/useOnboardingStore';
 import MetricTooltip from '@/components/ui/MetricTooltip';
+import { calcBlindRisk, getBlindRiskZone } from "@/utils/blindRisk";
 import { metricFormatter } from '@/utils/MetricFormatter';
 import CsvColumnMapper, { autoDetectMapping } from '@/components/ui/CsvColumnMapper';
 import { useSearchParams } from 'next/navigation';
@@ -780,10 +781,12 @@ export default function SimulatorWizard() {
                     {(() => {
                       const pPositive = result?.decomposition?.p_positive ?? 1;
                       const pPositivePct = (pPositive * 100).toFixed(1) + '%';
-                      const blindRiskPct = ((1 - pPositive) * 100).toFixed(1) + '%';
+                      const blindRiskVal = calcBlindRisk(pPositive);
+                      const blindRiskPct = blindRiskVal.toFixed(1) + '%';
+                      const zone = getBlindRiskZone(blindRiskVal);
                       const evPerTrade = result?.decomposition?.ev_mean ?? riskSuggestions?.ev_per_trade ?? 0;
                       
-                      if (pPositive < 0.50) {
+                      if (zone === 'critical') {
                         return (
                           <div className="mt-4 pt-4 border-t border-red-500/20 relative z-10">
                             <div className="p-5 bg-red-500/5 border-2 border-red-500/30 rounded-xl flex items-start gap-4">

@@ -12,6 +12,7 @@ import {
 import { getVerdictStyle, type VerdictStatus } from "@/utils/VerdictConfig";
 import { metricFormatter } from "@/utils/MetricFormatter";
 import { Humanizer, type RiskGaugeData } from "@/utils/Humanizer";
+import { resolveBlindRisk } from "@/utils/blindRisk";
 
 // --- Log-Gamma (Lanczos approximation) for Beta PDF ---
 function logGamma(z: number): number {
@@ -771,13 +772,12 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
                  {/* Blind Risk as main gauge */}
                  {(() => {
                    const blindRiskHumanizer = new Humanizer(tH, tV);
-                   const blindRiskRaw = 1 - d.p_positive;
-                   const blindPct = blindRiskRaw * 100;
+                   const { pct: blindPct, zone, style } = resolveBlindRisk(d.p_positive);
                    const blindPctStr = blindPct.toFixed(1);
-                   const { zone, narrative } = blindRiskHumanizer.blindRiskInfo(blindPct);
-                   const riskColor = zone === 'low' ? 'text-risk-green' : zone === 'moderate' ? 'text-amber-400' : 'text-risk-red';
-                   const barColor = zone === 'low' ? 'bg-gradient-to-r from-emerald-600 to-emerald-400' : zone === 'moderate' ? 'bg-gradient-to-r from-amber-600 to-amber-400' : 'bg-gradient-to-r from-red-700 to-red-500';
-                   const riskBg = zone === 'low' ? '' : zone === 'moderate' ? 'bg-amber-500/5 border-amber-500/20' : 'bg-red-500/5 border-red-500/20';
+                   const { narrative } = blindRiskHumanizer.blindRiskInfo(blindPct);
+                   const riskColor = style.textColor;
+                   const barColor = style.barGradient;
+                   const riskBg = (style.bgAccent || style.borderAccent) ? `${style.bgAccent} ${style.borderAccent}`.trim() : '';
                    return (
                      <div>
                        <div className="flex items-center justify-between mb-3">

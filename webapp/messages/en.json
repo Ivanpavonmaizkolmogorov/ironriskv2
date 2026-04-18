@@ -891,6 +891,10 @@
       "improvement": "Improvement"
     },
     "entries": {
+      "blind_risk_centralization": {
+        "title": "Absolute Blind Risk Centralization",
+        "body": "The IronRisk backend Bayesian Engine is now the single source of truth for all percentages, styles, and thresholds across the entire system."
+      },
       "alert_testing_fixes": {
         "title": "New Testing Alerts",
         "body": "Added risk state transition alert simulation. Also fixed hardcoded translations in notifications."

@@ -719,11 +719,8 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
         response = engine.build_live_response(live_data, portfolio.metrics_snapshot)
         response["portfolio_equity"] = cur["net_profit"]
         
-        p_pos = 0.0
-        snap = getattr(portfolio, "metrics_snapshot", None) or {}
-        bayes_cache = snap.get("bayes_cache", {})
-        p_pos = bayes_cache.get("p_positive", 0.0) * 100.0
-        cur["bayes_blind_risk"] = 100.0 - p_pos
+        from services.stats.bayes_engine import BayesEngine
+        cur["bayes_blind_risk"] = BayesEngine.blind_risk_from_snapshot(getattr(portfolio, "metrics_snapshot", None))
                 
         enriched_rc = enrich_risk_config(portfolio.risk_config, cur, master_toggles)
 
@@ -828,11 +825,8 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
         # Enrich risk_config with server-computed current values
         cur = compute_current_values(db, account.id, 0, req, start_date=portfolio.strategies[0].start_date if hasattr(portfolio, 'strategies') and portfolio.strategies else None)
         
-        p_pos = 0.0
-        snap = getattr(portfolio, "metrics_snapshot", None) or {}
-        bayes_cache = snap.get("bayes_cache", {})
-        p_pos = bayes_cache.get("p_positive", 0.0) * 100.0
-        cur["bayes_blind_risk"] = 100.0 - p_pos
+        from services.stats.bayes_engine import BayesEngine
+        cur["bayes_blind_risk"] = BayesEngine.blind_risk_from_snapshot(getattr(portfolio, "metrics_snapshot", None))
 
         enriched_rc = enrich_risk_config(portfolio.risk_config, cur, master_toggles)
         
@@ -949,11 +943,8 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
     # Enrich risk_config with server-computed current values
     cur = compute_current_values(db, account.id, req.magic_number, req, start_date=strategy.start_date)
             
-    p_pos = 0.0
-    snap = getattr(strategy, "metrics_snapshot", None) or {}
-    bayes_cache = snap.get("bayes_cache", {})
-    p_pos = bayes_cache.get("p_positive", 0.0) * 100.0
-    cur["bayes_blind_risk"] = 100.0 - p_pos
+    from services.stats.bayes_engine import BayesEngine
+    cur["bayes_blind_risk"] = BayesEngine.blind_risk_from_snapshot(getattr(strategy, "metrics_snapshot", None))
 
     enriched_rc = enrich_risk_config(strategy.risk_config, cur, master_toggles)
 
