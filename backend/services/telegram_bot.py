@@ -36,14 +36,14 @@ def _build_status_response(chat_id: str) -> str:
         # i18n strings
         T = {
             "es": {
-                "title": "🖥️ <b>Estado de Nodos (Workspaces)</b>\n",
+                "title": "🖥️ <b>Estado de Nodos</b>\n",
                 "no_accounts": "📊 No tienes cuentas de trading activas registradas en IronRisk.",
                 "active": "Activo",
                 "ago": "hace",
                 "min": "min",
                 "no_signal": "Sin señal",
                 "disconnected": "Desconectado",
-                "no_heartbeat": "Sin datos de heartbeat",
+                "no_heartbeat": "Sin datos de conexión",
                 "node": "Nodo",
                 "dup_warn": "🚨 <i>ATENCIÓN: Se detectaron múltiples instalaciones simultáneas intentando conectar con esta misma cuenta. Por seguridad, sugerimos mantener el Servicio activo en un solo ordenador.</i>",
             },

@@ -131,9 +131,19 @@ export default function UserProfileDropdown({
 
   const toggleLanguage = useCallback(async () => {
     const nextLocale = locale === "en" ? "es" : "en";
-    // Sync locale to backend for Telegram i18n — must complete BEFORE navigation
-    // because router.replace with a new locale causes a full page reload
-    try { await preferencesAPI.updateLocale(nextLocale); } catch {}
+    console.log("TOGGLE LANGUAGE STARTED:", { locale, nextLocale });
+    try { 
+      const res = await preferencesAPI.updateLocale(nextLocale); 
+      console.log("LOCALE SYNC SUCCESS:", res.data);
+    } catch (err: any) {
+      console.error("LOCALE SYNC FAILED:", err);
+      // Give the user a visual clue in dev
+      alert(`Locale API failed: ${err?.message || 'Unknown error'}`);
+    }
+    
+    // Pause for 1 second just to ensure we can see logs before navigation
+    await new Promise(r => setTimeout(r, 1000));
+    
     startTransition(() => {
       const params = searchParams.toString();
       const query = params ? `?${params}` : "";
