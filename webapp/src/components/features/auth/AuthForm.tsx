@@ -90,7 +90,7 @@ export default function AuthForm({ mode, onSuccess, className = "", defaultEmail
         try {
           await api.post('/api/trading-accounts/', {
             name: workspaceName,
-            account_number: "000000",
+            account_number: "",
             broker: ""
           });
         } catch (accountErr) {

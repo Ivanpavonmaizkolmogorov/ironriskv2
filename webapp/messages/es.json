@@ -897,6 +897,10 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "ea_autobind_hotfix": {
+        "title": "Corrección Vínculo EA",
+        "body": "Resuelto el problema inicial que impedía conectar correctamente la cuenta de MetaTrader con los Workspaces auto-generados al crear cuenta."
+      },
       "auth_centralization": {
         "title": "Centralización de Autenticación",
         "body": "Todo el código de registro, login y lista de espera de la aplicación se ha centralizado en de un súper-componente maestro unificando la fricción."

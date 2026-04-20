@@ -1,5 +1,11 @@
 [
   {
+    "id": "ea_autobind_hotfix",
+    "date": "2026-04-20",
+    "tag": "bugfix",
+    "internal": true
+  },
+  {
     "id": "auth_centralization",
     "date": "2026-04-20",
     "tag": "refactor",

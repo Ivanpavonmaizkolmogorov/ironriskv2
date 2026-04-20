@@ -897,6 +897,10 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "ea_autobind_hotfix": {
+        "title": "EA Autobind Fix",
+        "body": "Fixed a bug where auto-generated workspaces prevented the MetaTrader EA from properly connecting on first use."
+      },
       "auth_centralization": {
         "title": "Auth Centralization",
         "body": "Centralized all authentication and waitlist logics in a unified modal."
