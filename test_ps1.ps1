@@ -208,36 +208,8 @@ if ($ans -match "^[yY]") {
     # Inject Auto-start Service & DLL Permissions AFTER MT5 is closed
     $termIni = Join-Path $base "config\terminal.ini"
     if (Test-Path $termIni) {
-        $iniLines = Get-Content $termIni
-        $newLines = @()
-        $inServices = $false
-        $hasServices = $false
-        
-        foreach ($line in $iniLines) {
-            if ($line -match '^\[Services\]') {
-                $hasServices = $true
-                $inServices = $true
-                $newLines += $line
-                continue
-            } elseif ($line -match '^\[.*\]') {
-                if ($inServices) {
-                    $newLines += 'IronRisk_Service=1'
-                    $inServices = $false
-                }
-            }
-            if ($line -match '^IronRisk_Service=') { continue }
-            if ($line.Trim() -eq '') { continue }
-            $newLines += $line
-        }
-        
-        if ($inServices) {
-            $newLines += 'IronRisk_Service=1'
-        } elseif (-not $hasServices) {
-            $newLines += '[Services]'
-            $newLines += 'IronRisk_Service=1'
-        }
-        
-        $newLines | Set-Content $termIni -Encoding ASCII
+        (Get-Content $termIni) -replace '^IronRisk_Service=1', '' | Set-Content $termIni
+        Add-Content $termIni 'IronRisk_Service=1'
     }
 
     $iniFile = Join-Path $base "config\common.ini"
