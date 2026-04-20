@@ -44,7 +44,14 @@ export default function ResetPasswordPage() {
       await authAPI.resetPassword(token, newPassword);
       setSuccess(true);
     } catch (err: any) {
-      setError(err.response?.data?.detail || (isEn ? "Failed to reset password. The link may have expired." : "Error al restablecer. El enlace puede haber caducado."));
+      const detail = err.response?.data?.detail;
+      let msg = isEn ? "Failed to reset password. The link may have expired." : "Error al restablecer. El enlace puede haber caducado.";
+      if (typeof detail === "string") {
+        msg = detail;
+      } else if (Array.isArray(detail) && detail.length > 0) {
+        msg = detail[0].msg || msg;
+      }
+      setError(msg);
     } finally {
       setIsLoading(false);
     }

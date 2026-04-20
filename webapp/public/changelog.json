@@ -1,5 +1,11 @@
 [
   {
+    "id": "fastapi_array_hydration_fix",
+    "date": "2026-04-20",
+    "tag": "bugfix",
+    "internal": true
+  },
+  {
     "id": "bayes_math_ui_cleanup",
     "date": "2026-04-18",
     "tag": "refactor",

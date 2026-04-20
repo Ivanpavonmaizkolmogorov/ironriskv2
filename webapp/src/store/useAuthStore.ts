@@ -34,8 +34,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Load user profile
       const userRes = await authAPI.getMe();
       set({ user: userRes.data });
-    } catch (err: unknown) {
-      const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Login failed";
+    } catch (err: any) {
+      const detail = err.response?.data?.detail;
+      let message = "Login failed";
+      if (typeof detail === "string") {
+        message = detail;
+      } else if (Array.isArray(detail) && detail.length > 0) {
+        message = detail[0].msg || "Validation error";
+      }
       set({ error: message, isLoading: false });
     }
   },
@@ -51,8 +57,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ jwt: token, isAuthenticated: true, isLoading: false });
       const userRes = await authAPI.getMe();
       set({ user: userRes.data });
-    } catch (err: unknown) {
-      const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Registration failed";
+    } catch (err: any) {
+      const detail = err.response?.data?.detail;
+      let message = "Registration failed";
+      if (typeof detail === "string") {
+        message = detail;
+      } else if (Array.isArray(detail) && detail.length > 0) {
+        message = detail[0].msg || "Validation error";
+      }
       set({ error: message, isLoading: false });
     }
   },

@@ -22,6 +22,13 @@ import CsvColumnMapper, { autoDetectMapping } from '@/components/ui/CsvColumnMap
 import { useSearchParams } from 'next/navigation';
 import { useMetrics } from '@/contexts/MetricsContext';
 
+const extractError = (err: any, fallback: string) => {
+  const detail = err?.response?.data?.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail) && detail.length > 0) return detail[0].msg || fallback;
+  return err?.message || fallback;
+};
+
 export default function SimulatorWizard() {
   const t = useTranslations('simulate');
   const locale = useLocale();
@@ -127,7 +134,7 @@ export default function SimulatorWizard() {
         } catch (err: any) {
           if (!active) return;
           console.error("Error extracting columns:", err);
-          setError(err.response?.data?.detail || err.message || "Error extracting columns from file");
+          setError(extractError(err, "Error extracting columns from file"));
         } finally {
           if (active) setLoading(false);
         }
@@ -176,7 +183,7 @@ export default function SimulatorWizard() {
       setResult(res.data);
       storeSimulationInBackpack(res.data);
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || "Error analyzing edge");
+      setError(extractError(err, "Error analyzing edge"));
     } finally {
       setLoading(false);
     }
@@ -197,7 +204,7 @@ export default function SimulatorWizard() {
       setResult(res.data);
       storeSimulationInBackpack(res.data);
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || "Error analyzing CSV");
+      setError(extractError(err, "Error analyzing CSV"));
     } finally {
       setLoading(false);
     }
@@ -298,7 +305,7 @@ export default function SimulatorWizard() {
 
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.detail || err.message || "Failed");
+      setError(extractError(err, "Failed"));
       setOnboardingLoading(false);
       setOnboardPhase(null);
     }

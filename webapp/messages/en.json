@@ -905,6 +905,10 @@
         "title": "Absolute Blind Risk Centralization",
         "body": "The IronRisk backend Bayesian Engine is now the single source of truth for all percentages, styles, and thresholds across the entire system."
       },
+      "fastapi_array_hydration_fix": {
+        "title": "React/FastAPI Fix",
+        "body": "Fixed React crash on FastAPI array validation."
+      },
       "alert_testing_fixes": {
         "title": "New Testing Alerts",
         "body": "Added risk state transition alert simulation. Also fixed hardcoded translations in notifications."
