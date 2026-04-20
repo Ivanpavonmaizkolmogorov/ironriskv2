@@ -1,5 +1,11 @@
 [
   {
+    "id": "beta_code_hidden",
+    "date": "2026-04-20",
+    "tag": "feature",
+    "internal": true
+  },
+  {
     "id": "fastapi_array_hydration_fix",
     "date": "2026-04-20",
     "tag": "bugfix",

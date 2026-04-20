@@ -122,7 +122,7 @@ export default function RegisterPage() {
           <div className="pt-2">
             <Input
               label={t("betaCodeLabel")}
-              type="text"
+              type="password"
               placeholder={t("betaCodePlaceholder")}
               value={inviteCode}
               onChange={(e) => setInviteCode(e.target.value)}
