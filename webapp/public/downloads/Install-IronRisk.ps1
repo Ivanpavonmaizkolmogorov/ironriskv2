@@ -248,7 +248,7 @@ if ($ans -match "^[yY]") {
         $hasCommon = $false
         
         foreach ($line in $cLines) {
-            if ($line -match '^\[Common\]') {
+            if ($line -match '^\[Experts\]') {
                 $hasCommon = $true
                 $inCommon = $true
                 $cNewLines += $line
@@ -267,7 +267,8 @@ if ($ans -match "^[yY]") {
         if ($inCommon) {
             $cNewLines += 'AllowDllImport=1'
         } elseif (-not $hasCommon) {
-            $cNewLines = @('[Common]', 'AllowDllImport=1') + $cNewLines
+            $cNewLines += '[Experts]'
+            $cNewLines += 'AllowDllImport=1'
         }
         
         $cNewLines | Set-Content $iniFile -Encoding ASCII
