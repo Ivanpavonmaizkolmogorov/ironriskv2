@@ -156,31 +156,50 @@ export default function RegisterPage() {
 
           {/* Waitlist CTA when invalid code */}
           {showInvalidCode && !waitlistSubmitted && email.trim() && (
-            <div className="bg-risk-green/5 border border-risk-green/20 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-500">
-              <p className="text-sm text-iron-300 mb-3">
-                {isEn
-                  ? "No code yet? Leave your email and we'll notify you when spots open up."
-                  : "¿Aún no tienes código? Deja tu email y te avisamos cuando haya plazas disponibles."}
-              </p>
-              <textarea
-                value={motivation}
-                onChange={(e) => setMotivation(e.target.value)}
-                placeholder={isEn ? "What brought you to IronRisk? What problem are you looking to solve? (optional)" : "¿Qué te ha traído a IronRisk? ¿Qué problema buscas resolver? (opcional)"}
-                rows={3}
-                className="w-full bg-surface-primary border border-iron-700 rounded-lg px-3 py-2 text-sm text-iron-200 placeholder:text-iron-600 focus:outline-none focus:border-risk-green/40 resize-none mb-3 transition-colors"
-              />
-              <button
-                type="button"
-                onClick={handleWaitlist}
-                disabled={waitlistLoading}
-                className="w-full py-2.5 px-4 bg-risk-green/15 border border-risk-green/30 text-risk-green text-sm font-semibold rounded-lg hover:bg-risk-green/25 hover:border-risk-green/50 transition-all duration-300 disabled:opacity-50"
-              >
-                {waitlistLoading
-                  ? "..."
-                  : isEn
-                    ? `📩 Notify me at ${email}`
-                    : `📩 Avisarme a ${email}`}
-              </button>
+            <div className="bg-surface-secondary border border-risk-green/30 rounded-xl p-5 animate-in fade-in slide-in-from-top-2 duration-500 relative overflow-hidden shadow-lg">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-risk-green/5 blur-[50px] rounded-full pointer-events-none" />
+              <div className="relative z-10">
+                <p className="text-sm font-bold text-iron-100 mb-1">
+                  {isEn ? "Join the Private Waitlist" : "Únete a la Lista de Espera Privada"}
+                </p>
+                <p className="text-xs text-iron-400 mb-4 leading-relaxed">
+                  {isEn
+                    ? "IronRisk is currently in closed beta. We release a very limited number of spots every week to ensure stability."
+                    : "IronRisk está en beta cerrada. Liberamos una cantidad muy reducida de plazas semanalmente para garantizar la estabilidad."}
+                </p>
+
+                <div className="flex flex-col gap-1.5 mb-4">
+                  <label className="text-[13px] font-semibold text-iron-200">
+                    {isEn 
+                      ? "What problem are you looking to solve?" 
+                      : "¿Qué problema buscas resolver?"}
+                    <span className="text-risk-green ml-1 font-normal italic">
+                      {isEn ? "(Detailed answers get priority access 🚀)" : "(Las respuestas detalladas tienen prioridad 🚀)"}
+                    </span>
+                  </label>
+                  <textarea
+                    value={motivation}
+                    onChange={(e) => setMotivation(e.target.value)}
+                    placeholder={isEn 
+                      ? "E.g.: I keep blowing evaluation accounts during drawdowns and I need to calculate my true survival probabilities..." 
+                      : "Ej: Sigo quemando cuentas de fondeo durante los drawdowns y necesito calcular mis probabilidades de supervivencia..."}
+                    rows={3}
+                    className="w-full bg-surface-primary border border-iron-700/80 rounded-lg px-3 py-2 text-[13px] text-iron-200 placeholder:text-iron-600 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 resize-none transition-all shadow-inner"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleWaitlist}
+                  disabled={waitlistLoading}
+                  className="w-full py-2.5 px-4 bg-risk-green/15 border border-risk-green/30 text-risk-green text-sm font-semibold rounded-lg hover:bg-risk-green/25 hover:border-risk-green/50 transition-all duration-300 disabled:opacity-50"
+                >
+                  {waitlistLoading
+                    ? "..."
+                    : isEn
+                      ? `📩 Notify me at ${email}`
+                      : `📩 Avisarme a ${email}`}
+                </button>
+              </div>
             </div>
           )}
 

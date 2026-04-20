@@ -1,5 +1,11 @@
 [
   {
+    "id": "waitlist_ux_optimization",
+    "date": "2026-04-20",
+    "tag": "feature",
+    "internal": true
+  },
+  {
     "id": "simulator_funnel_optim",
     "date": "2026-04-20",
     "tag": "feature",

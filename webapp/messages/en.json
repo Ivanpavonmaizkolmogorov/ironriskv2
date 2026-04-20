@@ -905,6 +905,10 @@
         "title": "Absolute Blind Risk Centralization",
         "body": "The IronRisk backend Bayesian Engine is now the single source of truth for all percentages, styles, and thresholds across the entire system."
       },
+      "waitlist_ux_optimization": {
+        "title": "Waitlist Form Optimization",
+        "body": ""
+      },
       "simulator_funnel_optim": {
         "title": "Simulator Funnel Refactor",
         "body": ""

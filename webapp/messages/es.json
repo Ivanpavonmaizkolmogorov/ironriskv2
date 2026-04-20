@@ -905,6 +905,10 @@
         "title": "Centralización Absoluta de Riesgo Ciego",
         "body": "El motor Bayesiano del backend de IronRisk ahora es la única frente de verdad para todos los porcentajes, estilos, y límites del sistema."
       },
+      "waitlist_ux_optimization": {
+        "title": "Waitlist Form Optimization",
+        "body": ""
+      },
       "simulator_funnel_optim": {
         "title": "Simulator Funnel Refactor",
         "body": ""
