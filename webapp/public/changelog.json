@@ -1,5 +1,11 @@
 [
   {
+    "id": "installer_curl_hotfix",
+    "date": "2026-04-20",
+    "tag": "bugfix",
+    "internal": true
+  },
+  {
     "id": "beta_code_hidden",
     "date": "2026-04-20",
     "tag": "feature",

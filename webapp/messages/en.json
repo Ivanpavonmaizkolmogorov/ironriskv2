@@ -905,6 +905,10 @@
         "title": "Absolute Blind Risk Centralization",
         "body": "The IronRisk backend Bayesian Engine is now the single source of truth for all percentages, styles, and thresholds across the entire system."
       },
+      "installer_curl_hotfix": {
+        "title": "Installer Hotfix",
+        "body": ""
+      },
       "beta_code_hidden": {
         "title": "Beta Code Obscured",
         "body": ""

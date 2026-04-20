@@ -905,6 +905,10 @@
         "title": "Centralización Absoluta de Riesgo Ciego",
         "body": "El motor Bayesiano del backend de IronRisk ahora es la única frente de verdad para todos los porcentajes, estilos, y límites del sistema."
       },
+      "installer_curl_hotfix": {
+        "title": "Installer Hotfix",
+        "body": ""
+      },
       "beta_code_hidden": {
         "title": "Beta Code Obscurado",
         "body": ""
