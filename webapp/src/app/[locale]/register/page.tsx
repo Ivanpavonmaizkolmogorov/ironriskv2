@@ -7,70 +7,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import LocaleSwitcher from "@/components/ui/LocaleSwitcher";
-import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
+import AuthForm from "@/components/features/auth/AuthForm";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useSettingsStore } from "@/store/useSettingsStore";
-import { waitlistAPI } from "@/services/api";
 
 export default function RegisterPage() {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("landing");
+  const { isAuthenticated } = useAuthStore();
   const isEn = locale === "en";
-  const { register, isAuthenticated, isLoading, error, clearError } = useAuthStore();
-  const { adminTelegramHandle, fetchSettings } = useSettingsStore();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
-  const [localError, setLocalError] = useState("");
-  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
-  const [waitlistLoading, setWaitlistLoading] = useState(false);
-  const [waitlistAlready, setWaitlistAlready] = useState(false);
-  const [motivation, setMotivation] = useState("");
-  const [showTelegramQR, setShowTelegramQR] = useState(false);
-
-  useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
 
   useEffect(() => {
     if (isAuthenticated) router.push(`/${locale}/dashboard`);
   }, [isAuthenticated, router, locale]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearError();
-    setLocalError("");
-
-    if (password !== confirmPassword) {
-      setLocalError(isEn ? "Passwords do not match" : "Las contraseñas no coinciden");
-      return;
-    }
-    if (password.length < 6) {
-      setLocalError(isEn ? "Password must be at least 6 characters" : "La contraseña debe tener mínimo 6 caracteres");
-      return;
-    }
-    await register(email, password, inviteCode);
-  };
-
-  const handleWaitlist = async () => {
-    if (!email.trim() || !email.includes("@")) return;
-    setWaitlistLoading(true);
-    try {
-      const res = await waitlistAPI.submit(email, "register_no_code", locale, motivation);
-      setWaitlistSubmitted(true);
-      setWaitlistAlready(res.data?.already_registered || false);
-    } catch {
-      // Even if it fails, show success to not lose the impression
-      setWaitlistSubmitted(true);
-    } finally {
-      setWaitlistLoading(false);
-    }
-  };
-
-  const showInvalidCode = error?.toLowerCase().includes("invalid beta") || error?.toLowerCase().includes("invalid_invite");
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6 relative">
@@ -93,192 +42,7 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="trader@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Input
-            label={t("password")}
-            type="password"
-            placeholder={t("passwordPlaceholder")}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <Input
-            label={isEn ? "Confirm Password" : "Confirmar Contraseña"}
-            type="password"
-            placeholder={t("passwordPlaceholder")}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-          
-          <div className="pt-2">
-            <Input
-              label={t("betaCodeLabel")}
-              type="password"
-              placeholder={t("betaCodePlaceholder")}
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value)}
-              className="border-risk-blue/40 focus:border-risk-blue font-mono"
-            />
-          </div>
-
-          {(error || localError) && (
-            <div className={`border rounded-lg p-3 ${
-              error?.toLowerCase().includes("already registered") || error?.toLowerCase().includes("ya registrad")
-                ? "bg-amber-500/10 border-amber-500/30"
-                : "bg-risk-red/10 border-risk-red/30"
-            }`}>
-              <p className={`text-sm ${
-                error?.toLowerCase().includes("already registered") || error?.toLowerCase().includes("ya registrad")
-                  ? "text-amber-400"
-                  : "text-risk-red"
-              }`}>
-                {showInvalidCode ? t("errorInvalidCode") : (error || localError)}
-              </p>
-              {error?.toLowerCase().includes("already registered") && (
-                <p className="text-sm text-iron-400 mt-2">
-                  {isEn ? "You already have an account." : "Ya tienes una cuenta."}{" "}
-                  <Link href={`/${locale}/login`} className="text-risk-green hover:underline font-medium">
-                    {t("login")} →
-                  </Link>
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Waitlist CTA when invalid code */}
-          {showInvalidCode && !waitlistSubmitted && email.trim() && (
-            <div className="bg-surface-secondary border border-risk-green/30 rounded-xl p-5 animate-in fade-in slide-in-from-top-2 duration-500 relative overflow-hidden shadow-lg">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-risk-green/5 blur-[50px] rounded-full pointer-events-none" />
-              <div className="relative z-10">
-                <p className="text-sm font-bold text-iron-100 mb-1">
-                  {isEn ? "Join the Private Waitlist" : "Únete a la Lista de Espera Privada"}
-                </p>
-                <p className="text-xs text-iron-400 mb-4 leading-relaxed">
-                  {isEn
-                    ? "IronRisk is currently in closed beta. We release a very limited number of spots every week to ensure stability."
-                    : "IronRisk está en beta cerrada. Liberamos una cantidad muy reducida de plazas semanalmente para garantizar la estabilidad."}
-                </p>
-
-                <div className="flex flex-col gap-1.5 mb-4">
-                  <label className="text-[13px] font-semibold text-iron-200">
-                    {isEn 
-                      ? "What problem are you looking to solve?" 
-                      : "¿Qué problema buscas resolver?"}
-                    <span className="text-risk-green ml-1 font-normal italic">
-                      {isEn ? "(Detailed answers get priority access 🚀)" : "(Las respuestas detalladas tienen prioridad 🚀)"}
-                    </span>
-                  </label>
-                  <textarea
-                    value={motivation}
-                    onChange={(e) => setMotivation(e.target.value)}
-                    placeholder={isEn 
-                      ? "E.g.: I keep blowing evaluation accounts during drawdowns and I need to calculate my true survival probabilities..." 
-                      : "Ej: Sigo quemando cuentas de fondeo durante los drawdowns y necesito calcular mis probabilidades de supervivencia..."}
-                    rows={3}
-                    className="w-full bg-surface-primary border border-iron-700/80 rounded-lg px-3 py-2 text-[13px] text-iron-200 placeholder:text-iron-600 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 resize-none transition-all shadow-inner"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleWaitlist}
-                  disabled={waitlistLoading}
-                  className="w-full py-2.5 px-4 bg-risk-green/15 border border-risk-green/30 text-risk-green text-sm font-semibold rounded-lg hover:bg-risk-green/25 hover:border-risk-green/50 transition-all duration-300 disabled:opacity-50"
-                >
-                  {waitlistLoading
-                    ? "..."
-                    : isEn
-                      ? `📩 Notify me at ${email}`
-                      : `📩 Avisarme a ${email}`}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Success state */}
-          {waitlistSubmitted && (
-            <div className="bg-risk-green/10 border border-risk-green/30 rounded-xl p-4 text-center animate-in fade-in duration-500">
-              <p className="text-risk-green font-semibold text-sm">
-                {waitlistAlready
-                  ? (isEn ? "👋 You're already on the list!" : "👋 ¡Ya estás en la lista!")
-                  : (isEn ? "🎉 You're on the list!" : "🎉 ¡Estás en la lista!")}
-              </p>
-              <p className="text-iron-300 text-xs mt-2 mb-3">
-                {isEn
-                  ? "We'll email you when new spots open. Want to skip the line? Ask for a code directly!"
-                  : "Te avisaremos cuando haya plazas. ¿Quieres saltarte la fila? ¡Pídenos un código!"}
-              </p>
-              
-              <button type="button" onClick={() => setShowTelegramQR(!showTelegramQR)} className="text-[#29B6F6] text-xs hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors mb-3">
-                {isEn ? "💬 Request code via Telegram" : "💬 Pedir código por Telegram"}
-              </button>
-
-              {showTelegramQR && (
-                <div className="flex flex-col items-center gap-3 p-4 bg-surface-secondary border border-iron-800 rounded-xl mb-4 mx-auto w-fit animate-in fade-in zoom-in-95 duration-300">
-                  <div className="bg-white p-2 rounded-lg">
-                    <QRCodeSVG
-                      value={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
-                      size={120}
-                      bgColor="#ffffff"
-                      fgColor="#0a0a0a"
-                      level="M"
-                      includeMargin={false}
-                    />
-                  </div>
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-xs font-bold text-iron-100">{adminTelegramHandle}</span>
-                    <span className="text-[10px] text-iron-400">
-                      {isEn ? 'Scan with your phone' : 'Escanea con tu móvil'}
-                    </span>
-                  </div>
-                  <a
-                    href={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[10px] text-[#29B6F6] hover:text-[#4FC3F7] underline underline-offset-2"
-                  >
-                    {isEn ? 'Or open directly →' : 'O abrir directo →'}
-                  </a>
-                </div>
-              )}
-
-              <div className="h-px bg-iron-800/50 w-full my-3" />
-
-              <p className="text-iron-500 text-xs mb-3">
-                {isEn
-                  ? "Meanwhile, you can try our free strategy simulator:"
-                  : "Mientras tanto, puedes probar el simulador de estrategias gratis:"}
-              </p>
-              <Link
-                href={`/${locale}/simulate`}
-                className="inline-block px-4 py-2 bg-risk-green text-surface-primary text-sm font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,230,118,0.3)] transition-all"
-              >
-                {isEn ? "Try Free Simulator →" : "Probar Simulador Gratis →"}
-              </Link>
-            </div>
-          )}
-
-          <Button type="submit" isLoading={isLoading} className="w-full mt-2">
-            {t("register")}
-          </Button>
-
-          <div className="text-xs text-iron-400 mt-4 text-center leading-relaxed px-2">
-            <p>
-              {isEn
-                ? "Don't have a code? Try creating an account anyway to join our waitlist."
-                : "¿No tienes código? Intenta crear una cuenta igualmente para apuntarte a la lista de espera."
-              }
-            </p>
-          </div>
-        </form>
+        <AuthForm mode="register" onSuccess={() => router.push(`/${locale}/dashboard`)} />
 
         <p className="text-center text-sm text-iron-500 mt-6">
           {isEn ? "Already have an account?" : "¿Ya tienes una cuenta?"}{" "}

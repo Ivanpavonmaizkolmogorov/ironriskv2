@@ -1,5 +1,17 @@
 [
   {
+    "id": "auth_centralization",
+    "date": "2026-04-20",
+    "tag": "refactor",
+    "internal": false
+  },
+  {
+    "id": "waitlist_admin_mailto",
+    "date": "2026-04-20",
+    "tag": "feature",
+    "internal": true
+  },
+  {
     "id": "waitlist_ux_optimization",
     "date": "2026-04-20",
     "tag": "feature",

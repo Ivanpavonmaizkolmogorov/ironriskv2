@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { waitlistAPI } from "@/services/api";
-import { Trash2, Mail } from "lucide-react";
+import { Trash2, Mail, Send } from "lucide-react";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 interface Lead {
   id: string;
@@ -15,6 +16,25 @@ interface Lead {
 export default function LeadsTable() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const { adminTelegramHandle } = useSettingsStore();
+
+  const getInviteBody = () => {
+    const handle = adminTelegramHandle || "@OswIronRisk";
+    const url = `https://t.me/${handle.replace('@', '')}`;
+    return `🛡️ IronRisk — Beta Privada
+
+🌐 https://www.ironrisk.pro/es/register
+
+Tu código de acceso:
+🔑 IRONRISK-VIP-2026
+
+📺 Tutoriales:
+1. https://youtu.be/H65NyD795bI
+2. https://youtu.be/yiCZE9IYgsA
+
+💬 Soporte directo: ${handle}
+${url}`;
+  };
 
   const fetchLeads = async () => {
     try {
@@ -105,10 +125,17 @@ export default function LeadsTable() {
                       minute: "2-digit",
                     })}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right flex justify-end gap-1">
+                    <a
+                      href={`mailto:${lead.email}?subject=${encodeURIComponent("IronRisk - Acceso a Beta Privada")}&body=${encodeURIComponent(getInviteBody())}`}
+                      className="p-1.5 rounded-lg text-risk-green hover:text-white hover:bg-risk-green/20 transition-all flex items-center justify-center"
+                      title="Enviar Código (Email)"
+                    >
+                      <Send className="w-4 h-4" />
+                    </a>
                     <button
                       onClick={() => handleDelete(lead.id)}
-                      className="p-1.5 rounded-lg text-iron-500 hover:text-risk-red hover:bg-risk-red/10 transition-all"
+                      className="p-1.5 rounded-lg text-iron-500 hover:text-risk-red hover:bg-risk-red/10 transition-all flex items-center justify-center"
                       title="Delete lead"
                     >
                       <Trash2 className="w-4 h-4" />

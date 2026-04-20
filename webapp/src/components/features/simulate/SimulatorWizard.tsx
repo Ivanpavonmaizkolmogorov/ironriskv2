@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import AuthForm from '@/components/features/auth/AuthForm';
 import { useTranslations } from 'next-intl';
 import api, { strategyAPI, waitlistAPI } from '@/services/api';
 import SimulateCharts from './SimulateCharts';
@@ -49,17 +49,6 @@ export default function SimulatorWizard() {
   const { getDef } = useMetrics();
 
   // Onboarding UI State
-  const [onboardData, setOnboardData] = useState({
-    email: '',
-    password: '',
-    workspace: '',
-    accountNumber: '',
-    broker: '',
-    magicNumber: '0',
-    inviteCode: ''
-  });
-
-  const [showPassword, setShowPassword] = useState(false);
   const [onboardingLoading, setOnboardingLoading] = useState(false);
   const { adminTelegramHandle, fetchSettings } = useSettingsStore();
   const [onboardPhase, setOnboardPhase] = useState<string | null>(null);
@@ -72,13 +61,7 @@ export default function SimulatorWizard() {
   const [isProfitMapped, setIsProfitMapped] = useState(false);
   const [editingRiskKey, setEditingRiskKey] = useState<string | null>(null);
 
-  // Waitlist state (for simulator onboarding modal)
-  const [simWaitlistSubmitted, setSimWaitlistSubmitted] = useState(false);
-  const [simWaitlistLoading, setSimWaitlistLoading] = useState(false);
-  const [simWaitlistAlready, setSimWaitlistAlready] = useState(false);
-  const [simMotivation, setSimMotivation] = useState("");
-  const [showTelegramQR, setShowTelegramQR] = useState(false);
-
+  // Waitlist integrated into AuthForm
   // Demo preview state
   const [demoPreview, setDemoPreview] = useState<{
     rows: string[][];
@@ -222,74 +205,55 @@ export default function SimulatorWizard() {
     setCsvData([1], file); // Let useSimulatorStore keep track of the file globally
   };
 
-  const handleOnboardSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!onboardData.email || !onboardData.password) {
-      setError(t('errorFields'));
-      return;
-    }
-    if (modalMode === 'register' && (!onboardData.workspace || !onboardData.accountNumber)) {
-      setError(t('requiredFields'));
-      return;
-    }
-    
+  const handleAuthSuccess = async () => {
     setOnboardingLoading(true);
-    setOnboardPhase(null);
+    setOnboardPhase(t('phaseWorkspace'));
     setError(null);
-    try {
-      if (modalMode === 'register') {
-        // Phase 1: Register User
-        setOnboardPhase(t('phaseCreating'));
-        await register(onboardData.email, onboardData.password, onboardData.inviteCode);
-        const authError = useAuthStore.getState().error;
-        if (authError) {
-          throw new Error(authError);
-        }
-        
-        // Phase 2: Create Workspace
-        setOnboardPhase(t('phaseWorkspace'));
-        const accRes = await api.post('/api/trading-accounts/', {
-          name: onboardData.workspace,
-          account_number: onboardData.accountNumber,
-          broker: onboardData.broker
-        });
-        const accountId = accRes.data.id;
 
-        // Phase 3: Create strategy from simulation data (backpack)
-        const onboarding = useOnboardingStore.getState();
-        if (onboarding.hasData && onboarding.traderRiskConfig) {
-          setOnboardPhase(t('phaseRisk'));
-          const strategyName = csvFile ? csvFile.name.replace(/\.[^.]+$/, '') : onboardData.workspace;
-          await strategyAPI.createFromSimulation({
-            trading_account_id: accountId,
-            name: strategyName,
-            risk_config: onboarding.traderRiskConfig,
-            decomposition: onboarding.decomposition || {},
-            risk_suggestions: onboarding.riskSuggestions || {},
-            extracted_stats: onboarding.extractedStats || {},
-            equity_curve: onboarding.equityCurve || [],
-            start_date: onboarding.lastTradeDate || undefined,
-          });
-          onboarding.clear();
-        } else if (csvFile) {
-          // Fallback: old CSV upload flow
-          setOnboardPhase(t('phaseImporting'));
-          const formData = new FormData();
-          formData.append('trading_account_id', accountId);
-          formData.append('name', csvFile.name.replace(/\.[^.]+$/, ''));
-          formData.append('file', csvFile);
-          
-          await api.post('/api/strategies/upload', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-          });
-        }
+    try {
+      // Get the existing Workspaces to figure out where to push the strategy
+      let accountId: string;
+      const accRes = await api.get('/api/trading-accounts/');
+      
+      if (accRes.data && accRes.data.length > 0) {
+        accountId = accRes.data[0].id;
       } else {
-        // Login mode
-        await login(onboardData.email, onboardData.password);
-        const authError = useAuthStore.getState().error;
-        if (authError) {
-          throw new Error(authError);
-        }
+        // Just in case it's a login that had 0 workspaces
+        const newAcc = await api.post('/api/trading-accounts/', {
+          name: "Simulated Strategy",
+          account_number: "000000",
+          broker: "Simulator"
+        });
+        accountId = newAcc.data.id;
+      }
+
+      // Phase 3: Create strategy from simulation data (backpack)
+      const onboarding = useOnboardingStore.getState();
+      if (onboarding.hasData && onboarding.traderRiskConfig) {
+        setOnboardPhase(t('phaseRisk'));
+        const strategyName = csvFile ? csvFile.name.replace(/\.[^.]+$/, '') : "Simulated Edge";
+        await strategyAPI.createFromSimulation({
+          trading_account_id: accountId,
+          name: strategyName,
+          risk_config: onboarding.traderRiskConfig,
+          decomposition: onboarding.decomposition || {},
+          risk_suggestions: onboarding.riskSuggestions || {},
+          extracted_stats: onboarding.extractedStats || {},
+          equity_curve: onboarding.equityCurve || [],
+          start_date: onboarding.lastTradeDate || undefined,
+        });
+        onboarding.clear();
+      } else if (csvFile) {
+        // Fallback: old CSV upload flow
+        setOnboardPhase(t('phaseImporting'));
+        const formData = new FormData();
+        formData.append('trading_account_id', accountId);
+        formData.append('name', csvFile.name.replace(/\.[^.]+$/, ''));
+        formData.append('file', csvFile);
+        
+        await api.post('/api/strategies/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       }
 
       // Phase 4: Success — Transport to Dashboard
@@ -968,236 +932,10 @@ export default function SimulatorWizard() {
               </p>
             </div>
             
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-400 text-sm font-medium px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
-
-            {/* Waitlist CTA when invalid beta code */}
-            {error && (error.toLowerCase().includes('invalid beta') || error.toLowerCase().includes('invalid_invite') || error.toLowerCase().includes('incorrecto') || error.toLowerCase().includes('caducado')) && !simWaitlistSubmitted && onboardData.email.trim() && (
-              <div className="bg-surface-secondary border border-risk-green/30 rounded-xl p-5 animate-in fade-in slide-in-from-top-2 duration-500 relative overflow-hidden shadow-lg">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-risk-green/5 blur-[50px] rounded-full pointer-events-none" />
-                <div className="relative z-10">
-                  <p className="text-sm font-bold text-iron-100 mb-1">
-                    {locale === 'en' ? "Join the Private Waitlist" : "Únete a la Lista de Espera Privada"}
-                  </p>
-                  <p className="text-xs text-iron-400 mb-4 leading-relaxed">
-                    {locale === 'en'
-                      ? "IronRisk is currently in closed beta. We release a very limited number of spots every week to ensure stability."
-                      : "IronRisk está en beta cerrada. Liberamos una cantidad muy reducida de plazas semanalmente para garantizar la estabilidad."}
-                  </p>
-
-                  <div className="flex flex-col gap-1.5 mb-4">
-                    <label className="text-[13px] font-semibold text-iron-200">
-                      {locale === 'en' 
-                        ? "What problem are you looking to solve?" 
-                        : "¿Qué problema buscas resolver?"}
-                      <span className="text-risk-green ml-1 font-normal italic">
-                        {locale === 'en' ? "(Detailed answers get priority access 🚀)" : "(Las respuestas detalladas tienen prioridad 🚀)"}
-                      </span>
-                    </label>
-                    <textarea
-                      value={simMotivation}
-                      onChange={(e) => setSimMotivation(e.target.value)}
-                      placeholder={locale === 'en' 
-                        ? "E.g.: I keep blowing evaluation accounts during drawdowns and I need to calculate my true survival probabilities..." 
-                        : "Ej: Sigo quemando cuentas de fondeo durante los drawdowns y necesito calcular mis probabilidades de supervivencia..."}
-                      rows={3}
-                      className="w-full bg-surface-primary border border-iron-700/80 rounded-lg px-3 py-2 text-[13px] text-iron-200 placeholder:text-iron-600 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 resize-none transition-all shadow-inner"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setSimWaitlistLoading(true);
-                      try {
-                        const res = await waitlistAPI.submit(onboardData.email, 'simulator_onboard', locale, simMotivation);
-                        setSimWaitlistSubmitted(true);
-                        setSimWaitlistAlready(res.data?.already_registered || false);
-                      } catch {
-                        setSimWaitlistSubmitted(true);
-                      } finally {
-                        setSimWaitlistLoading(false);
-                      }
-                    }}
-                    disabled={simWaitlistLoading}
-                    className="w-full py-2.5 px-4 bg-risk-green/15 border border-risk-green/30 text-risk-green text-sm font-semibold rounded-lg hover:bg-risk-green/25 hover:border-risk-green/50 transition-all duration-300 disabled:opacity-50"
-                  >
-                    {simWaitlistLoading
-                      ? '...'
-                      : locale === 'en'
-                        ? `📩 Notify me at ${onboardData.email}`
-                        : `📩 Avisarme a ${onboardData.email}`}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {simWaitlistSubmitted && (
-              <div className="bg-risk-green/10 border border-risk-green/30 rounded-xl p-4 text-center animate-in fade-in duration-500">
-                <p className="text-risk-green font-semibold text-sm">
-                  {simWaitlistAlready
-                    ? (locale === 'en' ? '👋 You\'re already on the list!' : '👋 ¡Ya estás en la lista!')
-                    : (locale === 'en' ? '🎉 You\'re on the list!' : '🎉 ¡Estás en la lista!')}
-                </p>
-                <p className="text-iron-300 text-xs mt-2 mb-3">
-                  {locale === 'en'
-                    ? "We'll email you when new spots open. Want to skip the line? Ask for a code directly!"
-                    : "Te avisaremos cuando haya plazas. ¿Quieres saltarte la fila? ¡Pídenos un código!"}
-                </p>
-                
-                <button
-                  type="button"
-                  onClick={() => setShowTelegramQR(!showTelegramQR)}
-                  className="text-[#29B6F6] text-xs hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors mb-3"
-                >
-                  {locale === 'en' ? "💬 Request code via Telegram" : "💬 Pedir código por Telegram"}
-                </button>
-
-                {showTelegramQR && (
-                  <div className="flex flex-col items-center gap-3 p-4 bg-surface-secondary border border-iron-800 rounded-xl mb-2 mx-auto w-fit animate-in fade-in zoom-in-95 duration-300">
-                    <div className="bg-white p-2 rounded-lg">
-                      <QRCodeSVG
-                        value={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
-                        size={120}
-                        bgColor="#ffffff"
-                        fgColor="#0a0a0a"
-                        level="M"
-                        includeMargin={false}
-                      />
-                    </div>
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span className="text-xs font-bold text-iron-100">{adminTelegramHandle}</span>
-                      <span className="text-[10px] text-iron-400">
-                        {locale === 'es' ? 'Escanea con tu móvil' : 'Scan with your phone'}
-                      </span>
-                    </div>
-                    <a
-                      href={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] text-[#29B6F6] hover:text-[#4FC3F7] underline underline-offset-2"
-                    >
-                      {locale === 'es' ? 'O abrir directo →' : 'Or open directly →'}
-                    </a>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <form onSubmit={handleOnboardSubmit} className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-iron-400">{t('email')}</label>
-                  <input 
-                    type="email" required autoFocus
-                    value={onboardData.email} onChange={e => setOnboardData(p => ({...p, email: e.target.value}))}
-                    className="bg-surface-primary border border-iron-800/50 rounded-lg px-4 py-2.5 text-iron-200 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 transition-all"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5 relative">
-                  <label className="text-sm font-medium text-iron-400">{t('password')}</label>
-                  <div className="relative">
-                    <input 
-                      type={showPassword ? "text" : "password"} required
-                      value={onboardData.password} onChange={e => setOnboardData(p => ({...p, password: e.target.value}))}
-                      className="bg-surface-primary border border-iron-800/50 rounded-lg pl-4 pr-10 py-2.5 text-iron-200 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 transition-all w-full"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-iron-500 hover:text-iron-300 transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {modalMode === 'login' && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowOnboarding(false);
-                        router.push(`/${locale}/login`);
-                      }}
-                      className="text-xs text-iron-500 hover:text-risk-green transition-colors mt-1"
-                    >
-                      {t('forgotPassword')}
-                    </button>
-                  )}
-                </div>
-              </div>
-              
-              {modalMode === 'register' && (
-                <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-amber-400">
-                      {t('betaCodeLabel')} <span className="text-risk-red">*</span>
-                    </label>
-                    <input 
-                      type="password" required placeholder={t('betaCodePlaceholder')}
-                      value={onboardData.inviteCode} onChange={e => setOnboardData(p => ({...p, inviteCode: e.target.value}))}
-                      className="bg-surface-primary border-2 border-amber-500/30 rounded-lg px-4 py-3 text-amber-300 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20 transition-all font-mono font-bold tracking-wider"
-                    />
-                    <span className="text-[10px] text-iron-500 text-center mt-1">
-                      {locale === 'en'
-                        ? "Don't have a code? Create an account anyway to join our waitlist."
-                        : "¿No tienes código? Intenta crear una cuenta igualmente para unirte a la lista de espera."}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-iron-400">{t('inlineOnboarding.workspaceLabel')} <span className="text-risk-red">*</span></label>
-                    <input 
-                      type="text" required placeholder={t('inlineOnboarding.workspacePlaceholder')}
-                      value={onboardData.workspace} onChange={e => setOnboardData(p => ({...p, workspace: e.target.value}))}
-                      className="bg-surface-primary border-2 border-iron-800/50 rounded-lg px-4 py-3 text-iron-200 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 transition-all font-medium"
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-iron-400">{t('mtAccountLabel')} <span className="text-risk-red">*</span></label>
-                      <input 
-                        type="text" required placeholder={t('mtAccountPlaceholder')}
-                        value={onboardData.accountNumber} onChange={e => setOnboardData(p => ({...p, accountNumber: e.target.value}))}
-                        className="bg-surface-primary border border-iron-800/50 rounded-lg px-3 py-2 text-iron-200 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 transition-all text-sm font-mono"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-iron-400" title={t('magicHint')}>{t('magicLabel')} <span className="text-risk-red">*</span></label>
-                      <input 
-                        type="text" required placeholder={t('magicPlaceholder')}
-                        value={onboardData.magicNumber} onChange={e => setOnboardData(p => ({...p, magicNumber: e.target.value}))}
-                        className="bg-surface-primary border border-iron-800/50 rounded-lg px-3 py-2 text-iron-200 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 transition-all text-sm font-mono"
-                      />
-                      <span className="text-[10px] text-iron-600">{t('magicHint')}</span>
-                    </div>
-                  </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-iron-400">{t('brokerLabel')}</label>
-                      <input 
-                        type="text" placeholder={t('brokerPlaceholder')}
-                        value={onboardData.broker} onChange={e => setOnboardData(p => ({...p, broker: e.target.value}))}
-                        className="bg-surface-primary border border-iron-800/50 rounded-lg px-3 py-2 text-iron-200 focus:outline-none focus:border-risk-green/50 focus:ring-1 focus:ring-risk-green/20 transition-all text-sm"
-                      />
-                    </div>
-                  <p className="text-xs text-iron-500 bg-iron-900/50 p-2 rounded-md border border-iron-800/30">
-                    <span className="text-risk-yellow">⚠</span> {t('bindWarning')}
-                  </p>
-                </div>
-              )}
-
-              <button 
-                type="submit" disabled={onboardingLoading}
-                className="mt-2 w-full bg-risk-green text-surface-primary font-bold py-4 rounded-xl hover:brightness-110 transition-all disabled:opacity-50 text-lg shadow-[0_0_25px_rgba(0,230,118,0.25)]"
-              >
-                {onboardingLoading
-                  ? (onboardPhase || t('inlineOnboarding.creating'))
-                  : modalMode === 'register'
-                    ? t('inlineOnboarding.btnSubmit')
-                    : t('inlineOnboarding.btnLogin')
-                }
-              </button>
-            </form>
+            <AuthForm 
+              mode={modalMode} 
+              onSuccess={handleAuthSuccess}
+            />
           </div>
         </div>
       )}

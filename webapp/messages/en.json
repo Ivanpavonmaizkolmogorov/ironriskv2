@@ -897,6 +897,14 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "auth_centralization": {
+        "title": "Auth Centralization",
+        "body": "Centralized all authentication and waitlist logics in a unified modal."
+      },
+      "waitlist_admin_mailto": {
+        "title": "Waitlist Mailto",
+        "body": "Added mailto capability to leads table for simplified code delivery."
+      },
       "bayes_math_ui_cleanup": {
         "title": "Universal Bayesian Math Engine",
         "body": "Rebuilt the mathematical breakdown into a single unified graphical component that is shared 1:1 between the Machine Learning Risk Dashboard and the Data Sandbox."

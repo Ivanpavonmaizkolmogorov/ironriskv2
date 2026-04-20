@@ -897,6 +897,14 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "auth_centralization": {
+        "title": "Centralización de Autenticación",
+        "body": "Todo el código de registro, login y lista de espera de la aplicación se ha centralizado en de un súper-componente maestro unificando la fricción."
+      },
+      "waitlist_admin_mailto": {
+        "title": "Envío Directo Beta-Code",
+        "body": "El panel de administradores ahora soporta el envío de los códigos VIP a las personas de la lista agilizando la incorporación 1-click."
+      },
       "bayes_math_ui_cleanup": {
         "title": "Motor Matemático Universal",
         "body": "El desglose bayesiano ha sido reconstruido en un único componente gráfico que se comparte 1:1 entre el Sandbox de Datos y el Panel de Machine Learning."
