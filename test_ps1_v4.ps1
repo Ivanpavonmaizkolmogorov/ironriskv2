@@ -242,35 +242,7 @@ if ($ans -match "^[yY]") {
 
     $iniFile = Join-Path $base "config\common.ini"
     if (Test-Path $iniFile) {
-        $cLines = Get-Content $iniFile
-        $cNewLines = @()
-        $inCommon = $false
-        $hasCommon = $false
-        
-        foreach ($line in $cLines) {
-            if ($line -match '^\[Common\]') {
-                $hasCommon = $true
-                $inCommon = $true
-                $cNewLines += $line
-                continue
-            } elseif ($line -match '^\[.*\]') {
-                if ($inCommon) {
-                    $cNewLines += 'AllowDllImport=1'
-                    $inCommon = $false
-                }
-            }
-            if ($line -match '^AllowDllImport=') { continue }
-            if ($line.Trim() -eq '') { continue }
-            $cNewLines += $line
-        }
-        
-        if ($inCommon) {
-            $cNewLines += 'AllowDllImport=1'
-        } elseif (-not $hasCommon) {
-            $cNewLines = @('[Common]', 'AllowDllImport=1') + $cNewLines
-        }
-        
-        $cNewLines | Set-Content $iniFile -Encoding ASCII
+        (Get-Content $iniFile) -replace '^AllowDllImport=0', 'AllowDllImport=1' | Set-Content $iniFile
     }
     
     $exePath = Join-Path $selected.BrokerPath "terminal64.exe"
