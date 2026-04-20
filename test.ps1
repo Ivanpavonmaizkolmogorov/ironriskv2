@@ -168,7 +168,11 @@ if ($Server -match "localhost") {
 }
 $configText | Set-Content -Path $cfgFile -Encoding ASCII -Force
 
-
+# Patch DLL Allow
+$iniFile = Join-Path $base "config\common.ini"
+if (Test-Path $iniFile) {
+    (Get-Content $iniFile) -replace '^AllowDllImport=0', 'AllowDllImport=1' | Set-Content $iniFile
+}
 
 Write-Host "  [OK] Files installed securely." -ForegroundColor Green
 Write-Host ""
@@ -205,16 +209,11 @@ if ($ans -match "^[yY]") {
     } catch {}
     Start-Sleep -Seconds 3
     
-    # Inject Auto-start Service & DLL Permissions AFTER MT5 is closed
+    # Inject Auto-start Service
     $termIni = Join-Path $base "config\terminal.ini"
     if (Test-Path $termIni) {
         (Get-Content $termIni) -replace '^IronRisk_Service=1', '' | Set-Content $termIni
         Add-Content $termIni 'IronRisk_Service=1'
-    }
-
-    $iniFile = Join-Path $base "config\common.ini"
-    if (Test-Path $iniFile) {
-        (Get-Content $iniFile) -replace '^AllowDllImport=0', 'AllowDllImport=1' | Set-Content $iniFile
     }
     
     $exePath = Join-Path $selected.BrokerPath "terminal64.exe"
