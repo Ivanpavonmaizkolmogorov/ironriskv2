@@ -192,14 +192,55 @@ export default function RegisterPage() {
                   ? (isEn ? "👋 You're already on the list!" : "👋 ¡Ya estás en la lista!")
                   : (isEn ? "🎉 You're on the list!" : "🎉 ¡Estás en la lista!")}
               </p>
-              <p className="text-iron-400 text-xs mt-1">
+              <p className="text-iron-300 text-xs mt-2 mb-3">
                 {isEn
-                  ? "We'll email you when new spots open. Meanwhile, try the free simulator!"
-                  : "Te avisaremos cuando haya plazas. ¡Mientras, prueba el simulador gratis!"}
+                  ? "We'll email you when new spots open. Want to skip the line? Ask for a code directly!"
+                  : "Te avisaremos cuando haya plazas. ¿Quieres saltarte la fila? ¡Pídenos un código!"}
+              </p>
+              
+              <button type="button" onClick={() => setShowTelegramQR(!showTelegramQR)} className="text-[#29B6F6] text-xs hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors mb-3">
+                {isEn ? "💬 Request code via Telegram" : "💬 Pedir código por Telegram"}
+              </button>
+
+              {showTelegramQR && (
+                <div className="flex flex-col items-center gap-3 p-4 bg-surface-secondary border border-iron-800 rounded-xl mb-4 mx-auto w-fit animate-in fade-in zoom-in-95 duration-300">
+                  <div className="bg-white p-2 rounded-lg">
+                    <QRCodeSVG
+                      value={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
+                      size={120}
+                      bgColor="#ffffff"
+                      fgColor="#0a0a0a"
+                      level="M"
+                      includeMargin={false}
+                    />
+                  </div>
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-xs font-bold text-iron-100">{adminTelegramHandle}</span>
+                    <span className="text-[10px] text-iron-400">
+                      {isEn ? 'Scan with your phone' : 'Escanea con tu móvil'}
+                    </span>
+                  </div>
+                  <a
+                    href={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-[#29B6F6] hover:text-[#4FC3F7] underline underline-offset-2"
+                  >
+                    {isEn ? 'Or open directly →' : 'O abrir directo →'}
+                  </a>
+                </div>
+              )}
+
+              <div className="h-px bg-iron-800/50 w-full my-3" />
+
+              <p className="text-iron-500 text-xs mb-3">
+                {isEn
+                  ? "Meanwhile, you can try our free strategy simulator:"
+                  : "Mientras tanto, puedes probar el simulador de estrategias gratis:"}
               </p>
               <Link
                 href={`/${locale}/simulate`}
-                className="inline-block mt-3 px-4 py-2 bg-risk-green text-surface-primary text-sm font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,230,118,0.3)] transition-all"
+                className="inline-block px-4 py-2 bg-risk-green text-surface-primary text-sm font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,230,118,0.3)] transition-all"
               >
                 {isEn ? "Try Free Simulator →" : "Probar Simulador Gratis →"}
               </Link>
@@ -213,44 +254,10 @@ export default function RegisterPage() {
           <div className="text-xs text-iron-400 mt-4 text-center leading-relaxed px-2">
             <p>
               {isEn
-                ? <>Don&apos;t have a code? IronRisk is in Closed Beta by invitation.{' '}
-                    <button type="button" onClick={() => setShowTelegramQR(!showTelegramQR)} className="text-[#29B6F6] hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors">
-                      💬 Request code via Telegram
-                    </button>
-                  </>
-                : <>¿No tienes código? IronRisk está en Beta Privada por invitación.{' '}
-                    <button type="button" onClick={() => setShowTelegramQR(!showTelegramQR)} className="text-[#29B6F6] hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors">
-                      💬 Pedir código por Telegram
-                    </button>
-                  </>
+                ? "Don't have a code? Try creating an account anyway to join our waitlist."
+                : "¿No tienes código? Intenta crear una cuenta igualmente para apuntarte a la lista de espera."
               }
             </p>
-            {showTelegramQR && (
-              <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-xl mt-3 animate-in fade-in zoom-in-95 duration-300">
-                <QRCodeSVG
-                  value={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
-                  size={140}
-                  bgColor="#ffffff"
-                  fgColor="#0a0a0a"
-                  level="M"
-                  includeMargin={false}
-                />
-                <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-xs font-bold text-neutral-800">{adminTelegramHandle}</span>
-                  <span className="text-[10px] text-neutral-500">
-                    {isEn ? 'Scan with your phone to open Telegram' : 'Escanea con tu móvil para abrir Telegram'}
-                  </span>
-                </div>
-                <a
-                  href={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] text-[#29B6F6] underline underline-offset-2"
-                >
-                  {isEn ? 'Or open directly from here →' : 'O abre directo desde aquí →'}
-                </a>
-              </div>
-            )}
           </div>
         </form>
 

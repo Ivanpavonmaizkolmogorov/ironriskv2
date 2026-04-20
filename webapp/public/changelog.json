@@ -1,5 +1,11 @@
 [
   {
+    "id": "waitlist_funnel_optim",
+    "date": "2026-04-20",
+    "tag": "feature",
+    "internal": true
+  },
+  {
     "id": "installer_curl_hotfix",
     "date": "2026-04-20",
     "tag": "bugfix",
