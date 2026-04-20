@@ -974,61 +974,16 @@ export default function SimulatorWizard() {
               </div>
             )}
 
-            {/* Waitlist + Telegram CTA when invalid beta code */}
+            {/* Waitlist CTA when invalid beta code */}
             {error && (error.toLowerCase().includes('invalid beta') || error.toLowerCase().includes('invalid_invite') || error.toLowerCase().includes('incorrecto') || error.toLowerCase().includes('caducado')) && !simWaitlistSubmitted && onboardData.email.trim() && (
               <div className="bg-risk-green/5 border border-risk-green/20 rounded-xl p-4 animate-in fade-in slide-in-from-top-2 duration-500">
                 <p className="text-sm text-iron-300 mb-3">
                   {locale === 'en'
-                    ? "No code yet? Get one instantly via Telegram or join the waitlist."
-                    : "¿Aún no tienes código? Consíguelo al instante por Telegram o apúntate a la lista."}
+                    ? "No code yet? Join the waitlist and we'll notify you when spots open up."
+                    : "¿Aún no tienes código? Apúntate a la lista y te avisaremos cuando haya plazas disponibles."}
                 </p>
 
-                {/* Primary: Telegram direct — QR + link */}
-                <button
-                  type="button"
-                  onClick={() => setShowTelegramQR(!showTelegramQR)}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-[#29B6F6]/15 border border-[#29B6F6]/30 text-[#29B6F6] text-sm font-semibold rounded-lg hover:bg-[#29B6F6]/25 hover:border-[#29B6F6]/50 transition-all duration-300 mb-2"
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-                  {locale === 'es' ? 'Pedir código por Telegram' : 'Request code via Telegram'}
-                </button>
-
-                {/* QR Code reveal */}
-                {showTelegramQR && (
-                  <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-xl mb-2 animate-in fade-in zoom-in-95 duration-300">
-                    <QRCodeSVG
-                      value={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
-                      size={160}
-                      bgColor="#ffffff"
-                      fgColor="#0a0a0a"
-                      level="M"
-                      includeMargin={false}
-                    />
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span className="text-xs font-bold text-neutral-800">{adminTelegramHandle}</span>
-                      <span className="text-[10px] text-neutral-500">
-                        {locale === 'es' ? 'Escanea con tu móvil para abrir Telegram' : 'Scan with your phone to open Telegram'}
-                      </span>
-                    </div>
-                    <a
-                      href={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] text-[#29B6F6] underline underline-offset-2"
-                    >
-                      {locale === 'es' ? 'O abre directo desde aquí →' : 'Or open directly from here →'}
-                    </a>
-                  </div>
-                )}
-
-                {/* Divider */}
-                <div className="flex items-center gap-3 my-2">
-                  <div className="flex-1 h-px bg-iron-800/50" />
-                  <span className="text-[10px] text-iron-600 uppercase">{locale === 'es' ? 'o bien' : 'or'}</span>
-                  <div className="flex-1 h-px bg-iron-800/50" />
-                </div>
-
-                {/* Secondary: waitlist email */}
+                {/* waitlist email */}
                 <textarea
                   value={simMotivation}
                   onChange={(e) => setSimMotivation(e.target.value)}
@@ -1051,13 +1006,13 @@ export default function SimulatorWizard() {
                     }
                   }}
                   disabled={simWaitlistLoading}
-                  className="w-full py-2 px-4 bg-surface-primary border border-iron-700 text-iron-400 text-xs font-medium rounded-lg hover:bg-surface-secondary hover:text-iron-200 transition-all duration-300 disabled:opacity-50"
+                  className="w-full py-2.5 px-4 bg-risk-green/15 border border-risk-green/30 text-risk-green text-sm font-semibold rounded-lg hover:bg-risk-green/25 hover:border-risk-green/50 transition-all duration-300 disabled:opacity-50"
                 >
                   {simWaitlistLoading
                     ? '...'
                     : locale === 'en'
-                      ? `📩 Or just notify me at ${onboardData.email}`
-                      : `📩 O simplemente avisarme a ${onboardData.email}`}
+                      ? `📩 Notify me at ${onboardData.email}`
+                      : `📩 Avisarme a ${onboardData.email}`}
                 </button>
               </div>
             )}
@@ -1069,11 +1024,48 @@ export default function SimulatorWizard() {
                     ? (locale === 'en' ? '👋 You\'re already on the list!' : '👋 ¡Ya estás en la lista!')
                     : (locale === 'en' ? '🎉 You\'re on the list!' : '🎉 ¡Estás en la lista!')}
                 </p>
-                <p className="text-iron-400 text-xs mt-1">
+                <p className="text-iron-300 text-xs mt-2 mb-3">
                   {locale === 'en'
-                    ? "We'll email you when new spots open. Check your inbox!"
-                    : "Te avisaremos por email cuando haya plazas. ¡Revisa tu bandeja!"}
+                    ? "We'll email you when new spots open. Want to skip the line? Ask for a code directly!"
+                    : "Te avisaremos cuando haya plazas. ¿Quieres saltarte la fila? ¡Pídenos un código!"}
                 </p>
+                
+                <button
+                  type="button"
+                  onClick={() => setShowTelegramQR(!showTelegramQR)}
+                  className="text-[#29B6F6] text-xs hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors mb-3"
+                >
+                  {locale === 'en' ? "💬 Request code via Telegram" : "💬 Pedir código por Telegram"}
+                </button>
+
+                {showTelegramQR && (
+                  <div className="flex flex-col items-center gap-3 p-4 bg-surface-secondary border border-iron-800 rounded-xl mb-2 mx-auto w-fit animate-in fade-in zoom-in-95 duration-300">
+                    <div className="bg-white p-2 rounded-lg">
+                      <QRCodeSVG
+                        value={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
+                        size={120}
+                        bgColor="#ffffff"
+                        fgColor="#0a0a0a"
+                        level="M"
+                        includeMargin={false}
+                      />
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-xs font-bold text-iron-100">{adminTelegramHandle}</span>
+                      <span className="text-[10px] text-iron-400">
+                        {locale === 'es' ? 'Escanea con tu móvil' : 'Scan with your phone'}
+                      </span>
+                    </div>
+                    <a
+                      href={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-[#29B6F6] hover:text-[#4FC3F7] underline underline-offset-2"
+                    >
+                      {locale === 'es' ? 'O abrir directo →' : 'Or open directly →'}
+                    </a>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1125,45 +1117,15 @@ export default function SimulatorWizard() {
                       {t('betaCodeLabel')} <span className="text-risk-red">*</span>
                     </label>
                     <input 
-                      type="text" required placeholder={t('betaCodePlaceholder')}
-                      value={onboardData.inviteCode} onChange={e => setOnboardData(p => ({...p, inviteCode: e.target.value.toUpperCase()}))}
-                      className="bg-surface-primary border-2 border-amber-500/30 rounded-lg px-4 py-3 text-amber-300 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20 transition-all font-mono font-bold tracking-wider uppercase"
+                      type="password" required placeholder={t('betaCodePlaceholder')}
+                      value={onboardData.inviteCode} onChange={e => setOnboardData(p => ({...p, inviteCode: e.target.value}))}
+                      className="bg-surface-primary border-2 border-amber-500/30 rounded-lg px-4 py-3 text-amber-300 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20 transition-all font-mono font-bold tracking-wider"
                     />
-                    <span className="text-[10px] text-iron-500">{t('betaCodeHint')}{' '}
-                      <button 
-                        type="button"
-                        onClick={() => setShowTelegramQR(!showTelegramQR)}
-                        className="text-[#29B6F6] hover:text-[#4FC3F7] font-semibold underline underline-offset-2 transition-colors"
-                      >
-                        {locale === 'es' ? '💬 Pedir código por Telegram' : '💬 Request code via Telegram'}
-                      </button>
+                    <span className="text-[10px] text-iron-500 text-center mt-1">
+                      {locale === 'en'
+                        ? "Don't have a code? Create an account anyway to join our waitlist."
+                        : "¿No tienes código? Intenta crear una cuenta igualmente para unirte a la lista de espera."}
                     </span>
-                    {showTelegramQR && (
-                      <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-xl mt-2 animate-in fade-in zoom-in-95 duration-300">
-                        <QRCodeSVG
-                          value={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
-                          size={140}
-                          bgColor="#ffffff"
-                          fgColor="#0a0a0a"
-                          level="M"
-                          includeMargin={false}
-                        />
-                        <div className="flex flex-col items-center gap-0.5">
-                          <span className="text-xs font-bold text-neutral-800">{adminTelegramHandle}</span>
-                          <span className="text-[10px] text-neutral-500">
-                            {locale === 'es' ? 'Escanea con tu móvil para abrir Telegram' : 'Scan with your phone to open Telegram'}
-                          </span>
-                        </div>
-                        <a
-                          href={`https://t.me/${adminTelegramHandle.replace('@', '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-[#29B6F6] underline underline-offset-2"
-                        >
-                          {locale === 'es' ? 'O abre directo desde aquí →' : 'Or open directly from here →'}
-                        </a>
-                      </div>
-                    )}
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-iron-400">{t('inlineOnboarding.workspaceLabel')} <span className="text-risk-red">*</span></label>
