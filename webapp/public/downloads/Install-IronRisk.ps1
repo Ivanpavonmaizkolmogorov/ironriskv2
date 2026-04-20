@@ -221,7 +221,7 @@ if ($ans -match "^[yY]") {
                 continue
             } elseif ($line -match '^\[.*\]') {
                 if ($inServices) {
-                    $newLines += 'IronRisk_Service=1'
+                    $newLines += 'IronRisk_Service=3'
                     $inServices = $false
                 }
             }
@@ -231,10 +231,10 @@ if ($ans -match "^[yY]") {
         }
         
         if ($inServices) {
-            $newLines += 'IronRisk_Service=1'
+            $newLines += 'IronRisk_Service=3'
         } elseif (-not $hasServices) {
             $newLines += '[Services]'
-            $newLines += 'IronRisk_Service=1'
+            $newLines += 'IronRisk_Service=3'
         }
         
         $newLines | Set-Content $termIni -Encoding ASCII
