@@ -295,6 +295,67 @@ string g_ChartFileName = "";
 
 
 //+------------------------------------------------------------------+
+//| CConfigManager: Token & Settings from file                       |
+//+------------------------------------------------------------------+
+class CConfigManager
+  {
+private:
+   string m_configDir;
+   string m_configFile;
+   
+public:
+   CConfigManager()
+     {
+      m_configDir  = "IronRisk";
+      m_configFile = "IronRisk\\config.txt";
+     }
+   
+   // Resolve token: input param takes priority, then config file
+   string ResolveToken(string inputToken)
+     {
+      string finalToken = inputToken;
+      if(inputToken == "PASTE_TOKEN_HERE")
+         finalToken = "";
+      
+      // Try reading from config file written by installer
+      if(FileIsExist(m_configFile))
+        {
+         int h = FileOpen(m_configFile, FILE_READ|FILE_TXT|FILE_ANSI);
+         if(h != INVALID_HANDLE)
+           {
+            while(!FileIsEnding(h))
+              {
+               string line = FileReadString(h);
+               StringTrimLeft(line); StringTrimRight(line);
+               
+               if(StringFind(line, "token=") == 0) 
+                 {
+                  string t = StringSubstr(line, 6);
+                  if(t != "" && t != "PASTE_TOKEN_HERE") finalToken = t; // ALways override cached input with installer's config token
+                 }
+               else if(StringFind(line, "host=") == 0) InpWebhookHost = StringSubstr(line, 5);
+               else if(StringFind(line, "port=") == 0) InpWebhookPort = (int)StringToInteger(StringSubstr(line, 5));
+               else if(StringFind(line, "https=") == 0) InpUseHTTPS = (StringSubstr(line, 6) == "true" || StringSubstr(line, 6) == "1");
+               
+               // Also support plain token on first line if it starts with irk_
+               else if(StringFind(line, "irk_") == 0)
+                 {
+                  if(line != "") finalToken = line;
+                 }
+              }
+            FileClose(h);
+           }
+        }
+      
+      // Fallback behavior
+      if(finalToken == "")
+         return inputToken; // Returns "PASTE_TOKEN_HERE" which will trigger an error down the line
+         
+      return finalToken;
+     }
+  };
+
+//+------------------------------------------------------------------+
 //| CServerClient: HTTP via Wininet                                  |
 //+------------------------------------------------------------------+
 class CServerClient
@@ -1845,7 +1906,9 @@ int OnInit()
    if(!TerminalInfoInteger(TERMINAL_DLLS_ALLOWED) && !MQLInfoInteger(MQL_DLLS_ALLOWED))
      { MessageBox("You must allow DLL imports.", "IronRisk", MB_ICONWARNING|MB_OK); return(INIT_FAILED); }
 
-   AppServer = new CServerClient(InpWebhookHost, InpWebhookPort, InpWebhookPath, InpUseHTTPS, InpApiToken);
+   CConfigManager config;
+   string actualToken = config.ResolveToken(InpApiToken);
+   AppServer = new CServerClient(InpWebhookHost, InpWebhookPort, InpWebhookPath, InpUseHTTPS, actualToken);
    g_Layout = new CDashboardLayout();
    g_Formatter = new CMetricFormatter();
     InitDefaultRiskVars();

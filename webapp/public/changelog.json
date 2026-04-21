@@ -1,5 +1,11 @@
 [
   {
+    "id": "ea_config_hotfix",
+    "date": "2026-04-21",
+    "tag": "bugfix",
+    "internal": false
+  },
+  {
     "id": "ea_autobind_hotfix",
     "date": "2026-04-20",
     "tag": "bugfix",

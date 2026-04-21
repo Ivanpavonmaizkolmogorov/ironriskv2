@@ -897,6 +897,10 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "ea_config_hotfix": {
+        "title": "Dashboard Config Hotfix",
+        "body": "The Dashboard EA now automatically reads the fresh API Token from the config file, resolving the 401 Error that occurred when reinstalling over old charts preserving old templates."
+      },
       "ea_autobind_hotfix": {
         "title": "EA Autobind Fix",
         "body": "Fixed a bug where auto-generated workspaces prevented the MetaTrader EA from properly connecting on first use."

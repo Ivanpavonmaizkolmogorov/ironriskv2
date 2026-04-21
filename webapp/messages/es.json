@@ -897,6 +897,10 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "ea_config_hotfix": {
+        "title": "Corrección Configuración Dashboard",
+        "body": "El Dashboard EA ahora lee automáticamente el Token API fresco desde el archivo de configuración, resolviendo el Error 401 que ocurría al reinstalar sobre gráficos antiguos preservando plantillas antiguas."
+      },
       "ea_autobind_hotfix": {
         "title": "Corrección Vínculo EA",
         "body": "Resuelto el problema inicial que impedía conectar correctamente la cuenta de MetaTrader con los Workspaces auto-generados al crear cuenta."
