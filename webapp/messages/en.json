@@ -897,6 +897,10 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "test_fixture_path_fix": {
+        "title": "Fix: Tests Self-Contained on VPS",
+        "body": "Regression tests were failing on the production server (0ms = immediate crash) because the demo CSV was resolved via a repo-relative path that does not exist on the VPS. Fix: CSV moved to backend/tests/fixtures/ so tests are fully self-contained and portable."
+      },
       "selection_mismatch_test": {
         "title": "Test: Selection Consistency",
         "body": "Detected and documented a user-reported bug: the highlighted row in the strategy table did not match the strategy displayed in the Bayesian Engine panel. Root cause: the store auto-selects by backend array index, but the table re-sorts visually. Added 'selection_consistency' group with 5 regression tests."

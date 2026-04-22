@@ -1,5 +1,11 @@
 [
   {
+    "id": "test_fixture_path_fix",
+    "date": "2026-04-22",
+    "tag": "bugfix",
+    "internal": true
+  },
+  {
     "id": "selection_mismatch_test",
     "date": "2026-04-22",
     "tag": "bugfix",

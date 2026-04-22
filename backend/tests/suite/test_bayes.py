@@ -13,7 +13,7 @@ from .base import TestResult, run_test
 
 GROUP = "bayes"
 
-DEMO_CSV = Path(__file__).parent.parent.parent.parent / "webapp" / "public" / "data" / "demo_backtest.csv"
+DEMO_CSV = Path(__file__).parent.parent / "fixtures" / "demo_backtest.csv"
 
 # Golden value: computed once from the real demo CSV.
 # If the Bayes engine changes and this shifts > 2%, the test fails.

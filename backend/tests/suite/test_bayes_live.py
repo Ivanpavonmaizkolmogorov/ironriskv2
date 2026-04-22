@@ -12,7 +12,7 @@ from .base import TestResult, run_test
 
 GROUP = "bayes_live"
 
-DEMO_CSV = Path(__file__).parent.parent.parent.parent / "webapp" / "public" / "data" / "demo_backtest.csv"
+DEMO_CSV = Path(__file__).parent.parent / "fixtures" / "demo_backtest.csv"
 
 
 def _get_demo_pnl() -> list[float]:

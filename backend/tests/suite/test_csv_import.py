@@ -12,8 +12,8 @@ from .base import TestResult, run_test
 
 GROUP = "csv_import"
 
-# Path to the real demo CSV used in the public simulator
-DEMO_CSV = Path(__file__).parent.parent.parent.parent / "webapp" / "public" / "data" / "demo_backtest.csv"
+# Self-contained fixture — always available regardless of deploy structure
+DEMO_CSV = Path(__file__).parent.parent / "fixtures" / "demo_backtest.csv"
 DEMO_FILENAME = "demo_backtest.csv"
 EXPECTED_TRADE_COUNT = 762  # Known value from file inspection (trailing blank line excluded)
 

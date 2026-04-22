@@ -897,6 +897,10 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "test_fixture_path_fix": {
+        "title": "Corrección Tests en Producción",
+        "body": "Los tests de regresión fallaban en el servidor (0ms = crash inmediato) porque el fichero CSV demo se buscaba con una ruta relativa al repositorio completo que no existía en el VPS. Solución: el CSV se mueve a backend/tests/fixtures/ y los tests lo referencian desde ahí, siendo ahora auto-contenidos."
+      },
       "selection_mismatch_test": {
         "title": "Test: Consistencia de Selección",
         "body": "Detectado y documentado un bug reportado por usuario: la fila resaltada en la tabla no coincidía con la estrategia mostrada en el Motor Bayesiano. La causa es que el store auto-selecciona por posición en el backend, pero la tabla reordena visualmente. Añadido grupo 'selection_consistency' con 5 regresivas."
