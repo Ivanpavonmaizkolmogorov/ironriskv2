@@ -7,16 +7,19 @@ import { usePathname } from "next/navigation";
 /** Minimal EN / ES toggle for auth pages (login, register). */
 export default function LocaleSwitcher() {
   const locale = useLocale();
+  // usePathname() returns path WITHOUT locale prefix e.g. "/register"
   const pathname = usePathname();
 
-  // Replace /es/ with /en/ or vice-versa
-  const otherLocale = locale === "en" ? "es" : "en";
-  const newPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
+  // Strip leading locale segment if present (safety guard)
+  const stripped = pathname.replace(/^\/(en|es)/, "") || "/";
+
+  const enPath = `/en${stripped}`;
+  const esPath = `/es${stripped}`;
 
   return (
     <div className="flex items-center gap-1 text-xs font-mono">
       <Link
-        href={locale === "en" ? pathname : newPath}
+        href={enPath}
         className={`px-1.5 py-0.5 rounded transition-colors ${
           locale === "en"
             ? "text-iron-100 bg-iron-800"
@@ -27,7 +30,7 @@ export default function LocaleSwitcher() {
       </Link>
       <span className="text-iron-700">/</span>
       <Link
-        href={locale === "es" ? pathname : newPath}
+        href={esPath}
         className={`px-1.5 py-0.5 rounded transition-colors ${
           locale === "es"
             ? "text-iron-100 bg-iron-800"

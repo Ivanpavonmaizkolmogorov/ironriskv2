@@ -1047,6 +1047,10 @@
       "waitlist_magic_link": {
         "title": "Waitlist with magic link access",
         "body": "Registration no longer requires a VIP code. Traders join the waitlist and the admin approves access with one click: a magic link is generated and emailed in the user language."
+      },
+      "locale_switcher_fix": {
+        "title": "Fix locale switcher",
+        "body": "The EN/ES switcher on register and login pages now works correctly."
       }
     }
   }

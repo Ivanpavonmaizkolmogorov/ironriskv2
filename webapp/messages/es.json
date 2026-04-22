@@ -1047,6 +1047,10 @@
       "waitlist_magic_link": {
         "title": "Lista de espera con magic link",
         "body": "El registro ya no requiere código VIP. Los traders se unen a la lista de espera y el admin aprueba el acceso con un click: se genera un magic link y se envía por email en el idioma del usuario."
+      },
+      "locale_switcher_fix": {
+        "title": "Fix selector de idioma",
+        "body": "El selector EN/ES en las páginas de registro y login ahora funciona correctamente."
       }
     }
   }
