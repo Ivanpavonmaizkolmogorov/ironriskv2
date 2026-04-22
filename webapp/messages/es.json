@@ -1063,6 +1063,10 @@
       "telegram_waitlist_alert": {
         "title": "Alerta de leads en Telegram",
         "body": "El admin recibe ahora una notificación de Telegram en tiempo real cuando un nuevo usuario se une a la lista de espera."
+      },
+      "frontend_url_autofix": {
+        "title": "Fix routing links",
+        "body": "Fix correo url"
       }
     }
   }

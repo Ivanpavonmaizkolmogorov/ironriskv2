@@ -30,7 +30,11 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    settings = Settings()
+    # Auto-fix: if the server .env incorrectly set FRONTEND_URL to the backend IP/domain
+    if "nip.io" in settings.FRONTEND_URL or "62.238.19.114" in settings.FRONTEND_URL:
+        settings.FRONTEND_URL = "https://www.ironrisk.pro"
+    return settings
 
 
 class Base(DeclarativeBase):
