@@ -897,6 +897,10 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "selection_mismatch_test": {
+        "title": "Test: Consistencia de Selección",
+        "body": "Detectado y documentado un bug reportado por usuario: la fila resaltada en la tabla no coincidía con la estrategia mostrada en el Motor Bayesiano. La causa es que el store auto-selecciona por posición en el backend, pero la tabla reordena visualmente. Añadido grupo 'selection_consistency' con 5 regresivas."
+      },
       "regression_suite_launch": {
         "title": "Suite de Tests de Regresión",
         "body": "Implementada una suite de 18 tests automáticos (importación CSV, motor Bayesiano, trades live) visibles desde el Panel de Admin. GitHub Actions bloqueará ahora cualquier deploy si algún test falla."

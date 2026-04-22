@@ -897,6 +897,10 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "selection_mismatch_test": {
+        "title": "Test: Selection Consistency",
+        "body": "Detected and documented a user-reported bug: the highlighted row in the strategy table did not match the strategy displayed in the Bayesian Engine panel. Root cause: the store auto-selects by backend array index, but the table re-sorts visually. Added 'selection_consistency' group with 5 regression tests."
+      },
       "regression_suite_launch": {
         "title": "Regression Test Suite",
         "body": "Launched an 18-test automated regression suite covering CSV import, Bayesian engine, and live trade updates. Results are visible directly in the Admin Panel. GitHub Actions now blocks any deploy if a test fails."

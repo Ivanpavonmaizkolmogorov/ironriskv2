@@ -28,6 +28,7 @@ const GROUP_LABELS: Record<string, string> = {
   csv_import: "📄 CSV Import",
   bayes: "🧠 Bayesian Engine",
   bayes_live: "📈 Live Trade Updates",
+  selection_consistency: "🎯 Selection Consistency",
 };
 
 function timeAgo(isoString: string | null): string {

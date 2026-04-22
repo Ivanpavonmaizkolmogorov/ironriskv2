@@ -1,5 +1,11 @@
 [
   {
+    "id": "selection_mismatch_test",
+    "date": "2026-04-22",
+    "tag": "bugfix",
+    "internal": true
+  },
+  {
     "id": "regression_suite_launch",
     "date": "2026-04-22",
     "tag": "feature",
