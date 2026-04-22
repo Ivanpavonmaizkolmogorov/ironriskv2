@@ -897,10 +897,6 @@
       "refactor": "Refactor"
     },
     "entries": {
-      "bayes_snapshot_card": {
-        "title": "Bayesian Snapshot Card in Inspector",
-        "body": "The Inspector now shows a compact card with the Bayesian Engine verdict (STABLE/WATCH/ANOMALY/CRITICAL), Blind Risk and P(edge) bars when a strategy is selected. A single button navigates to the full analysis view."
-      },
       "risk_gauges_tests": {
         "title": "Tests: Risk Gauges (DD/Stagnation/Streaks)",
         "body": "Added 15 regression tests for the gauge engine: green/amber/red status via percentile thresholds, fatal status when physical limit is breached (Ulysses Pact), percentile monotonicity, no-distribution fallback, and simulated flag propagation."
