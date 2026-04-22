@@ -165,11 +165,31 @@ async def send_admin_notification(text: str):
         return
         
     settings = get_settings()
-    chat_id = getattr(settings, "ADMIN_TELEGRAM_CHAT_ID", None)
-    if not chat_id:
-        return
-        
-    await _send_message(bot_token, chat_id, text)
+    chat_ids = []
+    env_chat_id = getattr(settings, "ADMIN_TELEGRAM_CHAT_ID", None)
+    
+    if env_chat_id:
+        chat_ids.append(env_chat_id)
+    else:
+        # Fallback: find all users with is_admin=True and a telegram_chat_id
+        from models.database import SessionLocal
+        from models.user import User
+        try:
+            with SessionLocal() as db:
+                admins = db.query(UserPreferences.telegram_chat_id).join(
+                    User, User.id == UserPreferences.user_id
+                ).filter(
+                    User.is_admin == True,
+                    UserPreferences.telegram_chat_id.isnot(None)
+                ).all()
+                for (cid,) in admins:
+                    if cid and cid not in chat_ids:
+                        chat_ids.append(cid)
+        except Exception as e:
+            logger.error(f"Failed to lookup admin chat IDs: {e}")
+
+    for cid in chat_ids:
+        await _send_message(bot_token, cid, text)
 
 
 async def telegram_bot_poller():

@@ -1067,6 +1067,10 @@
       "frontend_url_autofix": {
         "title": "Fix routing links",
         "body": "Fix url email"
+      },
+      "telegram_admin_fallback": {
+        "title": "Fallback telegram admins",
+        "body": "-"
       }
     }
   }

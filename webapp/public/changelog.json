@@ -1,5 +1,11 @@
 [
   {
+    "id": "telegram_admin_fallback",
+    "date": "2026-04-22",
+    "tag": "improvement",
+    "internal": true
+  },
+  {
     "id": "frontend_url_autofix",
     "date": "2026-04-22",
     "tag": "improvement",
