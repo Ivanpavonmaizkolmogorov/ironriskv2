@@ -213,28 +213,58 @@ export default function SimulatorWizard() {
     try {
       // Get the existing Workspaces to figure out where to push the strategy
       let accountId: string;
-      const accRes = await api.get('/api/trading-accounts/');
+      const urlAccountId = searchParams.get('accountId');
       
-      if (accRes.data && accRes.data.length > 0) {
-        accountId = accRes.data[0].id;
+      if (urlAccountId) {
+        accountId = urlAccountId;
       } else {
-        // Just in case it's a login that had 0 workspaces
-        const newAcc = await api.post('/api/trading-accounts/', {
-          name: "Simulated Strategy",
-          account_number: "000000",
-          broker: "Simulator"
-        });
-        accountId = newAcc.data.id;
+        const accRes = await api.get('/api/trading-accounts/');
+        if (accRes.data && accRes.data.length > 0) {
+          accountId = accRes.data[0].id;
+        } else {
+          // Just in case it's a login that had 0 workspaces
+          const newAcc = await api.post('/api/trading-accounts/', {
+            name: "Simulated Strategy",
+            account_number: "000000",
+            broker: "Simulator"
+          });
+          accountId = newAcc.data.id;
+        }
       }
 
       // Phase 3: Create strategy from simulation data (backpack)
       const onboarding = useOnboardingStore.getState();
-      if (onboarding.hasData && onboarding.traderRiskConfig) {
+      
+      if (csvFile) {
+        // ACTUAL CSV Upload - Preserves MT5 exact history & magic number from backend parsing
+        setOnboardPhase(t('phaseImporting'));
+        const formData = new FormData();
+        formData.append('trading_account_id', accountId);
+        formData.append('name', csvFile.name.replace(/\.[^.]+$/, ''));
+        formData.append('file', csvFile);
+        
+        // Inject user-configured risk limits from the Ulysses Moment step
+        if (onboarding.traderRiskConfig) {
+           const rc = onboarding.traderRiskConfig;
+           if (rc.max_drawdown?.limit) formData.append('max_drawdown_limit', rc.max_drawdown.limit.toString());
+           if (rc.daily_loss?.limit) formData.append('daily_loss_limit', rc.daily_loss.limit.toString());
+        }
+        
+        // Inject column mappings if present
+        if (Object.keys(columnMapping).length > 0) {
+           formData.append('column_mapping', JSON.stringify(columnMapping));
+        }
+
+        await api.post('/api/strategies/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        onboarding.clear();
+      } else if (onboarding.hasData && onboarding.traderRiskConfig) {
+        // Manual simulation fallback -> goes to theoretical model
         setOnboardPhase(t('phaseRisk'));
-        const strategyName = csvFile ? csvFile.name.replace(/\.[^.]+$/, '') : "Simulated Edge";
         await strategyAPI.createFromSimulation({
           trading_account_id: accountId,
-          name: strategyName,
+          name: "Simulated Edge",
           risk_config: onboarding.traderRiskConfig,
           decomposition: onboarding.decomposition || {},
           risk_suggestions: onboarding.riskSuggestions || {},
@@ -243,17 +273,6 @@ export default function SimulatorWizard() {
           start_date: onboarding.lastTradeDate || undefined,
         });
         onboarding.clear();
-      } else if (csvFile) {
-        // Fallback: old CSV upload flow
-        setOnboardPhase(t('phaseImporting'));
-        const formData = new FormData();
-        formData.append('trading_account_id', accountId);
-        formData.append('name', csvFile.name.replace(/\.[^.]+$/, ''));
-        formData.append('file', csvFile);
-        
-        await api.post('/api/strategies/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
       }
 
       // Phase 4: Success — Transport to Dashboard

@@ -897,6 +897,10 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "strategy_upload_fix": {
+        "title": "Strategy Upload Fix",
+        "body": "Fixed a native Workspace bug where CSV uploads were losing their Magic Number and defaulting to 'Simulated Edge'. Deep MetaTrader CSV validation is now properly restored as the primary configuration path!"
+      },
       "ea_config_hotfix": {
         "title": "Dashboard Config Hotfix",
         "body": "The Dashboard EA now automatically reads the fresh API Token from the config file, resolving the 401 Error that occurred when reinstalling over old charts preserving old templates."

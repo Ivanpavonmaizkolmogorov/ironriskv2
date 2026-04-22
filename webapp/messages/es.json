@@ -897,6 +897,10 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "strategy_upload_fix": {
+        "title": "Corrección Carga de Estrategias",
+        "body": "Reparado un bug nativo en el Workspace que hacía que todas las subidas de CSV perdieran su Magic Number y se llamaran 'Simulated Edge'. ¡La validación profunda de MetaTrader en formato CSV vuelve a ser la vía principal de configuración!"
+      },
       "ea_config_hotfix": {
         "title": "Corrección Configuración Dashboard",
         "body": "El Dashboard EA ahora lee automáticamente el Token API fresco desde el archivo de configuración, resolviendo el Error 401 que ocurría al reinstalar sobre gráficos antiguos preservando plantillas antiguas."
