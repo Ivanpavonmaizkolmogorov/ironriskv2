@@ -378,7 +378,7 @@
     "gaugeSubtitle": "Verdict from IronRisk's Bayesian engine based on your statistics.",
     "gaugeDisclaimerTitle": "Prudential Calibration (Haircut): ",
     "gaugeDisclaimerDesc": "Backtest data inherently suffers from over-optimization. IronRisk applies an institutional discount to this static projection to evaluate your edge with maximum rigor. The live market will be the ultimate judge.",
-    "gaugeMessageGreen": "Historical data dictates a clear edge. But the market evolves and the mind breaks. Will you be able to maintain this mathematical curve under live pressure without sabotaging it?",
+    "gaugeMessageGreen": "Historical data shows a real edge. Now the question is: when this strategy goes against you in live trading, will you know if it's normal variance or a real warning signal? That's exactly what IronRisk solves.",
     "gaugeMessageOrange": "You are statistically on a tightrope. A losing streak of normal variance could wipe your account before your weak Edge acts in your favor. It requires iron discipline.",
     "gaugeMessageRed": "⚠️ Math Warning: The probabilities of sustaining positive expectancy are worse than flipping a coin. Trading this is mathematically gambling in a casino.",
     "blindRiskLabel": "Blind Risk",

@@ -378,7 +378,7 @@
     "gaugeSubtitle": "Veredicto del motor Bayesiano de IronRisk a partir de tus estadísticas.",
     "gaugeDisclaimerTitle": "Calibración Prudencial (Haircut): ",
     "gaugeDisclaimerDesc": "Los datos de backtest siempre sufren de sobre-optimización. IronRisk aplica un descuento institucional a esta proyección estática para evaluar tu ventaja matemática con el máximo rigor posible. El mercado real te dará la razón.",
-    "gaugeMessageGreen": "Los números históricos dictaminan una ventaja clara. Pero el mercado cambia y la mente se quiebra. ¿Serás capaz de mantener esta campana matemática bajo presión en vivo sin sabotearla?",
+    "gaugeMessageGreen": "Los números históricos muestran una ventaja real. Ahora la pregunta es: cuando esta estrategia vaya en contra en vivo, ¿sabrás si es varianza normal o una señal de alarma real? Eso es exactamente lo que resuelve IronRisk.",
     "gaugeMessageOrange": "Estás en la cuerda floja estadística. Una racha perdedora de varianza normal podría barrer tu cuenta antes de que tu débil ventaja actúe a tu favor. Requiere un control férreo.",
     "gaugeMessageRed": "⚠️ Alarma Matemática: Las probabilidades de sostener una esperanza positiva son inferiores a lanzar una moneda al aire. Operar esto es matemáticamente jugar al casino.",
     "blindRiskLabel": "Riesgo Ciego",
