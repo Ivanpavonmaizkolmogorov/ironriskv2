@@ -335,18 +335,20 @@ export const MonitorView = ({ context }: { context: DashboardContext }) => {
             <div className="flex items-center gap-3">
               <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-blue-500/30 bg-blue-500/10 min-w-[90px]">
                 <span className="text-3xl mb-0.5">{phase === "waiting" ? "⏳" : "📡"}</span>
-                <span className="font-mono font-bold text-xs text-blue-400">{phase === "waiting" ? "ESPERANDO" : "CALIBRANDO"}</span>
+                <span className="font-mono font-bold text-xs text-blue-400">
+                  {phase === "waiting" ? tWorkspace("phaseWaiting") : tWorkspace("phaseCalibrating")}
+                </span>
               </div>
               <p className="text-xs text-blue-300">
                 {phase === "waiting"
-                  ? "Sin datos live. Solo proyección del backtest."
-                  : `Calibrando — ${data.live_trades_total} trades live. Aún sin potencia estadística.`}
+                  ? tWorkspace("phaseWaitingDesc")
+                  : tWorkspace("phaseCalibratingDesc", { n: data.live_trades_total })}
               </p>
             </div>
           ) : loading ? (
-            <div className="flex items-center justify-center h-32 text-iron-500 text-xs animate-pulse">Calculando…</div>
+            <div className="flex items-center justify-center h-32 text-iron-500 text-xs animate-pulse">{tWorkspace("calculating")}</div>
           ) : (
-            <div className="flex items-center justify-center h-32 text-iron-600 text-xs">Selecciona una estrategia</div>
+            <div className="flex items-center justify-center h-32 text-iron-600 text-xs">{tWorkspace("selectStrategy")}</div>
           )}
         </div>
 

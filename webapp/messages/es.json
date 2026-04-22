@@ -216,6 +216,12 @@
     "tabVs": "⚔️ VS Mode",
     "tabMonitor": "📡 Monitor",
     "viewFullAnalysis": "Ver análisis completo",
+    "phaseWaiting": "ESPERANDO",
+    "phaseCalibrating": "CALIBRANDO",
+    "phaseWaitingDesc": "Sin datos live. Solo proyección del backtest.",
+    "phaseCalibratingDesc": "Calibrando — {n} trades live. Aún sin potencia estadística.",
+    "calculating": "Calculando…",
+    "selectStrategy": "Selecciona una estrategia",
     "gaugeNames": {
       "max_drawdown": "Drawdown",
       "daily_loss": "Daily Loss",
