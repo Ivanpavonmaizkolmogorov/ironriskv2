@@ -97,7 +97,7 @@ async def list_leads(user: User = Depends(get_current_user), db: Session = Depen
 
 @router.post("/{lead_id}/approve")
 async def approve_lead(lead_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Admin approves a waitlist lead — generates a magic link and sends the access email."""
+    """Admin approves a waitlist lead — creates the account immediately and sends login email."""
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin only")
 
@@ -105,28 +105,51 @@ async def approve_lead(lead_id: str, user: User = Depends(get_current_user), db:
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
 
-    # Generate magic JWT — no expiry, signed with app secret
-    settings = get_settings()
-    payload = {"email": lead.email, "purpose": "magic_access"}
-    token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    if not lead.password_hash:
+        raise HTTPException(status_code=400, detail="No password stored for this lead. Ask them to re-register.")
 
-    # Build frontend magic link URL
-    frontend_url = getattr(settings, "FRONTEND_URL", "https://www.ironrisk.pro")
     locale = lead.locale or "es"
-    magic_url = f"{frontend_url}/{locale}/auth/magic?token={token}"
+    settings = get_settings()
+    frontend_url = getattr(settings, "FRONTEND_URL", "https://www.ironrisk.pro")
+    login_url = f"{frontend_url}/{locale}/login"
+
+    # Check if account already exists
+    existing_user = db.query(User).filter(User.email == lead.email).first()
+    if not existing_user:
+        import uuid as _uuid
+        from models.trading_account import TradingAccount
+
+        new_user = User(
+            id=str(_uuid.uuid4()),
+            email=lead.email,
+            hashed_password=lead.password_hash,
+            email_verified=True,
+            is_admin=False,
+        )
+        db.add(new_user)
+
+        default_ws = TradingAccount(
+            id=str(_uuid.uuid4()),
+            user_id=new_user.id,
+            name="Mi Cuenta Principal",
+            account_number="",
+            broker="",
+        )
+        db.add(default_ws)
 
     # Mark as approved
     lead.approved_at = datetime.now(timezone.utc)
     db.commit()
 
-    # Send access email in background
+    # Send simple "you can now log in" email
     threading.Thread(
         target=email_service.send_access_granted_email,
-        args=(lead.email, magic_url, locale),
+        args=(lead.email, login_url, locale),
         daemon=True,
     ).start()
 
-    return {"status": "ok", "detail": f"Access email sent to {lead.email}"}
+    return {"status": "ok", "detail": f"Account created and access email sent to {lead.email}"}
+
 
 
 @router.delete("/{lead_id}")

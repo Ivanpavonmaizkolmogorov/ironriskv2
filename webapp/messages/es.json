@@ -1055,6 +1055,10 @@
       "waitlist_login_detect": {
         "title": "Detección de lista de espera en login",
         "body": "Si un usuario en lista de espera intenta hacer login, ahora recibe un mensaje explicando su estado en lugar de un error genérico."
+      },
+      "direct_approve_flow": {
+        "title": "Aprobación crea cuenta directamente",
+        "body": "Al aprobar un lead, la cuenta se crea inmediatamente. El usuario recibe un email para entrar con su email y contraseña, sin magic link."
       }
     }
   }

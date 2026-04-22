@@ -1055,6 +1055,10 @@
       "waitlist_login_detect": {
         "title": "Waitlist detection on login",
         "body": "If a waitlisted user tries to log in, they now receive a clear status message instead of a generic error."
+      },
+      "direct_approve_flow": {
+        "title": "Approval creates account instantly",
+        "body": "Approving a lead now creates the account immediately. The user receives an email to log in with their credentials, no magic link required."
       }
     }
   }
