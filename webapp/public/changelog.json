@@ -1,5 +1,29 @@
 [
   {
+    "id": "monitor_view",
+    "date": "2026-04-22",
+    "tag": "feature",
+    "internal": false
+  },
+  {
+    "id": "drawdown_live_chart",
+    "date": "2026-04-22",
+    "tag": "feature",
+    "internal": false
+  },
+  {
+    "id": "gauge_names_unified",
+    "date": "2026-04-22",
+    "tag": "improvement",
+    "internal": false
+  },
+  {
+    "id": "live_tab_rename",
+    "date": "2026-04-22",
+    "tag": "improvement",
+    "internal": false
+  },
+  {
     "id": "risk_gauges_tests",
     "date": "2026-04-22",
     "tag": "feature",

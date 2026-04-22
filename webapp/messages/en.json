@@ -213,7 +213,16 @@
     "tabInspector": "🕵️‍♂️ Micro Inspector",
     "tabBayes": "🧠 Bayesian Engine",
     "tabMacro": "🌍 Macro Risk",
-    "tabVs": "⚔️ VS Mode"
+    "tabVs": "⚔️ VS Mode",
+    "tabMonitor": "📡 Monitor",
+    "viewFullAnalysis": "View full analysis",
+    "gaugeNames": {
+      "max_drawdown": "Drawdown",
+      "daily_loss": "Daily Loss",
+      "stagnation_days": "Stagnation Days",
+      "stagnation_trades": "Stagnation Trades",
+      "consecutive_losses": "Consecutive Losses"
+    }
   },
   "charts": {
     "interactive": {
@@ -897,6 +906,22 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "monitor_view": {
+        "title": "Monitor View: Live Risk Snapshot at a Glance",
+        "body": "New Monitor tab consolidating real-time risk status: master verdict with health traffic light, live equity chart, 5 risk gauges with educational narrative, and direct one-click access to the Bayesian Engine."
+      },
+      "drawdown_live_chart": {
+        "title": "Live Drawdown Chart (Monetary)",
+        "body": "New underwater drawdown chart synchronized below the live equity chart: shows real-time drawdown in monetary units ($), not percentages, with a synchronized cursor across both charts and hover tooltip."
+      },
+      "gauge_names_unified": {
+        "title": "Unified Risk Terminology",
+        "body": "The names and educational tooltips of the 5 risk gauges are now identical across Inspector, Monitor and Bayesian Engine, localized in the user's language. Tooltips in Monitor and Bayesian Engine now use live current values, not the historical worst."
+      },
+      "live_tab_rename": {
+        "title": "Tab 'Live EA' renamed to 'Live'",
+        "body": "The live table view is now simply called 'Live' for greater clarity and conciseness."
+      },
       "risk_gauges_tests": {
         "title": "Tests: Risk Gauges (DD/Stagnation/Streaks)",
         "body": "Added 15 regression tests for the gauge engine: green/amber/red status via percentile thresholds, fatal status when physical limit is breached (Ulysses Pact), percentile monotonicity, no-distribution fallback, and simulated flag propagation."

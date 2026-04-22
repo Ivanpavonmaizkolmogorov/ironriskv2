@@ -297,7 +297,7 @@ export const BacktestView: TableViewDef = {
 
 export const LiveView: TableViewDef = {
   id: "live",
-  name: "🔴 Live EA",
+  name: "🔴 Live",
   defaultSortKey: "live_dd",
   defaultSortDir: "desc",
   columns: [
@@ -630,6 +630,13 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
            </span>
         </div>
       );
+    },
+    renderFooter: (assets) => {
+      const withData = assets.filter(s => s.bayesian_breakdown?.decomposition?.p_positive !== undefined);
+      if (withData.length === 0) return <span className="text-iron-600 font-mono block text-right">—</span>;
+      const avg = withData.reduce((sum, s) => sum + (s.bayesian_breakdown!.decomposition!.p_positive), 0) / withData.length;
+      let color = avg < 0.5 ? "text-risk-red" : avg < 0.85 ? "text-risk-amber" : "text-risk-green";
+      return <span className={`font-mono font-semibold block text-right ${color}`}>{(avg * 100).toFixed(1)}% avg</span>;
     }
   },
   degradation: {
@@ -676,6 +683,23 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
           </span>
         </div>
       );
+    },
+    renderFooter: (assets) => {
+      const withData = assets.filter(s => {
+        const btTrades = s.total_trades || 0;
+        const priorEv = btTrades ? s.net_profit / btTrades : 0;
+        const postEv = s.bayesian_breakdown?.decomposition?.ev_mean;
+        return s.bayesian_breakdown?.live_trades_total && postEv !== undefined && priorEv !== 0;
+      });
+      if (withData.length === 0) return <span className="text-iron-600 font-mono block text-right">—</span>;
+      const avg = withData.reduce((sum, s) => {
+        const priorEv = s.net_profit / s.total_trades;
+        const postEv = s.bayesian_breakdown!.decomposition!.ev_mean;
+        return sum + ((postEv - priorEv) / Math.abs(priorEv)) * 100;
+      }, 0) / withData.length;
+      const color = avg < -5 ? "text-risk-red" : avg > 5 ? "text-risk-green" : "text-iron-300";
+      const sign = avg > 0 ? "+" : "";
+      return <span className={`font-mono font-semibold block text-right ${color}`}>{sign}{avg.toFixed(1)}% avg</span>;
     }
   },
   bayesian_ev: {
@@ -747,6 +771,13 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
            </span>
         </div>
       );
+    },
+    renderFooter: (assets) => {
+      const withData = assets.filter(s => s.bayesian_breakdown?.live_trades_total && s.bayesian_breakdown?.decomposition?.ev_mean !== undefined);
+      if (withData.length === 0) return <span className="text-iron-600 font-mono block text-right">—</span>;
+      const avg = withData.reduce((sum, s) => sum + s.bayesian_breakdown!.decomposition!.ev_mean, 0) / withData.length;
+      const color = avg < 0 ? "text-risk-red" : "text-risk-green";
+      return <span className={`font-mono font-semibold block text-right ${color}`}>{metricFormatter.format("net_profit", avg)}</span>;
     }
   },
   weight: {
@@ -786,6 +817,20 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
           </span>
         </div>
       );
+    },
+    renderFooter: (assets) => {
+      const withData = assets.filter(s => s.bayesian_breakdown?.live_trades_total && s.bayesian_breakdown?.decomposition);
+      if (withData.length === 0) return <span className="text-iron-600 font-mono block text-right">—</span>;
+      const totalLive = withData.reduce((sum, s) => sum + (s.bayesian_breakdown!.live_trades_total || 0), 0);
+      const totalBt   = withData.reduce((sum, s) => { const d = s.bayesian_breakdown!.decomposition!; return sum + (d.eff_bt_wins + d.eff_bt_losses); }, 0);
+      const total = totalLive + totalBt;
+      if (total === 0) return <span className="text-iron-600 font-mono block text-right">—</span>;
+      return (
+        <div className="flex flex-col items-end gap-0">
+          <span className="font-mono text-sm text-[#00aaff] font-semibold">{((totalLive / total) * 100).toFixed(1)}% Live</span>
+          <span className="text-[9px] text-iron-500 font-mono">{((totalBt / total) * 100).toFixed(1)}% BT</span>
+        </div>
+      );
     }
   },
   blind_risk: {
@@ -808,6 +853,18 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
         <div className="flex items-center justify-end gap-1.5">
           <span className="text-[10px]">{style.icon}</span>
           <span className={`font-mono text-xs ${style.textColor} ${isRed ? 'font-bold' : ''}`}>{pct.toFixed(1)}%</span>
+        </div>
+      );
+    },
+    renderFooter: (assets) => {
+      const withData = assets.filter(s => s.bayesian_breakdown?.decomposition?.p_positive !== undefined);
+      if (withData.length === 0) return <span className="text-iron-600 font-mono block text-right">—</span>;
+      const avgP = withData.reduce((sum, s) => sum + s.bayesian_breakdown!.decomposition!.p_positive, 0) / withData.length;
+      const { pct, style } = resolveBlindRisk(avgP);
+      return (
+        <div className="flex items-center justify-end gap-1.5">
+          <span className="text-[10px]">{style.icon}</span>
+          <span className={`font-mono font-semibold text-xs ${style.textColor}`}>{pct.toFixed(1)}%</span>
         </div>
       );
     }

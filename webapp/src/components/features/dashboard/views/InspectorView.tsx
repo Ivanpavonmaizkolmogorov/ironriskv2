@@ -297,8 +297,6 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
                   return (a === -1 ? 99 : a) - (b === -1 ? 99 : b);
                 })
                 .map(([key, params]) => {
-                const displayName = key.replace("Metric", "").replace(/([A-Z])/g, " $1").trim();
-                
                 let displayValue = 0;
                 const maxKey = Object.keys(params as object).find((k) => k.startsWith("max_"));
                 if (maxKey) displayValue = (params as Record<string, number>)[maxKey];
@@ -311,6 +309,9 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
                   StagnationTradesMetric: "stagnation_trades",
                 };
                 const mappedKey = metricMap[key] || key;
+                const displayName = key in metricMap
+                  ? tWorkspace(`gaugeNames.${mappedKey}` as any)
+                  : key.replace("Metric", "").replace(/([A-Z])/g, " $1").trim();
 
                 const riskCfg = activeAsset.risk_config as Record<string, Record<string, number>> | null;
                 const hasHeartbeat = !!(riskCfg as any)?.last_updated;

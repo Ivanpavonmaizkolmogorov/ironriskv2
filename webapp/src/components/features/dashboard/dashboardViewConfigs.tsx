@@ -3,6 +3,7 @@ import type { RiskAsset } from "@/types/strategy";
 import { InspectorView } from "./views/InspectorView";
 import { MachineLearningView } from "./views/MachineLearningView";
 import { VsView } from "./views/VsView";
+import { MonitorView } from "./views/MonitorView";
 
 export interface DashboardContext {
   activeAsset: RiskAsset | null;
@@ -21,6 +22,7 @@ export interface DashboardContext {
   isLightMode: boolean;
   isInteractiveMode: boolean;
   setIsInteractiveMode: React.Dispatch<React.SetStateAction<boolean>>;
+  onNavigateToView?: (viewId: string) => void;
 }
 
 export interface DashboardViewDef {
@@ -47,8 +49,15 @@ export const VsModeViewDef: DashboardViewDef = {
   renderComponent: (context) => <VsView context={context} />
 };
 
+export const MonitorViewDef: DashboardViewDef = {
+  id: "monitor",
+  name: "📡 Monitor",
+  renderComponent: (context) => <MonitorView context={context} />,
+};
+
 export const DASHBOARD_VIEWS: DashboardViewDef[] = [
   ObjectInspectorViewDef,
+  MonitorViewDef,
   MachineLearningViewDef,
   VsModeViewDef
 ];

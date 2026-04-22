@@ -213,7 +213,16 @@
     "tabInspector": "🕵️‍♂️ Inspector Micro",
     "tabBayes": "🧠 Motor Bayesiano",
     "tabMacro": "🌍 Riesgo Macro",
-    "tabVs": "⚔️ VS Mode"
+    "tabVs": "⚔️ VS Mode",
+    "tabMonitor": "📡 Monitor",
+    "viewFullAnalysis": "Ver análisis completo",
+    "gaugeNames": {
+      "max_drawdown": "Drawdown",
+      "daily_loss": "Daily Loss",
+      "stagnation_days": "Días Estancado",
+      "stagnation_trades": "Trades Estancado",
+      "consecutive_losses": "Rachas Perdedoras"
+    }
   },
   "charts": {
     "interactive": {
@@ -897,6 +906,22 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "monitor_view": {
+        "title": "Vista Monitor: Diagnóstico Live en Un Vistazo",
+        "body": "Nueva pestaña Monitor que centraliza el estado de riesgo en tiempo real: veredicto maestro con semáforo de salud, gráfico de equity live, desglose de los 5 gauges de riesgo con narrativa educativa y acceso directo al Motor Bayesiano."
+      },
+      "drawdown_live_chart": {
+        "title": "Gráfico de Drawdown Live (Monetario)",
+        "body": "Nuevo gráfico underwater sincronizado bajo el equity live: muestra el drawdown en tiempo real en unidades monetarias ($), no en porcentajes, con cursor sincronizado entre ambos gráficos y tooltip al hover."
+      },
+      "gauge_names_unified": {
+        "title": "Terminología de Riesgos Unificada",
+        "body": "Los nombres y tooltips educativos de los 5 gauges de riesgo son ahora idénticos en Inspector, Monitor y Motor Bayesiano, localizados en el idioma del usuario. Los tooltips en Monitor y Motor Bayesiano usan los valores actuales live, no el peor histórico."
+      },
+      "live_tab_rename": {
+        "title": "Pestaña 'Live EA' renombrada a 'Live'",
+        "body": "La vista de tabla live pasa a llamarse 'Live' para mayor claridad y concisión."
+      },
       "risk_gauges_tests": {
         "title": "Tests: Risk Gauges (DD/Estancamiento/Racha)",
         "body": "Añadidos 15 tests de regresión para el motor de gauges: estado verde/ambar/rojo según percentiles, estado fatal al romper el límite físico (Pacto de Ulises), monotonía de percentiles, fallback sin distribución y propagación del flag de simulación."

@@ -16,6 +16,7 @@ import { resolveBlindRisk } from "@/utils/blindRisk";
 
 import GaussianChart from "@/components/features/charts/GaussianChart";
 import BayesMathBreakdown from "@/components/features/shared/BayesMathBreakdown";
+import MetricTooltip from "@/components/ui/MetricTooltip";
 
 
 // --- P-Value visualization: simple gauge ---
@@ -203,11 +204,11 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
   const simPnl = "";
 
   const METRICS = [
-    { key: "max_drawdown", label: "Drawdown" },
-    { key: "daily_loss", label: "Daily Loss" },
-    { key: "stagnation_days", label: "Estancamiento (días)" },
-    { key: "stagnation_trades", label: "Estancamiento (trades)" },
-    { key: "consecutive_losses", label: "Rachas Perdedoras" },
+    { key: "max_drawdown",       label: tWorkspace("gaugeNames.max_drawdown" as any) },
+    { key: "daily_loss",         label: tWorkspace("gaugeNames.daily_loss" as any) },
+    { key: "stagnation_days",    label: tWorkspace("gaugeNames.stagnation_days" as any) },
+    { key: "stagnation_trades",  label: tWorkspace("gaugeNames.stagnation_trades" as any) },
+    { key: "consecutive_losses", label: tWorkspace("gaugeNames.consecutive_losses" as any) },
   ];
 
 
@@ -709,7 +710,7 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
                           return (
                             <div key={key} className={`bg-surface-tertiary rounded-lg p-3 ${gauge.simulated ? 'border border-amber-500/30' : ''}`}>
                               <div className="text-xs text-iron-400 font-semibold flex items-center gap-1">
-                                {label}
+                                <MetricTooltip metricKey={`live_${key}`} variant="card">{label}</MetricTooltip>
                                 {gauge.simulated && <span className="text-amber-400 text-[10px]" title={tMath("ui.gaugeTooltipSim")}>🧪 sim</span>}
                               </div>
                               <div className="flex items-baseline gap-2">
