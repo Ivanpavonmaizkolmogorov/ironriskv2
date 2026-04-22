@@ -405,10 +405,10 @@
     "btnCreateWorkspace": "🛡️ Protect this Strategy →",
     "errorFields": "Please fill in all required fields.",
     "inlineOnboarding": {
-      "tabRegister": "Create Account",
+      "tabRegister": "Request Access",
       "tabLogin": "Already Have Account",
-      "title": "You are one step away from protecting your account.",
-      "desc": "Create your IronRisk account and your first MT5 Workspace to project this Edge on your live terminal.",
+      "title": "Early access to IronRisk.",
+      "desc": "Join the waitlist. We will reach out as soon as a spot opens.",
       "loginTitle": "Access your control panel.",
       "loginDesc": "Log in to link this analysis to your existing account.",
       "workspaceLabel": "Workspace Name",
@@ -605,7 +605,7 @@
       "cltDesc2": "Since Expectancy is simply the product of sample means (Win Rate, Winning PnL and Losing PnL), the joint distribution of the expected value becomes strictly Normal by asymptotic convergence. That's why this calculation isn't a 'rough estimate', it's the mathematical reality of your long-term risk."
     },
     "ui": {
-"title": "Bayesian Engine",
+      "title": "Bayesian Engine",
       "subtitle": "Statistical Inference of Survival Probability",
       "analyzing": "Analyzing data for:",
       "calculating": "Calculating...",
@@ -1043,6 +1043,10 @@
       "email_verification": {
         "title": "Email Verification",
         "body": "You can now verify your email to secure your account. You'll receive a verification email when you register."
+      },
+      "waitlist_magic_link": {
+        "title": "Waitlist with magic link access",
+        "body": "Registration no longer requires a VIP code. Traders join the waitlist and the admin approves access with one click: a magic link is generated and emailed in the user language."
       }
     }
   }

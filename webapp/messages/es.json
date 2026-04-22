@@ -405,10 +405,10 @@
     "btnCreateWorkspace": "🛡️ Proteger esta Estrategia →",
     "errorFields": "Por favor, completa todos los campos requeridos.",
     "inlineOnboarding": {
-      "tabRegister": "Crear Cuenta",
+      "tabRegister": "Solicitar Acceso",
       "tabLogin": "Ya Tengo Cuenta",
-      "title": "Estás a un paso de proyectar este Edge estadístico en tu terminal real.",
-      "desc": "Crea tu cuenta vitalicia de IronRisk y tu primer Workspace MT5 para guardar esta estrategia.",
+      "title": "Acceso anticipado a IronRisk.",
+      "desc": "Crea tu cuenta en lista de espera. Te avisamos en cuanto haya plaza disponible.",
       "loginTitle": "Accede a tu panel de control.",
       "loginDesc": "Inicia sesión para vincular este análisis a tu cuenta existente.",
       "workspaceLabel": "Nombre del Workspace",
@@ -1043,6 +1043,10 @@
       "email_verification": {
         "title": "Verificación de email",
         "body": "Ahora puedes verificar tu correo para asegurar tu cuenta. Recibirás un email de verificación al registrarte."
+      },
+      "waitlist_magic_link": {
+        "title": "Lista de espera con magic link",
+        "body": "El registro ya no requiere código VIP. Los traders se unen a la lista de espera y el admin aprueba el acceso con un click: se genera un magic link y se envía por email en el idioma del usuario."
       }
     }
   }

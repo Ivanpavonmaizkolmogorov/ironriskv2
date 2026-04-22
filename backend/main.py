@@ -51,6 +51,24 @@ if "email_verified" not in _user_cols:
         _conn.commit()
     logger.info("Migration: added email_verified column to users")
 
+# ── Waitlist migrations ──
+_waitlist_cols = [c["name"] for c in _inspector.get_columns("waitlist_leads")] if _inspector.has_table("waitlist_leads") else []
+for _col, _ddl_sqlite, _ddl_pg in [
+    ("locale",        "ALTER TABLE waitlist_leads ADD COLUMN locale VARCHAR(10) DEFAULT 'es'",
+                      "ALTER TABLE waitlist_leads ADD COLUMN locale VARCHAR(10) DEFAULT 'es'"),
+    ("password_hash", "ALTER TABLE waitlist_leads ADD COLUMN password_hash TEXT",
+                      "ALTER TABLE waitlist_leads ADD COLUMN password_hash TEXT"),
+    ("approved_at",   "ALTER TABLE waitlist_leads ADD COLUMN approved_at TIMESTAMP WITH TIME ZONE",
+                      "ALTER TABLE waitlist_leads ADD COLUMN approved_at TIMESTAMP WITH TIME ZONE"),
+]:
+    if _col not in _waitlist_cols:
+        with engine.connect() as _conn:
+            _ddl = _ddl_sqlite if engine.dialect.name == "sqlite" else _ddl_pg
+            _conn.execute(sa_text(_ddl))
+            _conn.commit()
+        logger.info(f"Migration: added {_col} column to waitlist_leads")
+
+
 settings = get_settings()
 
 app = FastAPI(

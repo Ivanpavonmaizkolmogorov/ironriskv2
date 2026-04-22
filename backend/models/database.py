@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     ADMIN_TELEGRAM_CHAT_ID: str | None = None
     BETA_ACCESS_CODE: str | None = None
     ENABLE_TELEGRAM_POLLER: bool = True
+    FRONTEND_URL: str = "https://www.ironrisk.pro"
 
     class Config:
         env_file = ".env"

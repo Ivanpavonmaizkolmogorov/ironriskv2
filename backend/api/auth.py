@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 
@@ -200,3 +201,81 @@ def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
     db.commit()
 
     return {"detail": "Password has been successfully reset."}
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Magic Link Access — creates account from approved waitlist token
+# ══════════════════════════════════════════════════════════════════════
+
+class MagicLinkRequest(BaseModel):
+    token: str
+
+
+@router.post("/magic", response_model=TokenResponse)
+def magic_link_auth(req: MagicLinkRequest, db: Session = Depends(get_db)):
+    """
+    Validates a magic access token (generated on waitlist approval).
+    - If user already exists → logs them in.
+    - If not → creates the account with stored password_hash → logs in.
+    """
+    from models.waitlist import WaitlistLead
+    from models.trading_account import TradingAccount
+
+    settings = get_settings()
+
+    try:
+        payload = jwt.decode(
+            req.token,
+            settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+            options={"verify_exp": False},  # magic links never expire
+        )
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Invalid magic link.")
+
+    if payload.get("purpose") != "magic_access":
+        raise HTTPException(status_code=400, detail="Invalid token purpose.")
+
+    email = payload.get("email", "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Malformed token.")
+
+    # If user already exists — just log them in
+    existing_user = db.query(User).filter(User.email == email).first()
+    if existing_user:
+        token = create_jwt(existing_user.id, existing_user.email)
+        return TokenResponse(access_token=token)
+
+    # Find waitlist lead to get stored password_hash
+    lead = db.query(WaitlistLead).filter(WaitlistLead.email == email).first()
+    if not lead or not lead.password_hash:
+        raise HTTPException(
+            status_code=400,
+            detail="Waitlist entry not found or no password stored. Please re-register."
+        )
+
+    # Create the user with stored password hash (already hashed)
+    import uuid as _uuid
+    new_user = User(
+        id=str(_uuid.uuid4()),
+        email=email,
+        hashed_password=lead.password_hash,
+        email_verified=True,  # magic link = verified email
+        is_admin=False,
+    )
+    db.add(new_user)
+
+    # Auto-create a default workspace
+    default_ws = TradingAccount(
+        id=str(_uuid.uuid4()),
+        user_id=new_user.id,
+        name="Mi Cuenta Principal",
+        account_number="",
+        broker="",
+    )
+    db.add(default_ws)
+    db.commit()
+
+    token = create_jwt(new_user.id, new_user.email)
+    return TokenResponse(access_token=token)
+

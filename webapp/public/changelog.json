@@ -1,5 +1,11 @@
 [
   {
+    "id": "waitlist_magic_link",
+    "date": "2026-04-22",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "monitor_i18n_fix",
     "date": "2026-04-22",
     "tag": "improvement",

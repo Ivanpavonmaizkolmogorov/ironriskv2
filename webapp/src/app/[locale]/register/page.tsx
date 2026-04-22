@@ -1,8 +1,7 @@
 /** Register Page */
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { QRCodeSVG } from 'qrcode.react';
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -23,8 +22,8 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6 relative">
-      <Link 
-        href={`/${locale}`} 
+      <Link
+        href={`/${locale}`}
         className="absolute top-6 left-6 md:top-8 md:left-8 text-sm text-iron-500 hover:text-iron-300 flex items-center gap-2 transition-colors"
       >
         <span>←</span> {isEn ? "Back to Home" : "Volver al inicio"}
@@ -38,11 +37,12 @@ export default function RegisterPage() {
             IRON<span className="text-risk-green">RISK</span>
           </h1>
           <p className="text-sm text-iron-500 mt-2">
-            {isEn ? "Protect your trading" : "Protege tu operativa"}
+            {isEn ? "Request early access" : "Solicita acceso anticipado"}
           </p>
         </div>
 
-        <AuthForm mode="register" onSuccess={() => router.push(`/${locale}/dashboard`)} />
+        <AuthForm mode="register" />
+
 
         <p className="text-center text-sm text-iron-500 mt-6">
           {isEn ? "Already have an account?" : "¿Ya tienes una cuenta?"}{" "}

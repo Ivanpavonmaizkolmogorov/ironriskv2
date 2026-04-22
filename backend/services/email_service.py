@@ -385,3 +385,83 @@ class EmailService:
             logger.error(f"Failed to send waitlist email to {recipient_email}: {e}")
             return False
 
+    def send_access_granted_email(self, recipient_email: str, magic_url: str, locale: str = "es") -> bool:
+        """Sends the magic access link to an approved waitlist user."""
+        if not self.is_configured():
+            logger.warning(f"EmailService not configured. Skipping access email to {recipient_email}.")
+            return False
+
+        try:
+            if locale == "en":
+                subject = "🛡️ Your IronRisk access is ready"
+                headline = "You're in. Your access is ready."
+                body_p1 = "We've reviewed your request and your access to <strong style=\"color: #c9d1d9;\">IronRisk</strong> is now activated."
+                body_p2 = "Click the button below to create your account and enter your dashboard:"
+                btn_text = "Enter IronRisk →"
+                spam_note = "⚠️ If you didn't request this, you can ignore this email."
+                footer_spam = "If the button doesn't work, copy and paste this link into your browser:"
+            else:
+                subject = "🛡️ Tu acceso a IronRisk está listo"
+                headline = "Estás dentro. Tu acceso está activado."
+                body_p1 = "Hemos revisado tu solicitud y tu acceso a <strong style=\"color: #c9d1d9;\">IronRisk</strong> está listo."
+                body_p2 = "Haz click en el botón de abajo para crear tu cuenta y entrar a tu panel de control:"
+                btn_text = "Entrar a IronRisk →"
+                spam_note = "⚠️ Si no solicitaste esto, puedes ignorar este correo."
+                footer_spam = "Si el botón no funciona, copia y pega este enlace en tu navegador:"
+
+            html_content = f"""
+            <html>
+              <body style="background-color: #0d1117; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 40px 20px;">
+                <div style="max-width: 520px; margin: 0 auto; background-color: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 40px;">
+                    <div style="text-align: center; margin-bottom: 32px;">
+                        <span style="font-size: 32px;">🛡️</span>
+                        <h1 style="color: #00e676; font-size: 22px; margin: 12px 0 4px;">{headline}</h1>
+                    </div>
+                    <p style="font-size: 15px; color: #8b949e; line-height: 1.6;">{body_p1}</p>
+                    <p style="font-size: 15px; color: #8b949e; line-height: 1.6;">{body_p2}</p>
+
+                    <div style="text-align: center; margin: 32px 0;">
+                        <a href="{magic_url}"
+                           style="display: inline-block; padding: 16px 32px; background-color: #00e676; color: #0d1117; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                           {btn_text}
+                        </a>
+                    </div>
+
+                    <div style="background-color: #1c2128; border: 1px solid #f0883e33; border-radius: 8px; padding: 12px 16px; margin: 24px 0;">
+                        <p style="font-size: 12px; color: #f0883e; margin: 0;">
+                            {spam_note}<br>
+                            <strong>Revisa la carpeta de spam</strong> si no ves este correo en tu bandeja de entrada.
+                        </p>
+                    </div>
+
+                    <p style="font-size: 12px; color: #484f58; margin-top: 24px;">{footer_spam}<br>
+                        <a href="{magic_url}" style="color: #00e676; word-break: break-all; font-size: 11px;">{magic_url}</a>
+                    </p>
+
+                    <p style="font-size: 13px; color: #484f58; margin-top: 32px; border-top: 1px solid #30363d; padding-top: 20px;">
+                        <strong style="color: #8b949e;">Iván P.</strong> <span style="color: #484f58;">— Founder & Lead Developer</span><br>
+                        <a href="https://www.ironrisk.pro" style="color: #00e676; text-decoration: none; font-size: 12px;">www.ironrisk.pro</a>
+                    </p>
+                </div>
+              </body>
+            </html>
+            """
+
+            msg = EmailMessage()
+            msg["Subject"] = subject
+            msg["From"] = self.sender_email
+            msg["To"] = recipient_email
+            msg.set_content(f"Tu acceso a IronRisk está listo: {magic_url}")
+            msg.add_alternative(html_content, subtype="html")
+
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.sender_email, self.sender_password)
+                server.send_message(msg)
+            logger.info(f"✅ Access granted email sent to {recipient_email}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send access email to {recipient_email}: {e}")
+            return False
+
+

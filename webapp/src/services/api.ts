@@ -218,10 +218,11 @@ export const adminAPI = {
 
 // --- Waitlist (lead capture) ---
 export const waitlistAPI = {
-  submit: (email: string, source: string = "register", locale: string = "es", motivation: string = "") =>
-    api.post('/api/waitlist', { email, source, locale, motivation }),
+  submit: (email: string, source: string = "register", locale: string = "es", motivation: string = "", password: string = "") =>
+    api.post('/api/waitlist', { email, source, locale, motivation, password }),
   list: () => api.get('/api/waitlist'),
   remove: (id: string) => api.delete(`/api/waitlist/${id}`),
+  approve: (id: string) => api.post(`/api/waitlist/${id}/approve`),
 };
 
 // --- System Settings endpoints ---
