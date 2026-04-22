@@ -906,6 +906,10 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "equity_curve_nan_fix": {
+        "title": "Equity Chart NaN Fix",
+        "body": "Fixed a bug causing NaN SVG rendering errors in the equity chart when using the non-breaking space thousand separator. Fixed by explicitly setting Y-axis width."
+      },
       "monitor_view": {
         "title": "Monitor View: Live Risk Snapshot at a Glance",
         "body": "New Monitor tab consolidating real-time risk status: master verdict with health traffic light, live equity chart, 5 risk gauges with educational narrative, and direct one-click access to the Bayesian Engine."

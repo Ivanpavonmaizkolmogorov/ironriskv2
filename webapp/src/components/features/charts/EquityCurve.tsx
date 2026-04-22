@@ -124,7 +124,7 @@ export default function EquityCurve({ data, variant = "backtest", hideAxes = fal
           )}
           {!hideAxes && (
             <YAxis
-              width={yAxisWidth}
+              width={yAxisWidth ?? 60}
               tick={{ fill: "#78828f", fontSize: 11 }}
               axisLine={{ stroke: "#3e444f" }}
               tickLine={false}

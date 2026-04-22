@@ -1,5 +1,11 @@
 [
   {
+    "id": "equity_curve_nan_fix",
+    "date": "2026-04-22",
+    "tag": "fix",
+    "internal": true
+  },
+  {
     "id": "monitor_view",
     "date": "2026-04-22",
     "tag": "feature",
