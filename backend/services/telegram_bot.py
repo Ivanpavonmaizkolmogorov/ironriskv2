@@ -264,7 +264,7 @@ async def telegram_bot_poller():
                             # User just clicked start without deep link
                             await _send_message(bot_token, chat_id, "⚠️ Para conectar tu cuenta de IronRisk, inicia el bot desde el enlace generado en el Centro de Alertas en la aplicación web.")
                     elif cmd.startswith("/a_"):
-                        lead_id = cmd[3:]
+                        lead_id = cmd[3:].replace("_", "-")
                         try:
                             from models.waitlist import WaitlistLead
                             from services.waitlist_service import execute_lead_approval

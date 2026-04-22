@@ -1075,6 +1075,10 @@
       "telegram_approve_command": {
         "title": "Aprobación rápida desde Telegram",
         "body": "Los administradores ahora pueden aprobar leads de la lista de espera con un solo clic directamente desde la notificación de Telegram."
+      },
+      "waitlist_pills": {
+        "title": "Botones de Sugerencia",
+        "body": "Añadidos botones para rellenar rápidamente el motivo en el registro."
       }
     }
   }

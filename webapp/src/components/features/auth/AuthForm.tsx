@@ -245,19 +245,46 @@ export default function AuthForm({ mode, onSuccess, className = "", defaultEmail
           />
 
           {/* Optional motivation field */}
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-iron-400">
               {isEn ? "What brought you here?" : "¿Qué te trajo aquí?"}
               <span className="ml-1 text-iron-600 font-normal text-xs">
                 {isEn ? "(optional)" : "(opcional)"}
               </span>
             </label>
+            
+            <div className="flex flex-wrap gap-2">
+              {(isEn 
+                ? ["Trade Funded Accounts", "Control my Drawdowns", "Automate Risk Management"]
+                : ["Operar Cuentas Fondeadas", "Controlar mis Drawdowns", "Gestión de Riesgo Auto."]
+              ).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    if (motivation.includes(opt)) {
+                      setMotivation(motivation.replace(opt, "").replace(/\|\s*\|/g, "|").replace(/^\|\s*|\s*\|$/g, "").trim());
+                    } else {
+                      setMotivation(motivation ? `${motivation} | ${opt}` : opt);
+                    }
+                  }}
+                  className={`px-3 py-1 text-xs rounded-full border transition-all ${
+                    motivation.includes(opt)
+                      ? "bg-risk-green/20 border-risk-green/50 text-risk-green"
+                      : "bg-surface-primary border-iron-800/50 text-iron-400 hover:border-iron-600/50"
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+
             <textarea
               value={motivation}
               onChange={(e) => setMotivation(e.target.value)}
               placeholder={isEn
-                ? "e.g. I keep blowing funded accounts during drawdowns..."
-                : "ej: Sigo quemando cuentas fondeadas en los drawdowns..."}
+                ? "e.g. I keep blowing funded accounts during drawdowns (or more details)..."
+                : "ej: Sigo quemando cuentas fondeadas en los drawdowns (o más detalles)..."}
               rows={2}
               className="w-full bg-surface-primary border border-iron-800/50 rounded-md px-3 py-2 text-sm text-iron-200 placeholder:text-iron-600 focus:outline-none focus:border-risk-green/50 resize-none transition-colors"
             />

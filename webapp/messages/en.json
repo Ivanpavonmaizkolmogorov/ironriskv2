@@ -1075,6 +1075,10 @@
       "telegram_approve_command": {
         "title": "Fast Telegram approval",
         "body": "Admins can now approve waitlist leads with a single click directly from the Telegram alert message."
+      },
+      "waitlist_pills": {
+        "title": "Suggestion Buttons",
+        "body": "Added quick suggestion buttons to fill out motivation on waitlist registration."
       }
     }
   }

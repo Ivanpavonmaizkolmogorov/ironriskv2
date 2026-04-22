@@ -88,11 +88,11 @@ async def add_to_waitlist(
 
     # Dispatch telegram notification to admin
     from services.telegram_bot import send_admin_notification
-    msg = f"🔔 <b>Nuevo Lead (Waitlist)</b>\n📧 {email}\n🌍 {body.locale}\n📍 {body.source}"
-    if body.motivation:
-        msg += f"\n\n📝 <i>{body.motivation}</i>"
+    motivo_text = body.motivation.strip() if body.motivation and body.motivation.strip() else "(Sin especificar)"
+    msg = f"🔔 <b>Nuevo Lead (Waitlist)</b>\n📧 {email}\n🌍 {body.locale}\n📍 {body.source}\n📝 Motivo: <i>{motivo_text}</i>"
         
-    msg += f"\n\n⚡ Para aprobar de inmediato:\n/a_{lead.id}"
+    safe_id = lead.id.replace("-", "_")
+    msg += f"\n\n⚡ Para aprobar de inmediato:\n/a_{safe_id}"
     background_tasks.add_task(send_admin_notification, msg)
 
     return WaitlistResponse(

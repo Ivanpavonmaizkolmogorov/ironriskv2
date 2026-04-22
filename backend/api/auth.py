@@ -68,18 +68,24 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     try:
         user = authenticate_user(db, req.email, req.password)
-    except HTTPException:
-        # Check if this email is on the waitlist (not yet a real account)
-        from models.waitlist import WaitlistLead
+    except HTTPException as e:
         email = req.email.strip().lower()
+        # Check if the user is already fully registered
+        existing_user = db.query(User).filter(User.email == email).first()
+        if existing_user:
+            # They exist, they just typed the wrong password. Return the original auth error.
+            raise e
+            
+        # Check if this email is still pending on the waitlist (not yet a real account)
+        from models.waitlist import WaitlistLead
         lead = db.query(WaitlistLead).filter(WaitlistLead.email == email).first()
         if lead:
             if lead.approved_at:
                 raise HTTPException(
                     status_code=401,
-                    detail="Tu acceso ha sido aprobado. Busca el email de acceso en tu bandeja (revisa spam también)."
+                    detail="Tu acceso ya fue aprobado. Entra con la contraseña que creaste."
                     if req.locale == "es" else
-                    "Your access has been approved. Check your inbox for the access email (check spam too)."
+                    "Your access is approved. Log in with your registered password."
                 )
             raise HTTPException(
                 status_code=401,
@@ -87,7 +93,8 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
                 if req.locale == "es" else
                 "You're on the waitlist. We'll email you when your access is activated."
             )
-        raise
+        # Not a user, not on waitlist -> return original invalid credentials error
+        raise e
 
     token = create_jwt(user.id, user.email)
     return TokenResponse(access_token=token)

@@ -37,11 +37,13 @@ def execute_lead_approval(db: Session, lead: WaitlistLead) -> str:
         )
         db.add(new_user)
         
+        ws_name = "Mi Primer Workspace" if locale == "es" else "My First Workspace"
+        
         # 2. Create Default Workspace
         default_ws = TradingAccount(
             id=str(_uuid.uuid4()),
             user_id=new_user.id,
-            name="Mi Cuenta Principal",
+            name=ws_name,
             account_number="",
             broker="",
         )
