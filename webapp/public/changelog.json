@@ -1,5 +1,11 @@
 [
   {
+    "id": "waitlist_login_detect",
+    "date": "2026-04-22",
+    "tag": "improvement",
+    "internal": false
+  },
+  {
     "id": "locale_switcher_fix",
     "date": "2026-04-22",
     "tag": "improvement",

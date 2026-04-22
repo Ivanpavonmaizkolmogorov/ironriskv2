@@ -1051,6 +1051,10 @@
       "locale_switcher_fix": {
         "title": "Fix selector de idioma",
         "body": "El selector EN/ES en las páginas de registro y login ahora funciona correctamente."
+      },
+      "waitlist_login_detect": {
+        "title": "Detección de lista de espera en login",
+        "body": "Si un usuario en lista de espera intenta hacer login, ahora recibe un mensaje explicando su estado en lugar de un error genérico."
       }
     }
   }

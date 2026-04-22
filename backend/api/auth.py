@@ -66,9 +66,32 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse)
 def login(req: LoginRequest, db: Session = Depends(get_db)):
-    user = authenticate_user(db, req.email, req.password)
+    try:
+        user = authenticate_user(db, req.email, req.password)
+    except HTTPException:
+        # Check if this email is on the waitlist (not yet a real account)
+        from models.waitlist import WaitlistLead
+        email = req.email.strip().lower()
+        lead = db.query(WaitlistLead).filter(WaitlistLead.email == email).first()
+        if lead:
+            if lead.approved_at:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Tu acceso ha sido aprobado. Busca el email de acceso en tu bandeja (revisa spam también)."
+                    if req.locale == "es" else
+                    "Your access has been approved. Check your inbox for the access email (check spam too)."
+                )
+            raise HTTPException(
+                status_code=401,
+                detail="Estás en lista de espera. Te avisaremos cuando tu acceso esté activado."
+                if req.locale == "es" else
+                "You're on the waitlist. We'll email you when your access is activated."
+            )
+        raise
+
     token = create_jwt(user.id, user.email)
     return TokenResponse(access_token=token)
+
 
 
 @router.get("/me", response_model=UserResponse)

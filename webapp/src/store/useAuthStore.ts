@@ -26,8 +26,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: async (email, password) => {
     set({ isLoading: true, error: null });
+    const locale = typeof window !== "undefined"
+      ? (window.location.pathname.split("/")[1] || "es")
+      : "es";
     try {
-      const res = await authAPI.login(email, password);
+      const res = await authAPI.login(email, password, locale);
+
       const token = res.data.access_token;
       localStorage.setItem("ironrisk_jwt", token);
       set({ jwt: token, isAuthenticated: true, isLoading: false });

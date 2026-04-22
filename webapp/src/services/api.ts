@@ -60,8 +60,8 @@ export default api;
 export const authAPI = {
   register: (email: string, password: string, locale: string = "es", invite_code?: string) =>
     api.post("/api/auth/register", { email, password, locale, invite_code }),
-  login: (email: string, password: string) =>
-    api.post("/api/auth/login", { email, password }),
+  login: (email: string, password: string, locale: string = "es") =>
+    api.post("/api/auth/login", { email, password, locale }),
   getMe: () => api.get("/api/auth/me"),
   forgotPassword: (email: string, locale: string = "es") =>
     api.post("/api/auth/forgot-password", { email, locale }),

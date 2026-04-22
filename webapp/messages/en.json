@@ -1051,6 +1051,10 @@
       "locale_switcher_fix": {
         "title": "Fix locale switcher",
         "body": "The EN/ES switcher on register and login pages now works correctly."
+      },
+      "waitlist_login_detect": {
+        "title": "Waitlist detection on login",
+        "body": "If a waitlisted user tries to log in, they now receive a clear status message instead of a generic error."
       }
     }
   }

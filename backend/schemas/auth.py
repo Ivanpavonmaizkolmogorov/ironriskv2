@@ -13,6 +13,7 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    locale: str = "es"
 
 
 class TokenResponse(BaseModel):
