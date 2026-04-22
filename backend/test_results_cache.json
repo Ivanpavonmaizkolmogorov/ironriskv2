@@ -1,0 +1,178 @@
+{
+  "run_at": "2026-04-22T09:22:44.384850+00:00",
+  "total": 18,
+  "passed": 18,
+  "failed": 0,
+  "success_rate": 100.0,
+  "duration_ms": 1992.3,
+  "groups": {
+    "csv_import": [
+      {
+        "name": "demo_csv_exists",
+        "group": "csv_import",
+        "passed": true,
+        "expected": "File exists",
+        "actual": "C:\\Users\\ivanp\\Desktop\\Symbols\\Porfolios\\ironriskv2\\webapp\\public\\data\\demo_backtest.csv",
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "name": "csv_parses_correctly",
+        "group": "csv_import",
+        "passed": true,
+        "expected": "762",
+        "actual": "762",
+        "duration_ms": 1350.2,
+        "error": null
+      },
+      {
+        "name": "csv_pnl_column_present",
+        "group": "csv_import",
+        "passed": true,
+        "expected": "All trades have 'pnl'",
+        "actual": "OK",
+        "duration_ms": 48.4,
+        "error": null
+      },
+      {
+        "name": "csv_summary_has_equity_curve",
+        "group": "csv_import",
+        "passed": true,
+        "expected": "equity_curve non-empty",
+        "actual": "762 points",
+        "duration_ms": 52.4,
+        "error": null
+      },
+      {
+        "name": "strategy_name_not_simulated_edge",
+        "group": "csv_import",
+        "passed": true,
+        "expected": "Name != 'Simulated Edge'",
+        "actual": "demo_backtest",
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "name": "csv_has_positive_and_negative_trades",
+        "group": "csv_import",
+        "passed": true,
+        "expected": "wins > 0 AND losses > 0",
+        "actual": "347 wins, 415 losses",
+        "duration_ms": 47.6,
+        "error": null
+      }
+    ],
+    "bayes": [
+      {
+        "name": "bayes_p_positive_in_range",
+        "group": "bayes",
+        "passed": true,
+        "expected": "50% <= P(EV>0) <= 100%",
+        "actual": "82.7%",
+        "duration_ms": 52.1,
+        "error": null
+      },
+      {
+        "name": "bayes_p_positive_golden_value",
+        "group": "bayes",
+        "passed": true,
+        "expected": "82.7% \u00b12.0%",
+        "actual": "82.7%",
+        "duration_ms": 48.7,
+        "error": null
+      },
+      {
+        "name": "blind_risk_complement",
+        "group": "bayes",
+        "passed": true,
+        "expected": "100.0%",
+        "actual": "100.0%",
+        "duration_ms": 49.6,
+        "error": null
+      },
+      {
+        "name": "bt_discount_reduces_confidence",
+        "group": "bayes",
+        "passed": true,
+        "expected": "P(bt_discount=1) >= P(bt_discount=100) - 5%",
+        "actual": "bt_discount=1 \u2192 100.0%, bt_discount=100 \u2192 67.19%",
+        "duration_ms": 49.3,
+        "error": null
+      },
+      {
+        "name": "empty_pnl_returns_none",
+        "group": "bayes",
+        "passed": true,
+        "expected": "None or p_positive=0.5 (degenerate prior)",
+        "actual": "p_positive=0.5000 (degenerate prior)",
+        "duration_ms": 0.3,
+        "error": null
+      },
+      {
+        "name": "positive_ev_has_high_p_positive",
+        "group": "bayes",
+        "passed": true,
+        "expected": "> 70%",
+        "actual": "100.0%",
+        "duration_ms": 0.4,
+        "error": null
+      }
+    ],
+    "bayes_live": [
+      {
+        "name": "zero_live_equals_bt_only",
+        "group": "bayes_live",
+        "passed": true,
+        "expected": "P equal (diff < 1e-6)",
+        "actual": "diff = 0.00000000",
+        "duration_ms": 49.1,
+        "error": null
+      },
+      {
+        "name": "winning_live_trades_increase_p_positive",
+        "group": "bayes_live",
+        "passed": true,
+        "expected": "P_live >= P_bt: 82.7%",
+        "actual": "P_live=100.0% | P_bt=82.7%",
+        "duration_ms": 49.0,
+        "error": null
+      },
+      {
+        "name": "losing_live_trades_decrease_p_positive",
+        "group": "bayes_live",
+        "passed": true,
+        "expected": "P_live <= P_bt: 82.7%",
+        "actual": "P_live=0.0% | P_bt=82.7%",
+        "duration_ms": 49.5,
+        "error": null
+      },
+      {
+        "name": "live_win_rate_tracked",
+        "group": "bayes_live",
+        "passed": true,
+        "expected": "live_win_rate \u2248 0.6667",
+        "actual": "0.6667",
+        "duration_ms": 47.5,
+        "error": null
+      },
+      {
+        "name": "n_live_count",
+        "group": "bayes_live",
+        "passed": true,
+        "expected": "5",
+        "actual": "5",
+        "duration_ms": 48.7,
+        "error": null
+      },
+      {
+        "name": "extreme_losing_streak_detectable",
+        "group": "bayes_live",
+        "passed": true,
+        "expected": "blind_risk > 30%",
+        "actual": "blind_risk = 100.0%",
+        "duration_ms": 49.6,
+        "error": null
+      }
+    ]
+  }
+}

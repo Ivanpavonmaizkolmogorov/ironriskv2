@@ -1,5 +1,11 @@
 [
   {
+    "id": "regression_suite_launch",
+    "date": "2026-04-22",
+    "tag": "feature",
+    "internal": true
+  },
+  {
     "id": "strategy_upload_fix",
     "date": "2026-04-22",
     "tag": "bugfix",

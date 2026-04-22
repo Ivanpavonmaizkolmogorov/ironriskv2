@@ -1,0 +1,44 @@
+name: Regression Tests
+
+on:
+  push:
+    branches: ["master", "main"]
+  pull_request:
+    branches: ["master", "main"]
+
+jobs:
+  regression:
+    name: IronRisk Regression Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+        working-directory: .
+
+      - name: Run regression suite
+        run: |
+          cd backend
+          python -m pytest tests/test_regression.py -v --tb=short
+        env:
+          # Use SQLite for test isolation — no real DB needed
+          DATABASE_URL: "sqlite:///./test_ironrisk.db"
+          SECRET_KEY: "test-secret-key-ci-only"
+          ENABLE_TELEGRAM_POLLER: "false"
+
+      - name: Upload test results cache (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-results
+          path: backend/test_results_cache.json
+          if-no-files-found: ignore

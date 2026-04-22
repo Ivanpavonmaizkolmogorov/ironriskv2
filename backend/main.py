@@ -2,6 +2,7 @@
 # Triggering Uvicorn reload to load .env variables...
 import logging
 import traceback
+import os
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -114,14 +115,12 @@ app.include_router(telegram_router)
 app.include_router(settings_router, prefix="/api/settings", tags=["System Settings"])
 app.include_router(vs_mode_router)
 
-from api import alerts, metrics_schema, waitlist, installer_telemetry
+from api import alerts, metrics_schema, waitlist, installer_telemetry, admin_tests
 app.include_router(alerts.router)
 app.include_router(metrics_schema.router)
 app.include_router(waitlist.router)
 app.include_router(installer_telemetry.router)
-
-import os
-from datetime import datetime, timezone
+app.include_router(admin_tests.router)
 
 _deploy_time = datetime.now(timezone.utc).strftime("%d-%b %H:%M UTC")
 _deploy_id = os.environ.get("DEPLOY_ID", "local")

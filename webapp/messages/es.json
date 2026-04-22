@@ -897,6 +897,10 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "regression_suite_launch": {
+        "title": "Suite de Tests de Regresión",
+        "body": "Implementada una suite de 18 tests automáticos (importación CSV, motor Bayesiano, trades live) visibles desde el Panel de Admin. GitHub Actions bloqueará ahora cualquier deploy si algún test falla."
+      },
       "strategy_upload_fix": {
         "title": "Corrección Carga de Estrategias",
         "body": "Reparado un bug nativo en el Workspace que hacía que todas las subidas de CSV perdieran su Magic Number y se llamaran 'Simulated Edge'. ¡La validación profunda de MetaTrader en formato CSV vuelve a ser la vía principal de configuración!"
