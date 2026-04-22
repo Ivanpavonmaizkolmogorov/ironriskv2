@@ -222,7 +222,7 @@ export const waitlistAPI = {
     api.post('/api/waitlist', { email, source, locale, motivation, password }),
   list: () => api.get('/api/waitlist'),
   remove: (id: string) => api.delete(`/api/waitlist/${id}`),
-  approve: (id: string) => api.post(`/api/waitlist/${id}/approve`),
+  approve: (id: string, silent: boolean = false) => api.post(`/api/waitlist/${id}/approve?silent=${silent}`),
 };
 
 // --- System Settings endpoints ---

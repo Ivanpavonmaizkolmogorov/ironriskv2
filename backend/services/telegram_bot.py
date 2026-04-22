@@ -263,8 +263,10 @@ async def telegram_bot_poller():
                         else:
                             # User just clicked start without deep link
                             await _send_message(bot_token, chat_id, "⚠️ Para conectar tu cuenta de IronRisk, inicia el bot desde el enlace generado en el Centro de Alertas en la aplicación web.")
-                    elif cmd.startswith("/a_"):
-                        lead_id = cmd[3:].replace("_", "-")
+                    elif cmd.startswith("/a_") or cmd.startswith("/as_"):
+                        is_silent = cmd.startswith("/as_")
+                        prefix_len = 4 if is_silent else 3
+                        lead_id = cmd[prefix_len:].replace("_", "-")
                         try:
                             from models.waitlist import WaitlistLead
                             from services.waitlist_service import execute_lead_approval
@@ -274,11 +276,14 @@ async def telegram_bot_poller():
                                     await _send_message(bot_token, chat_id, "❌ Lead no encontrado.")
                                 else:
                                     try:
-                                        res = execute_lead_approval(db, lead)
+                                        res = execute_lead_approval(db, lead, silent=is_silent)
                                         if res == "Already approved":
                                             await _send_message(bot_token, chat_id, f"⚠️ El lead {lead.email} ya estaba aprobado.")
                                         else:
-                                            await _send_message(bot_token, chat_id, f"✅ Lead {lead.email} aprobado con éxito.\nCuenta creada y correo enviado.")
+                                            success_msg = f"✅ Lead {lead.email} aprobado con éxito.\nCuenta creada y correo enviado." \
+                                                          if not is_silent else \
+                                                          f"✅ Lead {lead.email} aprobado (SILENCIOSO).\nCuenta creada pero NO se ha enviado correo."
+                                            await _send_message(bot_token, chat_id, success_msg)
                                     except ValueError as e:
                                         await _send_message(bot_token, chat_id, f"❌ Error: {e}")
                         except Exception as e:

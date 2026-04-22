@@ -1079,6 +1079,10 @@
       "waitlist_pills": {
         "title": "Suggestion Buttons",
         "body": "Added quick suggestion buttons to fill out motivation on waitlist registration."
+      },
+      "silent_approval": {
+        "title": "Silent approval",
+        "body": "Admins can create accounts without emails."
       }
     }
   }

@@ -12,8 +12,8 @@ from models.waitlist import WaitlistLead
 from models.trading_account import TradingAccount
 from services.email_service import EmailService
 
-def execute_lead_approval(db: Session, lead: WaitlistLead) -> str:
-    """Core logic to approve a lead, create user and workspace, and email the user."""
+def execute_lead_approval(db: Session, lead: WaitlistLead, silent: bool = False) -> str:
+    """Core logic to approve a lead, create user and workspace, and (optionally) email the user."""
     if lead.approved_at:
         return "Already approved"
         
@@ -54,11 +54,12 @@ def execute_lead_approval(db: Session, lead: WaitlistLead) -> str:
     db.commit()
 
     # 4. Dispatch Email
-    email_service = EmailService()
-    threading.Thread(
-        target=email_service.send_access_granted_email,
-        args=(lead.email, login_url, locale),
-        daemon=True,
-    ).start()
+    if not silent:
+        email_service = EmailService()
+        threading.Thread(
+            target=email_service.send_access_granted_email,
+            args=(lead.email, login_url, locale),
+            daemon=True,
+        ).start()
 
     return "Success"

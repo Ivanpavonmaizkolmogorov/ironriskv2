@@ -1079,6 +1079,10 @@
       "waitlist_pills": {
         "title": "Botones de Sugerencia",
         "body": "Añadidos botones para rellenar rápidamente el motivo en el registro."
+      },
+      "silent_approval": {
+        "title": "Aprobación silenciosa",
+        "body": "Los administradores pueden crear cuentas sin correo."
       }
     }
   }

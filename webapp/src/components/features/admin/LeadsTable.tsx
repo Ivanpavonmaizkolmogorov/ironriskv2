@@ -40,11 +40,11 @@ export default function LeadsTable() {
     fetchLeads();
   }, []);
 
-  const handleApprove = async (id: string, email: string) => {
-    if (!confirm(`Aprobar y enviar acceso a ${email}?`)) return;
+  const handleApprove = async (id: string, email: string, silent: boolean = false) => {
+    if (!confirm(silent ? `¿Crear cuenta para ${email} SILENCIOSAMENTE (sin enviar correo)?` : `¿Aprobar y enviar mensaje de acceso a ${email}?`)) return;
     setApproving(id);
     try {
-      await waitlistAPI.approve(id);
+      await waitlistAPI.approve(id, silent);
       setApprovedIds((prev) => new Set([...prev, id]));
     } catch (err: any) {
       alert(`Error: ${err?.response?.data?.detail || "Error al aprobar"}`);
@@ -143,24 +143,34 @@ export default function LeadsTable() {
                             Enviado
                           </span>
                         ) : (
-                          <button
-                            onClick={() => handleApprove(lead.id, lead.email)}
-                            disabled={isApproving}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-risk-green/15 border border-risk-green/30 text-risk-green text-xs font-semibold hover:bg-risk-green/25 transition-all disabled:opacity-50"
-                            title="Aprobar y enviar magic link"
-                          >
-                            {isApproving ? (
-                              <>
-                                <Clock className="w-3.5 h-3.5 animate-spin" />
-                                Enviando...
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                Aprobar
-                              </>
-                            )}
-                          </button>
+                          <div className="flex flex-col gap-1">
+                            <button
+                              onClick={() => handleApprove(lead.id, lead.email, false)}
+                              disabled={isApproving}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-risk-green/15 border border-risk-green/30 text-risk-green text-xs font-semibold hover:bg-risk-green/25 transition-all disabled:opacity-50"
+                              title="Aprobar y enviar email con token de acceso"
+                            >
+                              {isApproving ? (
+                                <>
+                                  <Clock className="w-3.5 h-3.5 animate-spin" />
+                                  Enviando...
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  Aprobar (Email)
+                                </>
+                              )}
+                            </button>
+                            <button
+                              onClick={() => handleApprove(lead.id, lead.email, true)}
+                              disabled={isApproving}
+                              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-iron-800/50 border border-iron-700/50 text-iron-400 text-xs hover:bg-iron-700/80 transition-all disabled:opacity-50"
+                              title="Crear cuenta sin enviar notificación al usuario"
+                            >
+                              Silencioso
+                            </button>
+                          </div>
                         )}
                         <button
                           onClick={() => handleDelete(lead.id)}

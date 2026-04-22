@@ -93,6 +93,7 @@ async def add_to_waitlist(
         
     safe_id = lead.id.replace("-", "_")
     msg += f"\n\n⚡ Para aprobar de inmediato:\n/a_{safe_id}"
+    msg += f"\n\n🤫 Aprobar sin enviar correo:\n/as_{safe_id}"
     background_tasks.add_task(send_admin_notification, msg)
 
     return WaitlistResponse(
@@ -109,7 +110,7 @@ async def list_leads(user: User = Depends(get_current_user), db: Session = Depen
 
 
 @router.post("/{lead_id}/approve")
-async def approve_lead(lead_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def approve_lead(lead_id: str, silent: bool = False, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Admin approves a waitlist lead — creates the account immediately and sends login email."""
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin only")
@@ -123,7 +124,7 @@ async def approve_lead(lead_id: str, user: User = Depends(get_current_user), db:
 
     from services.waitlist_service import execute_lead_approval
     try:
-        execute_lead_approval(db, lead)
+        execute_lead_approval(db, lead, silent=silent)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

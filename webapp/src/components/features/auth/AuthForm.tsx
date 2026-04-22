@@ -28,6 +28,7 @@ export default function AuthForm({ mode, onSuccess, className = "", defaultEmail
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [motivation, setMotivation] = useState("");
+  const [selectedPills, setSelectedPills] = useState<string[]>([]);
   const [localError, setLocalError] = useState("");
 
   // Waitlist state
@@ -70,7 +71,8 @@ export default function AuthForm({ mode, onSuccess, className = "", defaultEmail
     setWaitlistLoading(true);
     setLocalError("");
     try {
-      const res = await waitlistAPI.submit(email.trim().toLowerCase(), "register", locale, motivation, password);
+      const finalMotivation = [...selectedPills, motivation.trim()].filter(Boolean).join(" | ");
+      const res = await waitlistAPI.submit(email.trim().toLowerCase(), "register", locale, finalMotivation, password);
       setWaitlistSubmitted(true);
       setWaitlistAlready(res.data?.already_registered || false);
     } catch {
@@ -255,21 +257,19 @@ export default function AuthForm({ mode, onSuccess, className = "", defaultEmail
             
             <div className="flex flex-wrap gap-2">
               {(isEn 
-                ? ["Trade Funded Accounts", "Control my Drawdowns", "Automate Risk Management"]
-                : ["Operar Cuentas Fondeadas", "Controlar mis Drawdowns", "Gestión de Riesgo Auto."]
+                ? ["Trade Funded Accounts", "Control my Drawdowns", "Automate Risk Management", "Just Curious"]
+                : ["Operar Cuentas Fondeadas", "Controlar mis Drawdowns", "Gestión de Riesgo Auto.", "Por pura curiosidad"]
               ).map((opt) => (
                 <button
                   key={opt}
                   type="button"
                   onClick={() => {
-                    if (motivation.includes(opt)) {
-                      setMotivation(motivation.replace(opt, "").replace(/\|\s*\|/g, "|").replace(/^\|\s*|\s*\|$/g, "").trim());
-                    } else {
-                      setMotivation(motivation ? `${motivation} | ${opt}` : opt);
-                    }
+                    setSelectedPills(prev => 
+                      prev.includes(opt) ? prev.filter(p => p !== opt) : [...prev, opt]
+                    );
                   }}
                   className={`px-3 py-1 text-xs rounded-full border transition-all ${
-                    motivation.includes(opt)
+                    selectedPills.includes(opt)
                       ? "bg-risk-green/20 border-risk-green/50 text-risk-green"
                       : "bg-surface-primary border-iron-800/50 text-iron-400 hover:border-iron-600/50"
                   }`}
