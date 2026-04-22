@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import List
 import threading
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
@@ -47,7 +47,11 @@ class WaitlistLeadOut(BaseModel):
 
 
 @router.post("", response_model=WaitlistResponse)
-async def add_to_waitlist(body: WaitlistRequest, db: Session = Depends(get_db)):
+async def add_to_waitlist(
+    body: WaitlistRequest, 
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
     email = body.email.strip().lower()
 
     # Check for duplicate
@@ -81,6 +85,13 @@ async def add_to_waitlist(body: WaitlistRequest, db: Session = Depends(get_db)):
         args=(email, body.locale),
         daemon=True,
     ).start()
+
+    # Dispatch telegram notification to admin
+    from services.telegram_bot import send_admin_notification
+    msg = f"🔔 <b>Nuevo Lead (Waitlist)</b>\n📧 {email}\n🌍 {body.locale}\n📍 {body.source}"
+    if body.motivation:
+        msg += f"\n\n📝 <i>{body.motivation}</i>"
+    background_tasks.add_task(send_admin_notification, msg)
 
     return WaitlistResponse(
         message="¡Apuntado! Te avisaremos cuando haya plaza. 🚀" if body.locale == "es" else "You're on the list! We'll reach out when a spot opens. 🚀",

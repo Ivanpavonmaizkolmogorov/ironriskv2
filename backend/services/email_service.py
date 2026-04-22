@@ -3,6 +3,7 @@ from email.message import EmailMessage
 import logging
 import os
 from dotenv import load_dotenv
+from models.database import get_settings
 
 # Forced loading to capture changes immediately
 load_dotenv(override=True)
@@ -149,7 +150,8 @@ class EmailService:
             logger.warning(f"EmailService not configured. Skipping verification email to {recipient_email}.")
             return False
 
-        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        settings = get_settings()
+        frontend_url = getattr(settings, "FRONTEND_URL", "https://www.ironrisk.pro")
         verify_url = f"{frontend_url}/{locale}/verify-email?token={token}"
 
         if locale == "en":
@@ -236,7 +238,8 @@ class EmailService:
             lbl_warn = "Este enlace de seguridad caducará en 30 minutos."
             lbl_footer = "El Equipo de Cuantificación de IronRisk"
 
-        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        settings = get_settings()
+        frontend_url = getattr(settings, "FRONTEND_URL", "https://www.ironrisk.pro")
         reset_url = f"{frontend_url}/{locale}/reset-password?token={token}"
 
         html_content = f"""

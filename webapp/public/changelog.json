@@ -1,5 +1,12 @@
 [
   {
+    "id": "telegram_waitlist_alert",
+    "date": "2026-04-22",
+    "tag": "improvement",
+    "internal": true,
+    "has_regression_test": false
+  },
+  {
     "id": "direct_approve_flow",
     "date": "2026-04-22",
     "tag": "improvement",

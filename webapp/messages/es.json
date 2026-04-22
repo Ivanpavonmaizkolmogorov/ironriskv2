@@ -1059,6 +1059,10 @@
       "direct_approve_flow": {
         "title": "Aprobación crea cuenta directamente",
         "body": "Al aprobar un lead, la cuenta se crea inmediatamente. El usuario recibe un email para entrar con su email y contraseña, sin magic link."
+      },
+      "telegram_waitlist_alert": {
+        "title": "Alerta de leads en Telegram",
+        "body": "El admin recibe ahora una notificación de Telegram en tiempo real cuando un nuevo usuario se une a la lista de espera."
       }
     }
   }

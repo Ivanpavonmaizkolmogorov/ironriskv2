@@ -157,6 +157,21 @@ async def _pin_message(bot_token: str, chat_id: str, message_id: int):
             pass
 
 
+async def send_admin_notification(text: str):
+    """Send a notification specifically to the configured admin chat."""
+    bot_token = await _get_bot_token()
+    if not bot_token:
+        # Silently ignore if telegram isn't configured
+        return
+        
+    settings = get_settings()
+    chat_id = getattr(settings, "ADMIN_TELEGRAM_CHAT_ID", None)
+    if not chat_id:
+        return
+        
+    await _send_message(bot_token, chat_id, text)
+
+
 async def telegram_bot_poller():
     """Background task that polls Telegram getUpdates and responds to commands."""
     global _last_update_id

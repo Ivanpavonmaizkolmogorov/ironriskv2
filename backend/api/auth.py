@@ -132,8 +132,8 @@ def verify_email(token: str, db: Session = Depends(get_db)):
         logger.info(f"✅ Email verified for {user.email}")
 
     # Redirect to frontend login with verified flag
-    import os
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    settings = get_settings()
+    frontend_url = getattr(settings, "FRONTEND_URL", "https://www.ironrisk.pro")
     return RedirectResponse(url=f"{frontend_url}/es/login?verified=true")
 
 

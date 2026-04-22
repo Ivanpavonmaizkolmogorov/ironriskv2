@@ -1059,6 +1059,10 @@
       "direct_approve_flow": {
         "title": "Approval creates account instantly",
         "body": "Approving a lead now creates the account immediately. The user receives an email to log in with their credentials, no magic link required."
+      },
+      "telegram_waitlist_alert": {
+        "title": "Telegram lead alerts",
+        "body": "The admin now receives a real-time Telegram notification whenever a new user joins the waitlist."
       }
     }
   }
