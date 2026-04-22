@@ -21,6 +21,7 @@ export interface DashboardContext {
   isLightMode: boolean;
   isInteractiveMode: boolean;
   setIsInteractiveMode: React.Dispatch<React.SetStateAction<boolean>>;
+  onNavigateToView?: (viewId: string) => void;
 }
 
 export interface DashboardViewDef {

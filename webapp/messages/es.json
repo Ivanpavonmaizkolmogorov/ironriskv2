@@ -897,6 +897,10 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "bayes_snapshot_card": {
+        "title": "Tarjeta Resumen Bayesiano en Inspector",
+        "body": "El Inspector ahora muestra una tarjeta compacta con el veredicto del Motor Bayesiano (ESTABLE/VIGILAR/ANOMALÍA/CRÍTICO), barras de Riesgo Ciego y P(ventaja) directamente al seleccionar una estrategia. Un botón navega al análisis completo con un solo click."
+      },
       "risk_gauges_tests": {
         "title": "Tests: Risk Gauges (DD/Estancamiento/Racha)",
         "body": "Añadidos 15 tests de regresión para el motor de gauges: estado verde/ambar/rojo según percentiles, estado fatal al romper el límite físico (Pacto de Ulises), monotonía de percentiles, fallback sin distribución y propagación del flag de simulación."

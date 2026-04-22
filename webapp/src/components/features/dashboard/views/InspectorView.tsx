@@ -41,8 +41,92 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
     );
   }
 
+  // ── Bayesian snapshot (from bayes_cache injected by backend into metrics_snapshot) ──
+  const bayesCache = (activeAsset?.metrics_snapshot as any)?.bayes_cache as {
+    p_positive?: number;
+    blind_risk?: number;
+    verdict_status?: "green" | "amber" | "red" | "fatal";
+    n_live?: number;
+  } | null | undefined;
+
+  const statusMeta: Record<string, { icon: string; label: string; bg: string; border: string; text: string; bar: string }> = {
+    green:  { icon: "🟢", label: "ESTABLE",   bg: "bg-emerald-500/10", border: "border-emerald-500/30", text: "text-emerald-400", bar: "bg-gradient-to-r from-emerald-600 to-emerald-400" },
+    amber:  { icon: "🟡", label: "VIGILAR",   bg: "bg-amber-500/10",   border: "border-amber-500/30",   text: "text-amber-400",   bar: "bg-gradient-to-r from-amber-600 to-amber-400"   },
+    red:    { icon: "🔴", label: "ANOMALÍA",  bg: "bg-red-500/10",     border: "border-red-500/30",     text: "text-red-400",     bar: "bg-gradient-to-r from-red-700 to-red-500"        },
+    fatal:  { icon: "💀", label: "CRÍTICO",   bg: "bg-red-900/20",     border: "border-red-700/60",     text: "text-red-300",     bar: "bg-gradient-to-r from-red-900 to-red-600"        },
+  };
+
+  const vstatus = bayesCache?.verdict_status ?? null;
+  const vm = vstatus ? statusMeta[vstatus] : null;
+  const blindRisk = bayesCache?.blind_risk != null ? (bayesCache.blind_risk * 100).toFixed(1) : null;
+  const pPositive = bayesCache?.p_positive != null ? (bayesCache.p_positive * 100).toFixed(1) : null;
+
   return (
-    <div className="grid md:grid-cols-2 gap-4 items-start min-w-0 w-full">
+    <div className="flex flex-col gap-4 min-w-0 w-full">
+
+      {/* ═══ BAYESIAN SNAPSHOT CARD ═══ */}
+      <div className={`bg-iron-900 border rounded-xl p-3 flex items-center gap-4 shadow-lg min-w-0 w-full overflow-hidden transition-all ${vm ? `${vm.border}` : "border-iron-800"}`}>
+        {/* Status badge */}
+        {vm ? (
+          <div className={`flex flex-col items-center justify-center shrink-0 w-[90px] sm:w-[110px] p-2.5 rounded-xl border ${vm.bg} ${vm.border}`}>
+            <span className="text-3xl mb-0.5">{vm.icon}</span>
+            <span className={`font-mono font-bold text-[11px] tracking-widest ${vm.text}`}>{vm.label}</span>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center shrink-0 w-[90px] sm:w-[110px] p-2.5 rounded-xl border border-iron-700 bg-iron-800/40">
+            <span className="text-3xl mb-0.5">🧠</span>
+            <span className="font-mono font-bold text-[11px] tracking-widest text-iron-500">SIN DATOS</span>
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] text-iron-500 font-semibold uppercase tracking-wider mb-1">Motor Bayesiano</p>
+
+          {vm && blindRisk != null ? (
+            <>
+              {/* Blind risk bar */}
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-[10px] text-iron-400 shrink-0 w-[72px]">Riesgo Ciego</span>
+                <div className="flex-1 bg-iron-800 rounded-full h-2 overflow-hidden">
+                  <div className={`h-full rounded-full ${vm.bar}`} style={{ width: `${Math.min(parseFloat(blindRisk), 100)}%` }} />
+                </div>
+                <span className={`font-mono text-xs font-bold shrink-0 ${vm.text}`}>{blindRisk}%</span>
+              </div>
+              {/* P(EV>0) */}
+              {pPositive != null && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-iron-400 shrink-0 w-[72px]">P(ventaja)</span>
+                  <div className="flex-1 bg-iron-800 rounded-full h-2 overflow-hidden">
+                    <div className="h-full rounded-full bg-gradient-to-r from-cyan-700 to-cyan-400" style={{ width: `${Math.min(parseFloat(pPositive), 100)}%` }} />
+                  </div>
+                  <span className="font-mono text-xs font-bold shrink-0 text-cyan-400">{pPositive}%</span>
+                </div>
+              )}
+              {bayesCache?.n_live != null && (
+                <p className="text-[9px] text-iron-600 mt-1.5">{bayesCache.n_live} trades live procesados</p>
+              )}
+            </>
+          ) : (
+            <p className="text-xs text-iron-500 leading-relaxed">
+              Selecciona la pestaña <span className="text-iron-300 font-semibold">🧠 Motor Bayesiano</span> para cargar el análisis estadístico completo de esta estrategia.
+            </p>
+          )}
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={() => context.onNavigateToView?.("ml-bayes")}
+          className="shrink-0 flex items-center gap-1.5 bg-iron-800 hover:bg-iron-700 border border-iron-700 hover:border-cyan-500/50 text-iron-300 hover:text-cyan-300 text-[11px] font-semibold px-3 py-2 rounded-lg transition-all duration-200 group"
+        >
+          <span className="text-base">🧠</span>
+          <span className="hidden sm:inline">Análisis<br/>completo</span>
+          <span className="text-iron-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-transform">→</span>
+        </button>
+      </div>
+
+      {/* ═══ MAIN GRID: Equity Curves + Distribution + Metrics ═══ */}
+      <div className="grid md:grid-cols-2 gap-4 items-start min-w-0 w-full">
       {/* ═══ LEFT COLUMN: Equity Curves (Backtest + Live) ═══ */}
       <div className="flex flex-col gap-4 min-w-0 w-full overflow-hidden">
         {/* CARD 1: Backtest Equity Curve */}
@@ -379,6 +463,7 @@ export const InspectorView: React.FC<{ context: DashboardContext }> = ({ context
           accountId={accountId}
         />
       )}
+      </div>{/* end grid */}
     </div>
   );
 };

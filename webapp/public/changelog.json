@@ -1,5 +1,11 @@
 [
   {
+    "id": "bayes_snapshot_card",
+    "date": "2026-04-22",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "risk_gauges_tests",
     "date": "2026-04-22",
     "tag": "feature",

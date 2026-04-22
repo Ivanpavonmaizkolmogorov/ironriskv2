@@ -620,7 +620,7 @@ export default function DashboardPage() {
 
               {/* Injected View */}
               {activeAsset ? (() => {
-                 const ctx: DashboardContext = {
+               const ctx: DashboardContext = {
                    activeAsset,
                    liveEquity,
                    chartLoading,
@@ -636,7 +636,8 @@ export default function DashboardPage() {
                    tWorkspace,
                    isLightMode,
                    isInteractiveMode,
-                   setIsInteractiveMode
+                   setIsInteractiveMode,
+                   onNavigateToView: setActiveDashboardView,
                  };
                  const currentView = DASHBOARD_VIEWS.find(v => v.id === activeDashboardView);
                  return currentView ? currentView.renderComponent(ctx) : null;
