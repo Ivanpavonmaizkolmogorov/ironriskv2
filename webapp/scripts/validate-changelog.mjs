@@ -38,7 +38,9 @@ try {
       `    "id": "mi_cambio",\n` +
       `    "date": "${today}",\n` +
       `    "tag": "feature|fix|improvement",\n` +
-      `    "internal": false\n` +
+      `    "internal": false,\n` +
+      `    // Si tag es "fix", añade también:\n` +
+      `    "has_regression_test": true|false\n` +
       `  }\n` +
       `\n` +
       `  Y las traducciones en messages/es.json y messages/en.json:\n` +

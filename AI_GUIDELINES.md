@@ -33,3 +33,35 @@ IronRisk is a multi-language application powered by `next-intl`.
   - **Rule**: If a calculation spans more than 10 lines, encapsulate it within a class method.
   - **Rule**: Never use standalone functions for domain logic — always use instantiable or static classes.
 - **Non-Intrusive UX**: Tooltips should behave beautifully with dotted underlines instead of giant annoying floating `(i)` icons. 
+
+## 6. 🧪 MANDATORY: Regression Tests for Bug Fixes
+
+> **THIS IS A HARD RULE. No exceptions. Read carefully.**
+
+When a bug is fixed in this codebase, the fix is meaningless unless it is accompanied by a regression test that **would detect the bug if it reappears**. This is enforced at commit time by the pre-commit hook.
+
+### The Rule
+- `tag: "fix"` in `webapp/public/changelog.json` **requires** `"has_regression_test": true` AND a test file in `backend/tests/` that references the fix `id`.
+- There is **no `false` option**. If the bug cannot be reproduced by a test (e.g., a pure CSS/layout fix), use `tag: "improvement"` instead of `tag: "fix"`.
+- The test file must contain the changelog entry `id` in a comment or assertion so the hook can locate it.
+
+### Workflow for Bug Fixes
+1. Reproduce the bug in a test (`backend/tests/test_<area>.py`) — the test **must fail** before the fix.
+2. Fix the bug — the test now passes.
+3. Add to `webapp/public/changelog.json`:
+   ```json
+   {
+     "id": "my_bug_fix",
+     "date": "YYYY-MM-DD",
+     "tag": "fix",
+     "internal": false,
+     "has_regression_test": true
+   }
+   ```
+4. The pre-commit hook verifies `backend/tests/` contains a file referencing `"my_bug_fix"`. If not, the commit is blocked.
+
+### Why This Exists
+IronRisk is a risk management tool. A bug that goes undetected twice is a product failure. Regression tests are the only reliable way to guarantee a bug stays fixed across deployments and across AI-assisted development sessions.
+
+**If the pre-commit hook blocks you for a fix without a test, DO NOT change the tag to `improvement` to bypass it. Write the test.**
+
