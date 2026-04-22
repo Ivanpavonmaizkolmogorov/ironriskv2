@@ -91,6 +91,8 @@ async def add_to_waitlist(
     msg = f"🔔 <b>Nuevo Lead (Waitlist)</b>\n📧 {email}\n🌍 {body.locale}\n📍 {body.source}"
     if body.motivation:
         msg += f"\n\n📝 <i>{body.motivation}</i>"
+        
+    msg += f"\n\n⚡ Para aprobar de inmediato:\n/a_{lead.id}"
     background_tasks.add_task(send_admin_notification, msg)
 
     return WaitlistResponse(
@@ -119,45 +121,11 @@ async def approve_lead(lead_id: str, user: User = Depends(get_current_user), db:
     if not lead.password_hash:
         raise HTTPException(status_code=400, detail="No password stored for this lead. Ask them to re-register.")
 
-    locale = lead.locale or "es"
-    settings = get_settings()
-    frontend_url = getattr(settings, "FRONTEND_URL", "https://www.ironrisk.pro")
-    login_url = f"{frontend_url}/{locale}/login"
-
-    # Check if account already exists
-    existing_user = db.query(User).filter(User.email == lead.email).first()
-    if not existing_user:
-        import uuid as _uuid
-        from models.trading_account import TradingAccount
-
-        new_user = User(
-            id=str(_uuid.uuid4()),
-            email=lead.email,
-            hashed_password=lead.password_hash,
-            email_verified=True,
-            is_admin=False,
-        )
-        db.add(new_user)
-
-        default_ws = TradingAccount(
-            id=str(_uuid.uuid4()),
-            user_id=new_user.id,
-            name="Mi Cuenta Principal",
-            account_number="",
-            broker="",
-        )
-        db.add(default_ws)
-
-    # Mark as approved
-    lead.approved_at = datetime.now(timezone.utc)
-    db.commit()
-
-    # Send simple "you can now log in" email
-    threading.Thread(
-        target=email_service.send_access_granted_email,
-        args=(lead.email, login_url, locale),
-        daemon=True,
-    ).start()
+    from services.waitlist_service import execute_lead_approval
+    try:
+        execute_lead_approval(db, lead)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return {"status": "ok", "detail": f"Account created and access email sent to {lead.email}"}
 

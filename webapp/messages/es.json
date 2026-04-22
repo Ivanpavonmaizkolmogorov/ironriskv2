@@ -1071,6 +1071,10 @@
       "telegram_admin_fallback": {
         "title": "Fallback telegram admins",
         "body": "-"
+      },
+      "telegram_approve_command": {
+        "title": "Aprobación rápida desde Telegram",
+        "body": "Los administradores ahora pueden aprobar leads de la lista de espera con un solo clic directamente desde la notificación de Telegram."
       }
     }
   }

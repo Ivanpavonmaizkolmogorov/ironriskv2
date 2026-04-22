@@ -1,5 +1,11 @@
 [
   {
+    "id": "telegram_approve_command",
+    "date": "2026-04-22",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "telegram_admin_fallback",
     "date": "2026-04-22",
     "tag": "improvement",

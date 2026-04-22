@@ -1071,6 +1071,10 @@
       "telegram_admin_fallback": {
         "title": "Fallback telegram admins",
         "body": "-"
+      },
+      "telegram_approve_command": {
+        "title": "Fast Telegram approval",
+        "body": "Admins can now approve waitlist leads with a single click directly from the Telegram alert message."
       }
     }
   }

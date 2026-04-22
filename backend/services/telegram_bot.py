@@ -263,6 +263,27 @@ async def telegram_bot_poller():
                         else:
                             # User just clicked start without deep link
                             await _send_message(bot_token, chat_id, "⚠️ Para conectar tu cuenta de IronRisk, inicia el bot desde el enlace generado en el Centro de Alertas en la aplicación web.")
+                    elif cmd.startswith("/a_"):
+                        lead_id = cmd[3:]
+                        try:
+                            from models.waitlist import WaitlistLead
+                            from services.waitlist_service import execute_lead_approval
+                            with SessionLocal() as db:
+                                lead = db.query(WaitlistLead).filter(WaitlistLead.id == lead_id).first()
+                                if not lead:
+                                    await _send_message(bot_token, chat_id, "❌ Lead no encontrado.")
+                                else:
+                                    try:
+                                        res = execute_lead_approval(db, lead)
+                                        if res == "Already approved":
+                                            await _send_message(bot_token, chat_id, f"⚠️ El lead {lead.email} ya estaba aprobado.")
+                                        else:
+                                            await _send_message(bot_token, chat_id, f"✅ Lead {lead.email} aprobado con éxito.\nCuenta creada y correo enviado.")
+                                    except ValueError as e:
+                                        await _send_message(bot_token, chat_id, f"❌ Error: {e}")
+                        except Exception as e:
+                            logger.error(f"Error approving from telegram: {e}")
+                            await _send_message(bot_token, chat_id, "❌ Error interno al aprobar.")
                     # Unknown commands — silently ignore
 
         except httpx.ReadTimeout:
