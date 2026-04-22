@@ -897,6 +897,10 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "risk_gauges_tests": {
+        "title": "Tests: Risk Gauges (DD/Stagnation/Streaks)",
+        "body": "Added 15 regression tests for the gauge engine: green/amber/red status via percentile thresholds, fatal status when physical limit is breached (Ulysses Pact), percentile monotonicity, no-distribution fallback, and simulated flag propagation."
+      },
       "test_fixture_path_fix": {
         "title": "Fix: Tests Self-Contained on VPS",
         "body": "Regression tests were failing on the production server (0ms = immediate crash) because the demo CSV was resolved via a repo-relative path that does not exist on the VPS. Fix: CSV moved to backend/tests/fixtures/ so tests are fully self-contained and portable."

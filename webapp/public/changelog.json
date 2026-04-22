@@ -1,5 +1,11 @@
 [
   {
+    "id": "risk_gauges_tests",
+    "date": "2026-04-22",
+    "tag": "feature",
+    "internal": true
+  },
+  {
     "id": "test_fixture_path_fix",
     "date": "2026-04-22",
     "tag": "bugfix",

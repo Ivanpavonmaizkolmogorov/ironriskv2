@@ -897,6 +897,10 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "risk_gauges_tests": {
+        "title": "Tests: Risk Gauges (DD/Estancamiento/Racha)",
+        "body": "Añadidos 15 tests de regresión para el motor de gauges: estado verde/ambar/rojo según percentiles, estado fatal al romper el límite físico (Pacto de Ulises), monotonía de percentiles, fallback sin distribución y propagación del flag de simulación."
+      },
       "test_fixture_path_fix": {
         "title": "Corrección Tests en Producción",
         "body": "Los tests de regresión fallaban en el servidor (0ms = crash inmediato) porque el fichero CSV demo se buscaba con una ruta relativa al repositorio completo que no existía en el VPS. Solución: el CSV se mueve a backend/tests/fixtures/ y los tests lo referencian desde ahí, siendo ahora auto-contenidos."

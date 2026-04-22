@@ -1,10 +1,10 @@
 {
-  "run_at": "2026-04-22T10:08:59.398508+00:00",
-  "total": 23,
-  "passed": 23,
+  "run_at": "2026-04-22T10:19:36.354687+00:00",
+  "total": 38,
+  "passed": 38,
   "failed": 0,
   "success_rate": 100.0,
-  "duration_ms": 1904.7,
+  "duration_ms": 1988.2,
   "groups": {
     "csv_import": [
       {
@@ -13,7 +13,7 @@
         "passed": true,
         "expected": "File exists",
         "actual": "C:\\Users\\ivanp\\Desktop\\Symbols\\Porfolios\\ironriskv2\\backend\\tests\\fixtures\\demo_backtest.csv",
-        "duration_ms": 0.0,
+        "duration_ms": 0.1,
         "error": null
       },
       {
@@ -22,7 +22,7 @@
         "passed": true,
         "expected": "762",
         "actual": "762",
-        "duration_ms": 1287.3,
+        "duration_ms": 1336.7,
         "error": null
       },
       {
@@ -31,7 +31,7 @@
         "passed": true,
         "expected": "All trades have 'pnl'",
         "actual": "OK",
-        "duration_ms": 45.3,
+        "duration_ms": 50.3,
         "error": null
       },
       {
@@ -40,7 +40,7 @@
         "passed": true,
         "expected": "equity_curve non-empty",
         "actual": "762 points",
-        "duration_ms": 45.2,
+        "duration_ms": 47.9,
         "error": null
       },
       {
@@ -58,7 +58,7 @@
         "passed": true,
         "expected": "wins > 0 AND losses > 0",
         "actual": "347 wins, 415 losses",
-        "duration_ms": 45.3,
+        "duration_ms": 48.7,
         "error": null
       }
     ],
@@ -69,7 +69,7 @@
         "passed": true,
         "expected": "50% <= P(EV>0) <= 100%",
         "actual": "82.7%",
-        "duration_ms": 50.4,
+        "duration_ms": 52.6,
         "error": null
       },
       {
@@ -78,7 +78,7 @@
         "passed": true,
         "expected": "82.7% \u00b12.0%",
         "actual": "82.7%",
-        "duration_ms": 48.4,
+        "duration_ms": 47.4,
         "error": null
       },
       {
@@ -87,7 +87,7 @@
         "passed": true,
         "expected": "100.0%",
         "actual": "100.0%",
-        "duration_ms": 49.6,
+        "duration_ms": 53.8,
         "error": null
       },
       {
@@ -96,7 +96,7 @@
         "passed": true,
         "expected": "P(bt_discount=1) >= P(bt_discount=100) - 5%",
         "actual": "bt_discount=1 \u2192 100.0%, bt_discount=100 \u2192 67.19%",
-        "duration_ms": 50.2,
+        "duration_ms": 51.9,
         "error": null
       },
       {
@@ -125,7 +125,7 @@
         "passed": true,
         "expected": "P equal (diff < 1e-6)",
         "actual": "diff = 0.00000000",
-        "duration_ms": 48.0,
+        "duration_ms": 48.5,
         "error": null
       },
       {
@@ -134,7 +134,7 @@
         "passed": true,
         "expected": "P_live >= P_bt: 82.7%",
         "actual": "P_live=100.0% | P_bt=82.7%",
-        "duration_ms": 46.9,
+        "duration_ms": 48.9,
         "error": null
       },
       {
@@ -143,7 +143,7 @@
         "passed": true,
         "expected": "P_live <= P_bt: 82.7%",
         "actual": "P_live=0.0% | P_bt=82.7%",
-        "duration_ms": 48.9,
+        "duration_ms": 48.6,
         "error": null
       },
       {
@@ -152,7 +152,7 @@
         "passed": true,
         "expected": "live_win_rate \u2248 0.6667",
         "actual": "0.6667",
-        "duration_ms": 47.2,
+        "duration_ms": 47.9,
         "error": null
       },
       {
@@ -161,7 +161,7 @@
         "passed": true,
         "expected": "5",
         "actual": "5",
-        "duration_ms": 46.1,
+        "duration_ms": 49.1,
         "error": null
       },
       {
@@ -170,7 +170,7 @@
         "passed": true,
         "expected": "blind_risk > 30%",
         "actual": "blind_risk = 100.0%",
-        "duration_ms": 45.1,
+        "duration_ms": 48.8,
         "error": null
       }
     ],
@@ -218,6 +218,143 @@
         "expected": "selected='id-20' is in sorted list at non-0 position; sorted[0]='id-58'",
         "actual": "selected='id-20', sorted[0]='id-58', highlighted='id-20'",
         "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "risk_gauges": [
+      {
+        "name": "dd_green_when_value_low",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status=green, percentile<50",
+        "actual": "status=green, percentile=6.1",
+        "duration_ms": 4.1,
+        "error": null
+      },
+      {
+        "name": "dd_amber_when_value_high",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status=amber (pct ~90, amber=85, red=95)",
+        "actual": "status=amber, percentile=91.5",
+        "duration_ms": 0.4,
+        "error": null
+      },
+      {
+        "name": "dd_red_when_value_extreme",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status=red, percentile>=95",
+        "actual": "status=red, percentile=99.6",
+        "duration_ms": 0.2,
+        "error": null
+      },
+      {
+        "name": "dd_fatal_when_limit_breached",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status=fatal, limit_breached=True",
+        "actual": "status=fatal, limit_breached=True",
+        "duration_ms": 0.2,
+        "error": null
+      },
+      {
+        "name": "dd_not_fatal_when_limit_disabled",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status != fatal (limit disabled)",
+        "actual": "status=red",
+        "duration_ms": 0.2,
+        "error": null
+      },
+      {
+        "name": "stagnation_trades_green",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status=green (15 trades stagnation is low)",
+        "actual": "status=green, percentile=3.0",
+        "duration_ms": 0.1,
+        "error": null
+      },
+      {
+        "name": "stagnation_trades_red",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status=red (beyond historical max)",
+        "actual": "status=red, percentile=99.9",
+        "duration_ms": 0.1,
+        "error": null
+      },
+      {
+        "name": "stagnation_days_fatal",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status=fatal (90 >= limit 90)",
+        "actual": "status=fatal, limit_breached=True",
+        "duration_ms": 0.2,
+        "error": null
+      },
+      {
+        "name": "consec_losses_green_small_streak",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status=green",
+        "actual": "status=green, percentile=8.0",
+        "duration_ms": 0.1,
+        "error": null
+      },
+      {
+        "name": "consec_losses_red_extreme_streak",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status=red (25 > max hist 20)",
+        "actual": "status=red, percentile=99.9",
+        "duration_ms": 0.1,
+        "error": null
+      },
+      {
+        "name": "no_fit_defaults_to_green",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "status=green, percentile=0.0",
+        "actual": "status=green, percentile=0.0",
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "name": "result_keys_always_present",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "Keys: ['current', 'limit', 'limit_breached', 'percentile', 'simulated', 'status']",
+        "actual": "All present: ['current', 'limit', 'limit_breached', 'percentile', 'simulated', 'status']",
+        "duration_ms": 0.2,
+        "error": null
+      },
+      {
+        "name": "simulated_flag_forwarded",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "simulated=True",
+        "actual": "simulated=True",
+        "duration_ms": 0.2,
+        "error": null
+      },
+      {
+        "name": "percentile_monotonic_with_value",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "Monotonic: [(200, 0.1), (350, 6.1), (500, 50.5), (600, 85.5), (700, 98.2), (800, 99.9)]",
+        "actual": "None \u2014 strictly monotonic",
+        "duration_ms": 0.3,
+        "error": null
+      },
+      {
+        "name": "daily_loss_gauge_structure",
+        "group": "risk_gauges",
+        "passed": true,
+        "expected": "current=210.0, status in {green,amber,red,fatal}",
+        "actual": "current=210.0, status=green",
+        "duration_ms": 0.2,
         "error": null
       }
     ]
