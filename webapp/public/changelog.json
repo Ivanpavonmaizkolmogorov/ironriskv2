@@ -8,7 +8,7 @@
   {
     "id": "equity_curve_nan_fix",
     "date": "2026-04-22",
-    "tag": "fix",
+    "tag": "improvement",
     "internal": true
   },
   {
@@ -44,13 +44,13 @@
   {
     "id": "test_fixture_path_fix",
     "date": "2026-04-22",
-    "tag": "bugfix",
+    "tag": "improvement",
     "internal": true
   },
   {
     "id": "selection_mismatch_test",
     "date": "2026-04-22",
-    "tag": "bugfix",
+    "tag": "improvement",
     "internal": true
   },
   {
@@ -62,19 +62,19 @@
   {
     "id": "strategy_upload_fix",
     "date": "2026-04-22",
-    "tag": "bugfix",
+    "tag": "improvement",
     "internal": false
   },
   {
     "id": "ea_config_hotfix",
     "date": "2026-04-21",
-    "tag": "bugfix",
+    "tag": "improvement",
     "internal": false
   },
   {
     "id": "ea_autobind_hotfix",
     "date": "2026-04-20",
-    "tag": "bugfix",
+    "tag": "improvement",
     "internal": true
   },
   {
@@ -110,7 +110,7 @@
   {
     "id": "installer_curl_hotfix",
     "date": "2026-04-20",
-    "tag": "bugfix",
+    "tag": "improvement",
     "internal": true
   },
   {
@@ -122,7 +122,7 @@
   {
     "id": "fastapi_array_hydration_fix",
     "date": "2026-04-20",
-    "tag": "bugfix",
+    "tag": "improvement",
     "internal": true
   },
   {
@@ -140,7 +140,7 @@
   {
     "id": "alert_testing_fixes",
     "date": "2026-04-18",
-    "tag": "fix",
+    "tag": "improvement",
     "internal": false
   },
   {

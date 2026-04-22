@@ -37,15 +37,48 @@ try {
       `  {\n` +
       `    "id": "mi_cambio",\n` +
       `    "date": "${today}",\n` +
-      `    "tag": "feature|fix|improvement",\n` +
-      `    "internal": false,\n` +
+      `    "tag": "feature|fix|improvement|refactor",\n` +
+      `    "internal": false\n` +
       `    // Si tag es "fix", añade también:\n` +
-      `    "has_regression_test": true|false\n` +
+      `    // "has_regression_test": true\n` +
       `  }\n` +
       `\n` +
       `  Y las traducciones en messages/es.json y messages/en.json:\n` +
       `  "changelog": { "entries": { "mi_cambio": { "title": "...", "body": "..." } } }\n`
     );
+  }
+
+  // ── Tag whitelist ────────────────────────────────────────────────────────
+  // ONLY these exact strings are valid. "fixed", "bugfix", "fix:ui", etc. are rejected.
+  // This prevents agents from accidentally bypassing the regression-test gate
+  // by using a tag variant that the pre-commit hook doesn't recognize.
+  // To add a new allowed tag, update this array AND the pre-commit hook condition.
+  const ALLOWED_TAGS = ['feature', 'fix', 'improvement', 'refactor'];
+
+  for (const entry of entries) {
+    if (!ALLOWED_TAGS.includes(entry.tag)) {
+      fail(
+        `changelog.json — tag inválido en el entry "${entry.id}": "${entry.tag}"\n\n` +
+        `  Tags permitidos: ${ALLOWED_TAGS.map(t => `"${t}"`).join(' | ')}\n\n` +
+        `  ⚠️  Usar variantes como "fixed", "bugfix", "fix:ui", etc. está prohibido\n` +
+        `  porque el pre-commit hook solo reconoce "fix" exacto para el gate de\n` +
+        `  tests de regresión (ver AI_GUIDELINES.md § 6).`
+      );
+    }
+  }
+
+  // ── Fix entries must declare has_regression_test: true ───────────────────
+  // "false" is not a valid value — see AI_GUIDELINES.md § 6.
+  for (const entry of entries) {
+    if (entry.tag === 'fix' && entry.has_regression_test !== true) {
+      fail(
+        `changelog.json — entry "${entry.id}" tiene tag "fix" pero le falta\n` +
+        `has_regression_test: true\n\n` +
+        `  Todo fix DEBE ir acompañado de su test de regresión.\n` +
+        `  Si el bug no es testable (fix CSS/layout puro), usa tag: "improvement".\n` +
+        `  Ver AI_GUIDELINES.md § 6.`
+      );
+    }
   }
 
   // Verify i18n keys exist for all non-internal entries
