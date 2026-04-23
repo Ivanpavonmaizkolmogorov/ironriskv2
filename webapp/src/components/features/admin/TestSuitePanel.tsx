@@ -95,9 +95,9 @@ function TestRow({ test }: { test: SingleTestResult }) {
 }
 
 function GroupPanel({ groupKey, tests }: { groupKey: string; tests: SingleTestResult[] }) {
-  const [open, setOpen] = useState(true);
   const passed = tests.filter(t => t.passed).length;
   const allPassed = passed === tests.length;
+  const [open, setOpen] = useState(!allPassed);
 
   return (
     <div className="border border-surface-tertiary rounded-xl overflow-hidden">
