@@ -251,8 +251,17 @@
     "badge": "Beta Cerrada Oficial",
     "heroTitle1": "Tres semanas en negativo.",
     "heroTitle2": "¿Rota — o varianza?",
+    "heroBridge": "Sube tu backtest. Conecta tu cuenta. Recibe un veredicto en tiempo real.",
     "heroDesc": "Tu backtest ya ha respondido esa pregunta miles de veces. IronRisk conecta tu historial estadístico con tu cuenta live en tiempo real — para que sepas si lo que estás viendo es una señal de alarma real o el ruido esperado de tu sistema. Antes de tocar nada.",
     "heroTag": "Tu backtest, vivo y vigilando tu cuenta 24/7. Cero suposiciones, puro contexto estadístico.",
+    "heroScreenshotCaption": "Dashboard real de IronRisk — Veredicto de Riesgo en tiempo real",
+    "caseTitle": "Caso real",
+    "caseStrategy": "Estrategia USDJPY — BuyStopPlus V5",
+    "caseMetric": "Drawdown en live:",
+    "caseMetricValue": "$9,730",
+    "caseContext": "El backtest muestra que esto ocurre el 94% del tiempo.",
+    "casePercentile": "Percentil 94",
+    "caseVerdict": "Dentro del rango esperado. Sigue operando.",
     "emailPlaceholder": "tu@email.com",
     "emailBtnSmall": "Analizar Estrategia →",
     "emailBtnLarge": "🚀 Analiza Tu Estrategia Gratis",
@@ -303,6 +312,17 @@
     "feat3Title": "Vigilancia de VPS y Desconexiones",
     "feat3Desc": "¿Operas con estrategias en un VPS? Si tu sistema se desconecta — porque el VPS se apagó, MT5 se cerró o la conexión falló — IronRisk lo detecta y te avisa al instante por Telegram. Deja de descubrir que tu estrategia llevaba horas parada.",
     "featSectionTitle": "Lo que incluye tu escudo",
+    "showcaseTitle": "Así se ve por dentro",
+    "showcase1Title": "Veredicto de Riesgo en Tiempo Real",
+    "showcase1Desc": "El Monitor analiza tus métricas live contra tu backtest y emite un veredicto instantáneo: CONSISTENTE, DESVIACIÓN o ANOMALÍA. Incluye tu Riesgo Ciego — la probabilidad bayesiana de que estés operando sin ventaja real. Sin interpretación subjetiva, pura estadística.",
+    "showcase2Title": "Motor Bayesiano",
+    "showcase2Desc": "Ves la campana de tu expectancy y tu equity real lado a lado. Si la zona verde domina, tus trades confirman ventaja. Si la roja crece, tus resultados se parecen cada vez más a ruido. Sin opiniones — lo que dicen tus propios números.",
+    "showcase3Title": "Centro de Alertas",
+    "showcase3Desc": "Todas las alertas de todas tus estrategias, centralizadas. Cada vez que una métrica entra en zona inusual, recibes una notificación con el contexto estadístico exacto.",
+    "showcase4Title": "Inspector Micro — Distribuciones",
+    "showcase4Desc": "Click en cualquier métrica y visualiza exactamente dónde estás en la campana de probabilidad. Tu drawdown deja de ser un número para convertirse en un percentil que puedes interpretar.",
+    "showcase5Title": "Panel de Métricas — Vista Rápida",
+    "showcase5Desc": "Cinco métricas de riesgo, cinco barras de progreso, cinco percentiles. De un vistazo sabes si tu drawdown, pérdida diaria, días de estancamiento y rachas negativas están dentro de lo esperado. Sin abrir ningún gráfico.",
     "footerTagline": "Datos fríos. Cero gurús.",
     "errorSubmit": "Error al enviar. Inténtalo de nuevo.",
     "errorNetwork": "Error de red. Inténtalo de nuevo.",
@@ -1087,6 +1107,10 @@
       "tutorial_rephrase": {
         "title": "Actualización Guía",
         "body": "Instrucciones de instalación de Servicio actualizadas."
+      },
+      "landing_showcase": {
+        "title": "Showcase Visual de Features",
+        "body": "La landing page ahora muestra screenshots reales de cada feature: Veredicto, Motor Bayesiano, Alertas, Inspector y Métricas. Cada bloque incluye una imagen específica por idioma."
       }
     }
   }

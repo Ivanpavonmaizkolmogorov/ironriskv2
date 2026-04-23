@@ -1,5 +1,11 @@
 [
   {
+    "id": "landing_showcase",
+    "date": "2026-04-23",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "beta_invite_video_update",
     "date": "2026-04-23",
     "tag": "feature",

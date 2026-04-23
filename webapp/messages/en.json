@@ -259,8 +259,17 @@
     "badge": "Official Closed Beta",
     "heroTitle1": "Three weeks in the red.",
     "heroTitle2": "Broken — or variance?",
+    "heroBridge": "Upload your backtest. Connect your account. Get a verdict in real time.",
     "heroDesc": "Your backtest has already answered that question thousands of times. IronRisk connects your statistical history to your live account in real time — so you know whether what you're seeing is a real warning sign or just expected noise. Before you touch anything.",
     "heroTag": "Your backtest, alive and watching your account 24/7. Zero assumptions, pure statistical context.",
+    "heroScreenshotCaption": "Real IronRisk dashboard — Live Risk Verdict",
+    "caseTitle": "Real case",
+    "caseStrategy": "USDJPY Strategy — BuyStopPlus V5",
+    "caseMetric": "Live drawdown:",
+    "caseMetricValue": "$9,730",
+    "caseContext": "The backtest shows this happens 94% of the time.",
+    "casePercentile": "Percentile 94",
+    "caseVerdict": "Within expected range. Keep trading.",
     "emailPlaceholder": "you@email.com",
     "emailBtnSmall": "Analyze Strategy →",
     "emailBtnLarge": "🚀 Analyze Your Strategy Free",
@@ -311,6 +320,17 @@
     "feat3Title": "VPS & Disconnection Monitoring",
     "feat3Desc": "Running strategies on a VPS? If your system disconnects — because the VPS shut down, MT5 crashed, or the connection dropped — IronRisk detects it instantly and alerts you via Telegram. Stop finding out your strategy has been offline for hours.",
     "featSectionTitle": "What your shield includes",
+    "showcaseTitle": "See it from the inside",
+    "showcase1Title": "Real-Time Risk Verdict",
+    "showcase1Desc": "The Monitor analyzes your live metrics against your backtest and issues an instant verdict: CONSISTENT, DEVIATION, or ANOMALY. Includes your Blind Risk — the Bayesian probability that you're trading without a real edge. No subjective interpretation, pure statistics.",
+    "showcase2Title": "Bayesian Engine",
+    "showcase2Desc": "See your expectancy bell curve and your real equity side by side. If the green zone dominates, your trades confirm an edge. If the red grows, your results look more and more like noise. No opinions — just what your own numbers say.",
+    "showcase3Title": "Alerts Center",
+    "showcase3Desc": "All alerts from all your strategies, centralized. Every time a metric enters unusual territory, you get a notification with the exact statistical context.",
+    "showcase4Title": "Micro Inspector — Distributions",
+    "showcase4Desc": "Click any metric and visualize exactly where you stand on the probability bell curve. Your drawdown stops being a number and becomes a percentile you can interpret.",
+    "showcase5Title": "Metrics Panel — Quick Glance",
+    "showcase5Desc": "Five risk metrics, five progress bars, five percentiles. At a glance you know if your drawdown, daily loss, stagnation days, and losing streaks are within expected range. No charts needed.",
     "footerTagline": "Cold data. Zero gurus.",
     "errorSubmit": "Error submitting. Please try again.",
     "errorNetwork": "Network error. Please try again."
@@ -1087,6 +1107,10 @@
       "tutorial_rephrase": {
         "title": "Guide Update",
         "body": "Service installation instructions updated."
+      },
+      "landing_showcase": {
+        "title": "Visual Feature Showcase",
+        "body": "The landing page now displays real screenshots of every feature: Verdict, Bayesian Engine, Alerts, Inspector, and Metrics. Each block includes a language-specific image."
       }
     }
   }

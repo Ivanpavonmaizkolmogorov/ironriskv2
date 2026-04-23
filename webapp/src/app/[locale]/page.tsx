@@ -183,29 +183,30 @@ export default function LandingPage() {
             </div>
 
             {/* Headline */}
-            <h1 className="ir-fade ir-delay-1 text-4xl md:text-6xl lg:text-7xl font-bold text-iron-50 leading-[1.1] mb-8 tracking-tight">
+            <h1 className="ir-fade ir-delay-1 text-4xl md:text-6xl lg:text-7xl font-bold text-iron-50 leading-[1.1] mb-6 tracking-tight">
               {t("heroTitle1")}
               <br />
               <span className="ir-gradient-text">{t("heroTitle2")}</span>
             </h1>
 
-            {/* Sub */}
-            <p className="ir-fade ir-delay-2 text-lg md:text-xl text-iron-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-              {t("heroDesc")}
+            {/* Bridge phrase — instant clarity */}
+            <p className="ir-fade ir-delay-2 text-lg md:text-xl text-iron-200 font-medium max-w-2xl mx-auto mb-10 tracking-wide">
+              {t("heroBridge")}
             </p>
 
             {/* Hero CTA */}
-            <div className="ir-fade ir-delay-3 ir-glow rounded-2xl inline-block mt-4">
+            <div className="ir-fade ir-delay-3 ir-glow rounded-2xl inline-block">
               <SimulateButton large />
             </div>
 
-            <p className="ir-fade ir-delay-4 text-sm font-medium text-iron-500 mt-8 tracking-wide">
-              {t("heroTag")}
+            {/* Supporting description — moved below CTA, smaller */}
+            <p className="ir-fade ir-delay-4 text-sm text-iron-500 max-w-xl mx-auto mt-8 leading-relaxed">
+              {t("heroDesc")}
             </p>
           </div>
 
           {/* VSL Video */}
-          <div className="ir-fade ir-delay-4 max-w-4xl mx-auto mt-16 md:mt-24 rounded-2xl overflow-hidden border border-iron-800/60 shadow-[0_0_80px_rgba(0,230,118,0.08)] relative aspect-video bg-black">
+          <div className="ir-fade ir-delay-4 max-w-4xl mx-auto mt-16 md:mt-20 rounded-2xl overflow-hidden border border-iron-800/60 shadow-[0_0_80px_rgba(0,230,118,0.08)] relative aspect-video bg-black">
             <iframe
               src={`https://www.youtube.com/embed/${locale === 'en' ? 'BLpcqL42g-s' : 'cxBvNZ58N_w'}?si=k1G2mK0Psz3vV3T1`}
               title="IronRisk Bayesian Engine Demo"
@@ -266,34 +267,61 @@ export default function LandingPage() {
               ))}
             </div>
 
-            {/* ── Feature Highlights ── */}
-            <div className="mt-16">
-              <h3 className="ir-fade text-lg md:text-2xl font-bold text-iron-200 text-center mb-8 tracking-tight">
-                {t("featSectionTitle")}
+            {/* ── Visual Showcase — screenshots paired with features ── */}
+            <div className="mt-20">
+              <h3 className="ir-fade text-lg md:text-2xl font-bold text-iron-200 text-center mb-14 tracking-tight">
+                {t("showcaseTitle")}
               </h3>
-              <div className="grid md:grid-cols-3 gap-6">
+
+              <div className="space-y-16">
+                {/* Showcase items — alternating layout */}
                 {[
-                  { icon: t("feat1Icon"), title: t("feat1Title"), desc: t("feat1Desc") },
-                  { icon: t("feat2Icon"), title: t("feat2Title"), desc: t("feat2Desc") },
-                  { icon: t("feat3Icon"), title: t("feat3Title"), desc: t("feat3Desc") },
-                ].map((feat, i) => (
+                  { title: t("showcase1Title"), desc: t("showcase1Desc"), img: "landing-verdict",   reverse: false },
+                  { title: t("showcase2Title"), desc: t("showcase2Desc"), img: "landing-bayes",     reverse: true },
+                  { title: t("showcase3Title"), desc: t("showcase3Desc"), img: "landing-alerts",    reverse: false },
+                  { title: t("showcase4Title"), desc: t("showcase4Desc"), img: "landing-inspector", reverse: true },
+                ].map((item, i) => (
                   <div
                     key={i}
-                    className={`ir-fade ir-delay-${i + 1} relative overflow-hidden bg-surface-secondary/40 backdrop-blur-sm border border-iron-800/50 rounded-2xl p-7
-                      hover:border-risk-green/25 hover:shadow-[0_0_40px_rgba(0,230,118,0.08)]
-                      transition-all duration-500 group cursor-default`}
+                    className={`ir-fade ir-delay-${(i % 3) + 1} grid md:grid-cols-2 gap-8 items-center`}
                   >
-                    {/* Subtle corner glow */}
-                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-risk-green/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    <div className="relative">
-                      <span className="text-3xl mb-4 block">{feat.icon}</span>
-                      <h4 className="text-base font-semibold text-iron-100 mb-2 group-hover:text-risk-green transition-colors duration-300">
-                        {feat.title}
-                      </h4>
-                      <p className="text-sm text-iron-500 leading-relaxed">{feat.desc}</p>
+                    {/* Text block */}
+                    <div className={`${item.reverse ? 'md:order-2' : ''}`}>
+                      <h4 className="text-xl font-semibold text-iron-100 mb-3">{item.title}</h4>
+                      <p className="text-sm text-iron-400 leading-relaxed">{item.desc}</p>
+                    </div>
+
+                    {/* Screenshot */}
+                    <div className={`${item.reverse ? 'md:order-1' : ''}`}>
+                      <div className="rounded-2xl overflow-hidden border border-iron-800/60 shadow-[0_0_40px_rgba(0,230,118,0.06)] hover:border-risk-green/25 hover:shadow-[0_0_60px_rgba(0,230,118,0.1)] transition-all duration-500">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`/${item.img}.${locale}.png`}
+                          alt={item.title}
+                          className="w-full h-auto block"
+                          loading="lazy"
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
+
+                {/* Showcase 5 — Metrics Panel (full-width, horizontal) */}
+                <div className="ir-fade ir-delay-1">
+                  <div className="text-center mb-6">
+                    <h4 className="text-xl font-semibold text-iron-100 mb-3">{t("showcase5Title")}</h4>
+                    <p className="text-sm text-iron-400 leading-relaxed max-w-2xl mx-auto">{t("showcase5Desc")}</p>
+                  </div>
+                  <div className="rounded-2xl overflow-hidden border border-iron-800/60 shadow-[0_0_40px_rgba(0,230,118,0.06)] hover:border-risk-green/25 hover:shadow-[0_0_60px_rgba(0,230,118,0.1)] transition-all duration-500">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`/landing-metrics.${locale}.png`}
+                      alt={t("showcase5Title")}
+                      className="w-full h-auto block"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
