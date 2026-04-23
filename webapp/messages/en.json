@@ -1139,6 +1139,10 @@
       "add_broadcast_script": {
         "title": "Automated Broadcast Script",
         "body": "Added CI/CD architecture to trigger mass mailing through secure GitHub Actions environment variables."
+      },
+      "fix_landing_copy_typo": {
+        "title": "Landing Page Copy Typo",
+        "body": "Corrected a minor typo in the Ulysses Pact section."
       }
     }
   }

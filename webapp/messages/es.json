@@ -283,7 +283,7 @@
     "step3Title": "3. Autoconexión",
     "step3Desc": "Descarga nuestro autoinstalador. Él solo coloca los escudos en tu MetaTrader y establece la telemetría segura. En segundos estarás protegido.",
     "cureTitle": "El Pacto de Ulises",
-    "cureDesc": "Díjate los límites cuando eres racional, con el mercado cerrado. IronRisk los aplica cuando estás delante del número rojo, sin contexto. Así no decides con el estómago — lo decides con tus propios datos.",
+    "cureDesc": "Fíjate los límites cuando eres racional, con el mercado cerrado. IronRisk los aplica cuando estás delante del número rojo, sin contexto. Así no decides con el estómago — lo decides con tus propios datos.",
     "withoutTitle": "❌ Sin IronRisk",
     "without1": "Ves -$800 y entras en pánico",
     "without2": "Cierras la operación perdedora prematuramente",
@@ -1139,6 +1139,10 @@
       "add_broadcast_script": {
         "title": "Script de Difusión Automática",
         "body": "Se ha añadido la lógica necesaria para disparar envíos masivos mediante pipelines de CI de GitHub Actions."
+      },
+      "fix_landing_copy_typo": {
+        "title": "Corrección Texto Landing Page",
+        "body": "Se ha corregido un error tipográfico en la sección del Pacto de Ulises."
       }
     }
   }
