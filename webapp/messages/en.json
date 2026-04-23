@@ -1111,6 +1111,10 @@
       "landing_showcase": {
         "title": "Visual Feature Showcase",
         "body": "The landing page now displays real screenshots of every feature: Verdict, Bayesian Engine, Alerts, Inspector, and Metrics. Each block includes a language-specific image."
+      },
+      "beta_reactivation_email_trigger": {
+        "title": "Beta Reactivation Trigger",
+        "body": "You can now safely trigger the beta reactivation email from the Alert Piano inside the admin dashboard."
       }
     }
   }

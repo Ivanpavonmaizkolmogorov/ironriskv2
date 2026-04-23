@@ -1,5 +1,11 @@
 [
   {
+    "id": "beta_reactivation_email_trigger",
+    "date": "2026-04-23",
+    "tag": "feature",
+    "internal": true
+  },
+  {
     "id": "landing_showcase",
     "date": "2026-04-23",
     "tag": "feature",

@@ -447,6 +447,13 @@ async def trigger_alert(
         # Reuse the test-uptime logic — already handled by /test-uptime
         return {"status": "ok", "detail": "Use the 'Test Server' button for health check emails."}
 
+    elif alert_type == "beta_reactivation":
+        svc = EmailService()
+        if not svc.is_configured():
+            raise HTTPException(status_code=500, detail="Email service not configured.")
+        svc.send_beta_reactivation(admin.email, locale)
+        return {"status": "ok", "detail": f"Beta reactivation email ({locale}) sent to {admin.email}."}
+
     raise HTTPException(status_code=400, detail=f"Unknown alert_type: {alert_type}")
 
 

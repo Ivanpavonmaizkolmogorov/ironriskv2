@@ -30,6 +30,7 @@ const ALERTS: AlertKey[] = [
   { id: "welcome_email",   label: "Welcome Email",     icon: "✉️", channel: "email", color: "emerald", description: "Email de bienvenida a nuevo usuario" },
   { id: "password_reset",  label: "Password Reset",    icon: "🔑", channel: "email", color: "violet", description: "Email de restablecimiento de contraseña" },
   { id: "waitlist",        label: "Waitlist",           icon: "📋", channel: "email", color: "blue", description: "Confirmación de lista de espera" },
+  { id: "beta_reactivation", label: "Beta Reactivation", icon: "🚀", channel: "email", color: "emerald", description: "Email de reactivación para leads de la waitlist" },
 ];
 
 const colorMap: Record<string, { idle: string; hover: string }> = {

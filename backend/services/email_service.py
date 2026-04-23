@@ -456,3 +456,121 @@ class EmailService:
         except Exception as e:
             logger.error(f"Failed to send access email to {recipient_email}: {e}")
             return False
+
+    def send_beta_reactivation(self, recipient_email: str, locale: str = "es") -> bool:
+        """Sends a reactivation email to a waitlist lead inviting them to test the beta."""
+        if not self.is_configured():
+            logger.warning(f"EmailService not configured. Skipping reactivation email to {recipient_email}.")
+            return False
+
+        if locale == "en":
+            subject = "You signed up for IronRisk a few weeks ago (and I need your feedback)"
+            demo_url = "https://www.ironrisk.pro/en"
+            body_paragraphs = """
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hi,</p>
+
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                    A few weeks ago you joined the IronRisk waitlist. I'm Ivan — I built the whole thing solo.
+                </p>
+
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                    Sorry for the silence. I've been heads-down coding and testing it on my own MT5 accounts to make sure it actually works before showing it to anyone.
+                </p>
+
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                    I just uploaded a quick <strong style="color: #c9d1d9;">1-minute demo</strong> showing how the real-time visual shield works to stop panic-closing during normal drawdowns.
+                </p>
+
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                    Right now I'm looking for a <strong style="color: #00e676;">very small group of real systematic traders</strong> to test the beta, try to break it, and give me brutally honest feedback.
+                </p>
+            """
+            cta_btn = "Watch the 1-min Demo"
+            reply_line = 'If the math and the logic make sense to you, reply with <strong style="color: #00e676;">"I\'m in"</strong> and I\'ll activate your account today.'
+            ps_text = '<strong style="color: #c9d1d9;">P.S.</strong> — The tool flagged one of my USDJPY strategies with a 38% Blind Risk — a real probability that my edge didn\'t exist. I stopped trusting it in live. That\'s exactly the kind of decision it helps you make before you lose more.'
+            bug_text = '<strong style="color: #c9d1d9;">Direct line:</strong> Once inside, you\'ll find a <strong style="color: #00e676;">bug icon at the bottom-right</strong> of every screen. One tap and your report lands directly in my Telegram — no tickets, no support queue. You talk to the developer, not a bot.'
+        else:
+            subject = "Te apuntaste a IronRisk hace unas semanas (y necesito tu feedback)"
+            demo_url = "https://www.ironrisk.pro/es"
+            body_paragraphs = """
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hola,</p>
+
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                    Hace unas semanas te apuntaste a la lista de espera de IronRisk. Soy Ivan, el desarrollador en solitario del proyecto.
+                </p>
+
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                    Perdona el silencio. He estado metido de lleno programando y probando la herramienta en mis propias cuentas de MT5 para asegurarme de que realmente funciona antes de mostrarla.
+                </p>
+
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                    Acabo de subir una <strong style="color: #c9d1d9;">demo de 1 minuto</strong> mostrando como funciona el escudo visual en tiempo real para evitar cerrar en panico durante los drawdowns normales.
+                </p>
+
+                <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
+                    Ahora mismo estoy buscando un <strong style="color: #00e676;">grupo muy reducido de traders sistematicos reales</strong> para que prueben la beta, intenten romperla y me den feedback brutal y honesto.
+                </p>
+            """
+            cta_btn = "Ver la Demo de 1 min"
+            reply_line = 'Si las mates y la logica te cuadran, responde con <strong style="color: #00e676;">"me apunto"</strong> y te activo la cuenta hoy.'
+            ps_text = '<strong style="color: #c9d1d9;">P.D.</strong> — La herramienta detecto que una de mis estrategias con USDJPY tenia un Riesgo Ciego del 38% — una probabilidad real de que mi ventaja no existiera. Deje de confiar en ella en real. Ese es exactamente el tipo de decision que te ayuda a tomar antes de perder mas.'
+            bug_text = '<strong style="color: #c9d1d9;">Linea directa:</strong> Una vez dentro, veras un <strong style="color: #00e676;">icono de bug abajo a la derecha</strong> en cada pantalla. Un toque y tu reporte me llega directo a Telegram — sin tickets, sin cola de soporte. Hablas con el desarrollador, no con un bot.'
+
+        html_content = f"""
+        <html>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; background-image: linear-gradient(#0d1117, #0d1117); color: #c9d1d9;">
+            <div style="max-width: 520px; margin: 0 auto; background-color: #161b22; background-image: linear-gradient(#161b22, #161b22); border: 1px solid #30363d; border-radius: 12px; padding: 40px;">
+                <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
+
+                {body_paragraphs}
+
+                <div style="text-align: center; margin: 35px 0;">
+                    <a href="{demo_url}" 
+                       style="display: inline-block; padding: 16px 32px; background-color: #00e676; color: #0d1117; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                       {cta_btn}
+                    </a>
+                </div>
+
+                <p style="font-size: 16px; color: #c9d1d9; line-height: 1.6; text-align: center;">
+                    {reply_line}
+                </p>
+
+                <div style="background-color: #1c2128; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin: 24px 0;">
+                    <p style="font-size: 13px; color: #8b949e; margin: 0; line-height: 1.5;">
+                        {ps_text}
+                    </p>
+                </div>
+
+                <div style="background-color: #1c2128; border: 1px solid #00e67633; border-radius: 8px; padding: 16px; margin: 0 0 24px;">
+                    <p style="font-size: 13px; color: #8b949e; margin: 0; line-height: 1.5;">
+                        {bug_text}
+                    </p>
+                </div>
+
+                <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
+                    <strong style="color: #8b949e;">Ivan P.</strong> <span style="color: #484f58;">— Founder & Lead Developer</span><br>
+                    <a href="https://www.ironrisk.pro" style="color: #00e676; text-decoration: none; font-size: 12px;">www.ironrisk.pro</a>
+                </p>
+            </div>
+          </body>
+        </html>
+        """
+
+        try:
+            msg = EmailMessage()
+            msg["Subject"] = subject
+            msg["From"] = f"IronRisk <{self.sender_email}>"
+            msg["To"] = recipient_email
+            msg.set_content("Update from IronRisk beta.")
+            msg.add_alternative(html_content, subtype="html")
+
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.sender_email, self.sender_password)
+                server.send_message(msg)
+            logger.info(f"Beta reactivation email sent to {recipient_email} ({locale})")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send beta reactivation to {recipient_email}: {e}")
+            return False
+

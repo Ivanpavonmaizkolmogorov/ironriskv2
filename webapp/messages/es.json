@@ -1111,6 +1111,10 @@
       "landing_showcase": {
         "title": "Showcase Visual de Features",
         "body": "La landing page ahora muestra screenshots reales de cada feature: Veredicto, Motor Bayesiano, Alertas, Inspector y Métricas. Cada bloque incluye una imagen específica por idioma."
+      },
+      "beta_reactivation_email_trigger": {
+        "title": "Trigger de reactivación de Beta",
+        "body": "Ahora se puede enviar el correo de reactivación de beta directamente desde el piano de alertas en el panel de administrador."
       }
     }
   }
