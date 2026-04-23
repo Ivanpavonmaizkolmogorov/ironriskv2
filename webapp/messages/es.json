@@ -1127,6 +1127,10 @@
       "fix_email_unicode_header": {
         "title": "Codificación Header Email",
         "body": "Se ha arreglado la codificación de caracteres no ASCII en el remitente de los correos para evitar rechazos de servidores SMTP o problemas de red."
+      },
+      "add_regression_test_email": {
+        "title": "Regresión Email",
+        "body": "Se ha añadido una prueba de regresión para asegurar que los correos se envían correctamente usando formataddr."
       }
     }
   }

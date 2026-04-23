@@ -1127,6 +1127,10 @@
       "fix_email_unicode_header": {
         "title": "Email Header Unicode Fix",
         "body": "Patched SMTP strict-layer rejection formatting for accented sender names."
+      },
+      "add_regression_test_email": {
+        "title": "Email Regression",
+        "body": "Added a regression test to ensure emails are correctly sent using formataddr."
       }
     }
   }
