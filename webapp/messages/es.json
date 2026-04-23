@@ -1123,6 +1123,10 @@
       "fix_ci_pipeline": {
         "title": "Fix CI Pipeline",
         "body": "Instalación de pytest en las Github Actions resuelta."
+      },
+      "fix_email_unicode_header": {
+        "title": "Codificación Header Email",
+        "body": "Se ha arreglado la codificación de caracteres no ASCII en el remitente de los correos para evitar rechazos de servidores SMTP o problemas de red."
       }
     }
   }

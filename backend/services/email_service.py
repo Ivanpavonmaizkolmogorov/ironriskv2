@@ -1,5 +1,6 @@
 import smtplib
 from email.message import EmailMessage
+from email.utils import formataddr
 import logging
 import os
 from dotenv import load_dotenv
@@ -124,7 +125,7 @@ class EmailService:
         msg = EmailMessage()
         msg['Subject'] = subject
         sender_name = "Ivan from IronRisk" if locale == "en" else "Iván de IronRisk"
-        msg['From'] = f"{sender_name} <{self.sender_email}>"
+        msg['From'] = formataddr((sender_name, self.sender_email))
         msg['To'] = recipient_email
         msg.set_content("Abre este correo en un cliente que soporte renderizado HTML para ver las instrucciones.")
         msg.add_alternative(html_content, subtype='html')
@@ -201,7 +202,7 @@ class EmailService:
         msg = EmailMessage()
         msg['Subject'] = subject
         sender_name = "Ivan from IronRisk" if locale == "en" else "Iván de IronRisk"
-        msg['From'] = f"{sender_name} <{self.sender_email}>"
+        msg['From'] = formataddr((sender_name, self.sender_email))
         msg['To'] = recipient_email
         msg.set_content("Verifica tu email para completar tu registro en IronRisk.")
         msg.add_alternative(html_content, subtype='html')
@@ -376,7 +377,7 @@ class EmailService:
             msg = EmailMessage()
             msg["Subject"] = subject
             sender_name = "Ivan from IronRisk" if locale == "en" else "Iván de IronRisk"
-            msg["From"] = f"{sender_name} <{self.sender_email}>"
+            msg["From"] = formataddr((sender_name, self.sender_email))
             msg["To"] = recipient_email
             msg.set_content("You've been added to the IronRisk waitlist.")
             msg.add_alternative(html_content, subtype="html")
@@ -446,7 +447,7 @@ class EmailService:
             msg = EmailMessage()
             msg["Subject"] = subject
             sender_name = "Ivan from IronRisk" if locale == "en" else "Iván de IronRisk"
-            msg["From"] = f"{sender_name} <{self.sender_email}>"
+            msg["From"] = formataddr((sender_name, self.sender_email))
             msg["To"] = recipient_email
             msg.set_content(f"Tu acceso a IronRisk está listo. Entra en: {login_url}")
             msg.add_alternative(html_content, subtype="html")
@@ -564,7 +565,7 @@ class EmailService:
             msg = EmailMessage()
             msg["Subject"] = subject
             sender_name = "Ivan from IronRisk" if locale == "en" else "Iván de IronRisk"
-            msg["From"] = f"{sender_name} <{self.sender_email}>"
+            msg["From"] = formataddr((sender_name, self.sender_email))
             msg["To"] = recipient_email
             msg.set_content("Update from IronRisk beta.")
             msg.add_alternative(html_content, subtype="html")

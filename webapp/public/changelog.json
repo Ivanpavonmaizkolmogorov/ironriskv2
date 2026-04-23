@@ -1,5 +1,12 @@
 [
   {
+    "id": "fix_email_unicode_header",
+    "date": "2026-04-23",
+    "tag": "fix",
+    "internal": true,
+    "has_regression_test": true
+  },
+  {
     "id": "fix_ci_pipeline",
     "date": "2026-04-23",
     "tag": "fix",

@@ -1123,6 +1123,10 @@
       "fix_ci_pipeline": {
         "title": "Fix CI Pipeline",
         "body": "Fixed missing pytest in Github Actions."
+      },
+      "fix_email_unicode_header": {
+        "title": "Email Header Unicode Fix",
+        "body": "Patched SMTP strict-layer rejection formatting for accented sender names."
       }
     }
   }
