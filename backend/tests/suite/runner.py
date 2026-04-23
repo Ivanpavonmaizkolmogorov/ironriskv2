@@ -24,7 +24,7 @@ RESULTS_CACHE = Path(__file__).parent.parent.parent / "test_results_cache.json"
 
 def run_all() -> dict:
     """Run every registered test group and return a structured result dict."""
-    from . import test_csv_import, test_bayes, test_bayes_live, test_selection_consistency, test_risk_gauges, test_email_service
+    from . import test_csv_import, test_bayes, test_bayes_live, test_selection_consistency, test_risk_gauges, test_email_service, test_ci_pipeline
 
     groups_map = {
         "csv_import": test_csv_import.run_group,
@@ -33,6 +33,7 @@ def run_all() -> dict:
         "selection_consistency": test_selection_consistency.run_group,
         "risk_gauges": test_risk_gauges.run_group,
         "email_service": test_email_service.run_group,
+        "ci_pipeline": test_ci_pipeline.run_group,
     }
 
     t_start = time.perf_counter()

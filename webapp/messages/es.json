@@ -1143,6 +1143,10 @@
       "fix_landing_copy_typo": {
         "title": "Corrección Texto Landing Page",
         "body": "Se ha corregido un error tipográfico en la sección del Pacto de Ulises."
+      },
+      "add_ci_regression_tests": {
+        "title": "Regresiones CI/CD",
+        "body": "Se ha ampliado la suite de pruebas para evitar fallos de rutas y husos horarios en integraciones continuas futuras."
       }
     }
   }

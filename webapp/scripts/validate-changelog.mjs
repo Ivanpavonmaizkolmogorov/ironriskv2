@@ -24,14 +24,26 @@ try {
     fail('changelog.json está vacío. Añade al menos una entrada.');
   }
 
-  // Get today's date in YYYY-MM-DD
-  const today = new Date().toISOString().split('T')[0];
+  // Get dates in YYYY-MM-DD
+  const todayDate = new Date();
+  
+  const today = todayDate.toISOString().split('T')[0];
+  
+  const yesterdayDate = new Date(todayDate);
+  yesterdayDate.setDate(todayDate.getDate() - 1);
+  const yesterday = yesterdayDate.toISOString().split('T')[0];
+  
+  const tomorrowDate = new Date(todayDate);
+  tomorrowDate.setDate(todayDate.getDate() + 1);
+  const tomorrow = tomorrowDate.toISOString().split('T')[0];
 
-  // Check if latest entry is from today
+  const allowedDates = [yesterday, today, tomorrow];
+
+  // Check if latest entry is within timezone variance
   const latest = entries[0]; // Entries are newest-first
-  if (latest.date !== today) {
+  if (!allowedDates.includes(latest.date)) {
     fail(
-      `La última entrada del changelog es del ${latest.date}, pero hoy es ${today}.\n` +
+      `La última entrada del changelog es del ${latest.date}, pero la fecha actual (±1 día por zona horaria) es ${today}.\n` +
       `\n` +
       `  Añade una entrada a webapp/public/changelog.json:\n` +
       `  {\n` +

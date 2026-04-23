@@ -45,5 +45,5 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             cd /var/www/ironrisk/backend
-            source /var/www/ironrisk/venv/bin/activate || true
+            source /var/www/ironrisk/backend/venv/bin/activate || true
             PYTHONPATH=. python scripts/broadcast_beta.py

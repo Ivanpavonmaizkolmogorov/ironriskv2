@@ -1,5 +1,11 @@
 [
   {
+    "id": "add_ci_regression_tests",
+    "date": "2026-04-23",
+    "tag": "improvement",
+    "internal": true
+  },
+  {
     "id": "fix_landing_copy_typo",
     "date": "2026-04-23",
     "tag": "improvement",
