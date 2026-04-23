@@ -1,10 +1,10 @@
 {
-  "run_at": "2026-04-22T10:19:36.354687+00:00",
-  "total": 38,
-  "passed": 38,
+  "run_at": "2026-04-23T23:23:08.711130+00:00",
+  "total": 39,
+  "passed": 39,
   "failed": 0,
   "success_rate": 100.0,
-  "duration_ms": 1988.2,
+  "duration_ms": 2321.2,
   "groups": {
     "csv_import": [
       {
@@ -22,7 +22,7 @@
         "passed": true,
         "expected": "762",
         "actual": "762",
-        "duration_ms": 1336.7,
+        "duration_ms": 1606.3,
         "error": null
       },
       {
@@ -31,7 +31,7 @@
         "passed": true,
         "expected": "All trades have 'pnl'",
         "actual": "OK",
-        "duration_ms": 50.3,
+        "duration_ms": 55.4,
         "error": null
       },
       {
@@ -40,7 +40,7 @@
         "passed": true,
         "expected": "equity_curve non-empty",
         "actual": "762 points",
-        "duration_ms": 47.9,
+        "duration_ms": 55.7,
         "error": null
       },
       {
@@ -58,7 +58,7 @@
         "passed": true,
         "expected": "wins > 0 AND losses > 0",
         "actual": "347 wins, 415 losses",
-        "duration_ms": 48.7,
+        "duration_ms": 55.7,
         "error": null
       }
     ],
@@ -69,7 +69,7 @@
         "passed": true,
         "expected": "50% <= P(EV>0) <= 100%",
         "actual": "82.7%",
-        "duration_ms": 52.6,
+        "duration_ms": 54.1,
         "error": null
       },
       {
@@ -78,7 +78,7 @@
         "passed": true,
         "expected": "82.7% \u00b12.0%",
         "actual": "82.7%",
-        "duration_ms": 47.4,
+        "duration_ms": 53.0,
         "error": null
       },
       {
@@ -87,7 +87,7 @@
         "passed": true,
         "expected": "100.0%",
         "actual": "100.0%",
-        "duration_ms": 53.8,
+        "duration_ms": 52.4,
         "error": null
       },
       {
@@ -96,7 +96,7 @@
         "passed": true,
         "expected": "P(bt_discount=1) >= P(bt_discount=100) - 5%",
         "actual": "bt_discount=1 \u2192 100.0%, bt_discount=100 \u2192 67.19%",
-        "duration_ms": 51.9,
+        "duration_ms": 53.8,
         "error": null
       },
       {
@@ -105,7 +105,7 @@
         "passed": true,
         "expected": "None or p_positive=0.5 (degenerate prior)",
         "actual": "p_positive=0.5000 (degenerate prior)",
-        "duration_ms": 0.2,
+        "duration_ms": 0.3,
         "error": null
       },
       {
@@ -125,7 +125,7 @@
         "passed": true,
         "expected": "P equal (diff < 1e-6)",
         "actual": "diff = 0.00000000",
-        "duration_ms": 48.5,
+        "duration_ms": 57.2,
         "error": null
       },
       {
@@ -134,7 +134,7 @@
         "passed": true,
         "expected": "P_live >= P_bt: 82.7%",
         "actual": "P_live=100.0% | P_bt=82.7%",
-        "duration_ms": 48.9,
+        "duration_ms": 51.1,
         "error": null
       },
       {
@@ -143,7 +143,7 @@
         "passed": true,
         "expected": "P_live <= P_bt: 82.7%",
         "actual": "P_live=0.0% | P_bt=82.7%",
-        "duration_ms": 48.6,
+        "duration_ms": 53.2,
         "error": null
       },
       {
@@ -152,7 +152,7 @@
         "passed": true,
         "expected": "live_win_rate \u2248 0.6667",
         "actual": "0.6667",
-        "duration_ms": 47.9,
+        "duration_ms": 55.2,
         "error": null
       },
       {
@@ -161,7 +161,7 @@
         "passed": true,
         "expected": "5",
         "actual": "5",
-        "duration_ms": 49.1,
+        "duration_ms": 51.4,
         "error": null
       },
       {
@@ -170,7 +170,7 @@
         "passed": true,
         "expected": "blind_risk > 30%",
         "actual": "blind_risk = 100.0%",
-        "duration_ms": 48.8,
+        "duration_ms": 56.2,
         "error": null
       }
     ],
@@ -228,7 +228,7 @@
         "passed": true,
         "expected": "status=green, percentile<50",
         "actual": "status=green, percentile=6.1",
-        "duration_ms": 4.1,
+        "duration_ms": 1.1,
         "error": null
       },
       {
@@ -237,7 +237,7 @@
         "passed": true,
         "expected": "status=amber (pct ~90, amber=85, red=95)",
         "actual": "status=amber, percentile=91.5",
-        "duration_ms": 0.4,
+        "duration_ms": 0.2,
         "error": null
       },
       {
@@ -355,6 +355,17 @@
         "expected": "current=210.0, status in {green,amber,red,fatal}",
         "actual": "current=210.0, status=green",
         "duration_ms": 0.2,
+        "error": null
+      }
+    ],
+    "email_service": [
+      {
+        "name": "test_unicode_sender_header",
+        "group": "email_service",
+        "passed": true,
+        "expected": null,
+        "actual": null,
+        "duration_ms": 0.0,
         "error": null
       }
     ]
