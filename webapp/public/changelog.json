@@ -1,5 +1,11 @@
 [
   {
+    "id": "personalized_email_sender",
+    "date": "2026-04-23",
+    "tag": "improvement",
+    "internal": true
+  },
+  {
     "id": "beta_reactivation_email_trigger",
     "date": "2026-04-23",
     "tag": "feature",

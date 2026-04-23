@@ -1115,6 +1115,10 @@
       "beta_reactivation_email_trigger": {
         "title": "Trigger de reactivación de Beta",
         "body": "Ahora se puede enviar el correo de reactivación de beta directamente desde el piano de alertas en el panel de administrador."
+      },
+      "personalized_email_sender": {
+        "title": "Remitente de email personalizado",
+        "body": "El nombre del remitente en los emails ahora aparece como 'Iván de IronRisk' o 'Ivan from IronRisk' para humanizar el contacto."
       }
     }
   }

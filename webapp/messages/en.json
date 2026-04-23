@@ -1115,6 +1115,10 @@
       "beta_reactivation_email_trigger": {
         "title": "Beta Reactivation Trigger",
         "body": "You can now safely trigger the beta reactivation email from the Alert Piano inside the admin dashboard."
+      },
+      "personalized_email_sender": {
+        "title": "Personalized Email Sender",
+        "body": "The email sender name now displays as 'Ivan from IronRisk' or 'Iván de IronRisk' to humanize the contact format."
       }
     }
   }
