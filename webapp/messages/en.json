@@ -1135,6 +1135,10 @@
       "minimalist_email_template": {
         "title": "Minimalist Beta Email",
         "body": "Stripped heavy CSS and layouts from the beta reactivation email to hit Primary inboxes by mimicking organic interpersonal format."
+      },
+      "add_broadcast_script": {
+        "title": "Automated Broadcast Script",
+        "body": "Added CI/CD architecture to trigger mass mailing through secure GitHub Actions environment variables."
       }
     }
   }

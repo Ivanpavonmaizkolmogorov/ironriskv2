@@ -1,5 +1,12 @@
 [
   {
+    "id": "add_broadcast_script",
+    "date": "2026-04-23",
+    "tag": "feature",
+    "internal": true,
+    "has_regression_test": true
+  },
+  {
     "id": "minimalist_email_template",
     "date": "2026-04-23",
     "tag": "improvement",

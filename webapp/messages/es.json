@@ -1135,6 +1135,10 @@
       "minimalist_email_template": {
         "title": "Plantilla Minimalista Beta",
         "body": "Se ha simplificado la estructura del correo de la beta para un aspecto más orgánico, aumentando las probabilidades de llegar a la bandeja principal."
+      },
+      "add_broadcast_script": {
+        "title": "Script de Difusión Automática",
+        "body": "Se ha añadido la lógica necesaria para disparar envíos masivos mediante pipelines de CI de GitHub Actions."
       }
     }
   }
