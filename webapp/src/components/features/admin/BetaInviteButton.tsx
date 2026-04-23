@@ -21,9 +21,8 @@ export default function BetaInviteButton() {
 Your access code:
 🔑 IRONRISK-VIP-2026
 
-📺 Tutorials:
-1. https://youtu.be/H65NyD795bI
-2. https://youtu.be/yiCZE9IYgsA
+📺 Tutorial:
+https://youtu.be/rW_rJLNmtTw
 
 💬 Direct support: ${handle}
 ${url}`;
@@ -35,9 +34,8 @@ ${url}`;
 Tu código de acceso:
 🔑 IRONRISK-VIP-2026
 
-📺 Tutoriales:
-1. https://youtu.be/H65NyD795bI
-2. https://youtu.be/yiCZE9IYgsA
+📺 Tutorial:
+https://youtu.be/rW_rJLNmtTw
 
 💬 Soporte directo: ${handle}
 ${url}`;

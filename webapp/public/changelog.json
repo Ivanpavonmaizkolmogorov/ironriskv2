@@ -1,5 +1,11 @@
 [
   {
+    "id": "beta_invite_video_update",
+    "date": "2026-04-23",
+    "tag": "feature",
+    "internal": true
+  },
+  {
     "id": "tutorial_rephrase",
     "date": "2026-04-23",
     "tag": "improvement",
