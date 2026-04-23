@@ -1131,6 +1131,10 @@
       "add_regression_test_email": {
         "title": "Regresión Email",
         "body": "Se ha añadido una prueba de regresión para asegurar que los correos se envían correctamente usando formataddr."
+      },
+      "minimalist_email_template": {
+        "title": "Plantilla Minimalista Beta",
+        "body": "Se ha simplificado la estructura del correo de la beta para un aspecto más orgánico, aumentando las probabilidades de llegar a la bandeja principal."
       }
     }
   }

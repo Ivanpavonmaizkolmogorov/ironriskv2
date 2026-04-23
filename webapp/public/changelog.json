@@ -1,5 +1,11 @@
 [
   {
+    "id": "minimalist_email_template",
+    "date": "2026-04-23",
+    "tag": "improvement",
+    "internal": false
+  },
+  {
     "id": "add_regression_test_email",
     "date": "2026-04-23",
     "tag": "fix",

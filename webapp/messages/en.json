@@ -1131,6 +1131,10 @@
       "add_regression_test_email": {
         "title": "Email Regression",
         "body": "Added a regression test to ensure emails are correctly sent using formataddr."
+      },
+      "minimalist_email_template": {
+        "title": "Minimalist Beta Email",
+        "body": "Stripped heavy CSS and layouts from the beta reactivation email to hit Primary inboxes by mimicking organic interpersonal format."
       }
     }
   }
