@@ -1119,6 +1119,10 @@
       "personalized_email_sender": {
         "title": "Personalized Email Sender",
         "body": "The email sender name now displays as 'Ivan from IronRisk' or 'Iván de IronRisk' to humanize the contact format."
+      },
+      "fix_ci_pipeline": {
+        "title": "Fix CI Pipeline",
+        "body": "Fixed missing pytest in Github Actions."
       }
     }
   }
