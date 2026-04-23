@@ -204,17 +204,16 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Mockup */}
-          <div className="ir-fade ir-delay-4 max-w-5xl mx-auto mt-20 rounded-2xl overflow-hidden border border-iron-800/60 shadow-[0_0_80px_rgba(0,230,118,0.08)] relative group">
-            <div className="absolute inset-0 bg-gradient-to-t from-surface-primary via-surface-primary/20 to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-b from-risk-green/5 via-transparent to-transparent z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <Image
-              src="/ironrisk-shield-mockup.png"
-              alt="IronRisk MetaTrader 5 Dashboard"
-              width={1600}
-              height={900}
-              className="w-full h-auto object-cover opacity-85 group-hover:opacity-100 transition-all duration-700 group-hover:scale-[1.01]"
-              priority
+          {/* VSL Video */}
+          <div className="ir-fade ir-delay-4 max-w-4xl mx-auto mt-16 md:mt-24 rounded-2xl overflow-hidden border border-iron-800/60 shadow-[0_0_80px_rgba(0,230,118,0.08)] relative aspect-video bg-black">
+            <iframe
+              src="https://www.youtube.com/embed/rW_rJLNmtTw?si=k1G2mK0Psz3vV3T1"
+              title="IronRisk Bayesian Engine Demo"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              className="absolute top-0 left-0 w-full h-full"
             />
           </div>
         </section>
