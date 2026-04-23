@@ -18,9 +18,6 @@ export default function BetaInviteButton() {
 
 🌐 https://www.ironrisk.pro/en/register
 
-Your access code:
-🔑 IRONRISK-VIP-2026
-
 📺 Tutorial:
 https://youtu.be/rW_rJLNmtTw
 
@@ -30,9 +27,6 @@ ${url}`;
       return `🛡️ IronRisk — Beta Privada
 
 🌐 https://www.ironrisk.pro/es/register
-
-Tu código de acceso:
-🔑 IRONRISK-VIP-2026
 
 📺 Tutorial:
 https://youtu.be/rW_rJLNmtTw
