@@ -177,7 +177,7 @@
     "tutorialTitle": "Connect IronRisk to your MetaTrader",
     "tutorialStep1": "<strong>Click ⚡ Auto-Installer</strong> (above). The <code>.bat</code> file will be downloaded completely pre-configured.",
     "tutorialStep2": "<strong>Double-click the .bat file</strong>. Pick your terminal from the command prompt and answer 'y' to restart. Zero configuration.",
-    "tutorialStep3": "<strong>Double-click the MetaTrader Service</strong><br><br>1. In the left panel of MT5 (<strong>Navigator</strong>), expand the <strong>Services</strong> folder.<br>2. <strong>Double-click</strong> on <code>IronRisk_Service</code> and hit <strong>OK</strong>.<br><br>The panel will automatically switch to <strong>CONNECTED</strong>!",
+    "tutorialStep3": "<strong>Start the MetaTrader Service</strong><br><br>1. In the left panel of MT5 (<strong>Navigator</strong>), expand the <strong>Services</strong> folder until you reach its last child (<code>IronRisk_Service</code>).<br>2. <strong>Right-click</strong> on it and select <strong>Start</strong>.<br><br>With this, it will stay connected permanently and you will be able to see it running in green both on the web and normally in your terminal.",
     "dblClickRename": "Double-click to rename",
     "lockedTooltip": "Install and connect the EA bot on your MetaTrader terminal first. The workspace will unlock once we receive the first heartbeat.",
     "logout": "Logout",
@@ -1083,6 +1083,10 @@
       "silent_approval": {
         "title": "Silent approval",
         "body": "Admins can create accounts without emails."
+      },
+      "tutorial_rephrase": {
+        "title": "Guide Update",
+        "body": "Service installation instructions updated."
       }
     }
   }

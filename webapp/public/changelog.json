@@ -1,5 +1,11 @@
 [
   {
+    "id": "tutorial_rephrase",
+    "date": "2026-04-23",
+    "tag": "improvement",
+    "internal": false
+  },
+  {
     "id": "silent_approval",
     "date": "2026-04-22",
     "tag": "feature",

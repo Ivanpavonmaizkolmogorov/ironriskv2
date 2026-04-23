@@ -46,8 +46,8 @@ class EmailService:
             subject = "Welcome to IronRisk - Project Your Statistical Edge"
             html_content = f"""
             <html>
-              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
-                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; background-image: linear-gradient(#0d1117, #0d1117); color: #c9d1d9;">
+                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; background-image: linear-gradient(#161b22, #161b22); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
                     <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hello,</p>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
@@ -85,8 +85,8 @@ class EmailService:
             subject = "Bienvenido a IronRisk - Proyecta tu Edge Matemático"
             html_content = f"""
             <html>
-              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
-                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; background-image: linear-gradient(#0d1117, #0d1117); color: #c9d1d9;">
+                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; background-image: linear-gradient(#161b22, #161b22); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
                     <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hola,</p>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
@@ -171,8 +171,8 @@ class EmailService:
 
         html_content = f"""
         <html>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
-            <div style="max-width: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; background-image: linear-gradient(#0d1117, #0d1117); color: #c9d1d9;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #161b22; background-image: linear-gradient(#161b22, #161b22); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
                 <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
                 <h2 style="color: #00e676; margin-top: 10px; font-size: 20px; font-weight: 800;">{lbl_title}</h2>
                 <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">{lbl_desc}</p>
@@ -244,8 +244,8 @@ class EmailService:
 
         html_content = f"""
         <html>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
-            <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #ff4d4d; border: 1px solid #30363d;">
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; background-image: linear-gradient(#0d1117, #0d1117); color: #c9d1d9;">
+            <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; background-image: linear-gradient(#161b22, #161b22); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #ff4d4d; border: 1px solid #30363d;">
                 <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
                 <h2 style="color: #ff4d4d; margin-top: 10px; font-size: 20px; font-weight: 800;">{lbl_title}</h2>
                 <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">{lbl_desc}</p>
@@ -297,8 +297,8 @@ class EmailService:
             subject = "You're on the IronRisk Waitlist 🛡️"
             html_content = f"""
             <html>
-              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
-                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; background-image: linear-gradient(#0d1117, #0d1117); color: #c9d1d9;">
+                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; background-image: linear-gradient(#161b22, #161b22); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
                     <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hello,</p>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
@@ -335,8 +335,8 @@ class EmailService:
             subject = "Estás en la Lista de Espera de IronRisk 🛡️"
             html_content = f"""
             <html>
-              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; color: #c9d1d9;">
-                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
+              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; background-image: linear-gradient(#0d1117, #0d1117); color: #c9d1d9;">
+                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; background-image: linear-gradient(#161b22, #161b22); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
                     <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hola,</p>
                     <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
@@ -410,8 +410,8 @@ class EmailService:
 
             html_content = f"""
             <html>
-              <body style="background-color: #0d1117; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 40px 20px;">
-                <div style="max-width: 520px; margin: 0 auto; background-color: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 40px;">
+              <body style="background-color: #0d1117; background-image: linear-gradient(#0d1117, #0d1117); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 40px 20px;">
+                <div style="max-width: 520px; margin: 0 auto; background-color: #161b22; background-image: linear-gradient(#161b22, #161b22); border: 1px solid #30363d; border-radius: 12px; padding: 40px;">
                     <div style="text-align: center; margin-bottom: 32px;">
                         <span style="font-size: 32px;">🛡️</span>
                         <h1 style="color: #00e676; font-size: 22px; margin: 12px 0 4px;">{headline}</h1>
