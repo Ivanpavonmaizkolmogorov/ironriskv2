@@ -207,7 +207,7 @@ export default function LandingPage() {
           {/* VSL Video */}
           <div className="ir-fade ir-delay-4 max-w-4xl mx-auto mt-16 md:mt-24 rounded-2xl overflow-hidden border border-iron-800/60 shadow-[0_0_80px_rgba(0,230,118,0.08)] relative aspect-video bg-black">
             <iframe
-              src="https://www.youtube.com/embed/cxBvNZ58N_w?si=k1G2mK0Psz3vV3T1"
+              src={`https://www.youtube.com/embed/${locale === 'en' ? 'BLpcqL42g-s' : 'cxBvNZ58N_w'}?si=k1G2mK0Psz3vV3T1`}
               title="IronRisk Bayesian Engine Demo"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
