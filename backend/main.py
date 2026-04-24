@@ -175,45 +175,65 @@ async def ea_connectivity_watchdog():
             with SessionLocal() as db:
                 now = datetime.now(timezone.utc)
                 accounts = db.query(TradingAccount).filter(TradingAccount.is_active == True).all()
+                
+                # Track users with at least one disconnected account
+                users_with_disconnect = set()
+                users_seen = set()
+                
                 for acc in accounts:
-                    if acc.last_heartbeat_at:
-                        last_hb = acc.last_heartbeat_at
-                        if last_hb.tzinfo is None:
-                            last_hb = last_hb.replace(tzinfo=timezone.utc)
-                            
-                        elapsed_seconds = (now - last_hb).total_seconds()
-                        elapsed_minutes = elapsed_seconds / 60.0
-                        if elapsed_minutes >= 1:
-                            # Find ALL ea_disconnect configs for this user
-                            # (may be configured on a different workspace)
-                            configs = db.query(UserAlertConfig).filter(
-                                UserAlertConfig.user_id == acc.user_id,
-                                UserAlertConfig.metric_key == "ea_disconnect_minutes",
-                                UserAlertConfig.is_active == True
-                            ).all()
-                            
-                            if configs:
-                                for cfg in configs:
-                                    dispatch_alerts_background(
-                                        user_id=acc.user_id,
-                                        target_type=cfg.target_type,
-                                        target_id=cfg.target_id,
-                                        metrics={
-                                            "ea_disconnect_minutes": elapsed_minutes,
-                                            "disconnected_workspace": acc.name or acc.id[:8]
-                                        }
-                                    )
-                            else:
-                                # Fallback: dispatch with account id (legacy behavior)
-                                dispatch_alerts_background(
-                                    user_id=acc.user_id,
-                                    target_type="account",
-                                    target_id=acc.id,
-                                    metrics={
-                                        "ea_disconnect_minutes": elapsed_minutes,
-                                        "disconnected_workspace": acc.name or acc.id[:8]
-                                    }
-                                )
+                    if not acc.last_heartbeat_at:
+                        continue
+                    
+                    users_seen.add(acc.user_id)
+                    last_hb = acc.last_heartbeat_at
+                    if last_hb.tzinfo is None:
+                        last_hb = last_hb.replace(tzinfo=timezone.utc)
+                        
+                    elapsed_seconds = (now - last_hb).total_seconds()
+                    elapsed_minutes = elapsed_seconds / 60.0
+                    
+                    # Find disconnect configs for this user
+                    configs = db.query(UserAlertConfig).filter(
+                        UserAlertConfig.user_id == acc.user_id,
+                        UserAlertConfig.metric_key == "ea_disconnect_minutes",
+                        UserAlertConfig.is_active == True
+                    ).all()
+                    
+                    if not configs:
+                        continue
+                    
+                    threshold = configs[0].threshold_value or 1.0
+                    
+                    if elapsed_minutes >= threshold:
+                        users_with_disconnect.add(acc.user_id)
+                        for cfg in configs:
+                            dispatch_alerts_background(
+                                user_id=acc.user_id,
+                                target_type=cfg.target_type,
+                                target_id=cfg.target_id,
+                                metrics={
+                                    "ea_disconnect_minutes": elapsed_minutes,
+                                    "disconnected_workspace": acc.name or acc.id[:8]
+                                }
+                            )
+                
+                # Clear disconnect history for users with ALL accounts now online
+                # This resets the "once per incident" lock so next disconnect fires fresh
+                from models.user_alerts import UserAlertHistory
+                for user_id in (users_seen - users_with_disconnect):
+                    configs = db.query(UserAlertConfig).filter(
+                        UserAlertConfig.user_id == user_id,
+                        UserAlertConfig.metric_key == "ea_disconnect_minutes"
+                    ).all()
+                    for cfg in configs:
+                        cleared = db.query(UserAlertHistory).filter(
+                            UserAlertHistory.config_id == cfg.id
+                        ).delete(synchronize_session=False)
+                        if cleared:
+                            logger.info(f"Watchdog: cleared disconnect history for user {user_id} (all accounts online)")
+                if users_seen - users_with_disconnect:
+                    db.commit()
+                    
         except Exception as e:
             logger.error(f"Heartbeat Watchdog Error: {e}")
 
