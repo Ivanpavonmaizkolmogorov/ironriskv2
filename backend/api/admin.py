@@ -460,7 +460,7 @@ async def trigger_alert(
 @router.post("/purge_alert_history")
 def purge_alert_history(admin: User = Depends(get_admin_user), db: Session = Depends(get_db)):
     """Deletes all alert history (cooldown locks) for the admin, allowing immediate re-testing of proactive alerts."""
-    from models.user_alert_config import UserAlertHistory, UserAlertConfig
+    from models.user_alerts import UserAlertHistory, UserAlertConfig
     
     # Get all configs for this user
     configs = db.query(UserAlertConfig).filter(UserAlertConfig.user_id == admin.id).all()
