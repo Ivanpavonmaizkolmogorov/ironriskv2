@@ -41,6 +41,8 @@ class WaitlistLeadOut(BaseModel):
     notes: str | None = None
     approved_at: datetime | None = None
     created_at: datetime
+    login_count: int = 0
+    last_login_at: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -106,7 +108,20 @@ async def add_to_waitlist(
 async def list_leads(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin only")
-    return db.query(WaitlistLead).order_by(WaitlistLead.created_at.desc()).all()
+    
+    leads = db.query(WaitlistLead).order_by(WaitlistLead.created_at.desc()).all()
+    
+    # Enrich with login engagement data from User table
+    result = []
+    for lead in leads:
+        data = WaitlistLeadOut.model_validate(lead)
+        linked_user = db.query(User).filter(User.email == lead.email).first()
+        if linked_user:
+            data.login_count = linked_user.login_count or 0
+            data.last_login_at = linked_user.last_login_at
+        result.append(data)
+    
+    return result
 
 
 @router.post("/{lead_id}/approve")

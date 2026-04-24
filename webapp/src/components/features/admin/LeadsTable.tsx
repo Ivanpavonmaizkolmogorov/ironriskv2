@@ -12,6 +12,8 @@ interface Lead {
   notes: string | null;
   approved_at: string | null;
   created_at: string;
+  login_count: number;
+  last_login_at: string | null;
 }
 
 export default function LeadsTable() {
@@ -94,6 +96,7 @@ export default function LeadsTable() {
                 <th className="text-left px-4 py-3 font-medium">Email</th>
                 <th className="text-left px-4 py-3 font-medium">Locale</th>
                 <th className="text-left px-4 py-3 font-medium">Motivación</th>
+                <th className="text-center px-4 py-3 font-medium">Logins</th>
                 <th className="text-left px-4 py-3 font-medium">Fecha</th>
                 <th className="text-right px-4 py-3 font-medium">Acciones</th>
               </tr>
@@ -124,6 +127,19 @@ export default function LeadsTable() {
                         </span>
                       ) : (
                         <span className="text-iron-600">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {lead.login_count > 0 ? (
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-full ${
+                          lead.login_count >= 5 ? 'bg-risk-green/15 text-risk-green border border-risk-green/30'
+                          : lead.login_count >= 2 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                          : 'bg-iron-700/50 text-iron-300 border border-iron-600/30'
+                        }`}>
+                          {lead.login_count}×
+                        </span>
+                      ) : (
+                        <span className="text-iron-600 text-xs">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-iron-400 text-xs">

@@ -97,6 +97,12 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         raise e
 
     token = create_jwt(user.id, user.email)
+    
+    # Track login engagement
+    user.login_count = (user.login_count or 0) + 1
+    user.last_login_at = datetime.now(timezone.utc)
+    db.commit()
+    
     return TokenResponse(access_token=token)
 
 

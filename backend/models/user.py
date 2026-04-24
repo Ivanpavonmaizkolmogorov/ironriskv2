@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, DateTime, Boolean
+from sqlalchemy import String, DateTime, Boolean, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -22,6 +22,8 @@ class User(Base):
     )
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    login_count: Mapped[int] = mapped_column(Integer, default=0)
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     trading_accounts = relationship("TradingAccount", back_populates="user", cascade="all, delete-orphan")
