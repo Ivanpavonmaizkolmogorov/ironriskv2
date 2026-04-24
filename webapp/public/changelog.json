@@ -1,5 +1,11 @@
 [
   {
+    "id": "telegram_admin_invite_template",
+    "date": "2026-04-24",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "fix_invite_english_youtube_link",
     "date": "2026-04-24",
     "tag": "improvement",

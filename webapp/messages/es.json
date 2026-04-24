@@ -1151,6 +1151,10 @@
       "fix_invite_english_youtube_link": {
         "title": "Enlace de YouTube Corregido",
         "body": "Se ha arreglado el enlace al tutorial en la invitación inglesa que redirigía por defecto al vídeo en español."
+      },
+      "telegram_admin_invite_template": {
+        "title": "Asistente de Invitación en Telegram",
+        "body": "Ahora, al aprobar un nuevo lead, el bot de Telegram te enviará automáticamente la plantilla de invitación en el idioma nativo del trader para que puedas reenviarla con un solo toque."
       }
     }
   }

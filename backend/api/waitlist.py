@@ -122,9 +122,22 @@ async def approve_lead(lead_id: str, silent: bool = False, user: User = Depends(
     if not lead.password_hash:
         raise HTTPException(status_code=400, detail="No password stored for this lead. Ask them to re-register.")
 
-    from services.waitlist_service import execute_lead_approval
+    from services.waitlist_service import execute_lead_approval, get_beta_invite_text
+    from services.telegram_bot import send_admin_notification
+    import asyncio
+    
     try:
         execute_lead_approval(db, lead, silent=silent)
+        
+        # Also give the admin the copy-paste template in Telegram
+        invite_text = get_beta_invite_text(lead.locale or "es")
+        msg = f"📋 <b>Copia y reenvía esto a {lead.email}:</b>\n\n<code>{invite_text}</code>"
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(send_admin_notification(msg))
+        except RuntimeError:
+            asyncio.run(send_admin_notification(msg))
+            
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

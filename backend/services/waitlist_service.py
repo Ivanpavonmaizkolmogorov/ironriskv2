@@ -12,6 +12,17 @@ from models.waitlist import WaitlistLead
 from models.trading_account import TradingAccount
 from services.email_service import EmailService
 
+def get_beta_invite_text(locale: str) -> str:
+    """Provides the exact copy from the frontend for Telegram/admin forwarding."""
+    settings = get_settings()
+    handle = getattr(settings, "ADMIN_TELEGRAM_HANDLE", "@IronRiskAdmin")
+    url = f"https://t.me/{handle.replace('@', '')}"
+    
+    if locale == "en":
+        return f"🛡️ IronRisk — Closed Beta\n\n🌐 https://www.ironrisk.pro/en/register\n\n📺 Tutorial:\nhttps://youtu.be/IgGUemRjnoc\n\n💬 Direct support: {handle}\n{url}"
+    else:
+        return f"🛡️ IronRisk — Beta Privada\n\n🌐 https://www.ironrisk.pro/es/register\n\n📺 Tutorial:\nhttps://youtu.be/rW_rJLNmtTw\n\n💬 Soporte directo: {handle}\n{url}"
+
 def execute_lead_approval(db: Session, lead: WaitlistLead, silent: bool = False) -> str:
     """Core logic to approve a lead, create user and workspace, and (optionally) email the user."""
     if lead.approved_at:

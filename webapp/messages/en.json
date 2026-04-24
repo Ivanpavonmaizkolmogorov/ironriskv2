@@ -1151,6 +1151,10 @@
       "fix_invite_english_youtube_link": {
         "title": "YouTube Link Correction",
         "body": "Fixed the tutorial link in the English invite template which was incorrectly pointing to the Spanish video."
+      },
+      "telegram_admin_invite_template": {
+        "title": "Telegram Invite Assistant",
+        "body": "When approving a new lead, the Telegram bot will now automatically send you the pre-formatted invite template in the trader's native language for one-tap forwarding."
       }
     }
   }

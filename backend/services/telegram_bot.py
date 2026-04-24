@@ -284,6 +284,10 @@ async def telegram_bot_poller():
                                                           if not is_silent else \
                                                           f"✅ Lead {lead.email} aprobado (SILENCIOSO).\nCuenta creada pero NO se ha enviado correo."
                                             await _send_message(bot_token, chat_id, success_msg)
+                                            # Send copy-paste template for easy forwarding
+                                            from services.waitlist_service import get_beta_invite_text
+                                            invite_text = get_beta_invite_text(lead.locale or "es")
+                                            await _send_message(bot_token, chat_id, f"📋 <b>Copia y reenvía esto al trader:</b>\n\n<code>{invite_text}</code>")
                                     except ValueError as e:
                                         await _send_message(bot_token, chat_id, f"❌ Error: {e}")
                         except Exception as e:
