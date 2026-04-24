@@ -130,10 +130,13 @@ class AlertEngine:
                 # We can fire the alert!
                 
                 # Handling custom EA disconnect alert message
+                skip_target_footer = False
                 if config.metric_key == "ea_disconnect_minutes":
+                    workspace_name = metrics_snapshot.get("disconnected_workspace", "Unknown")
                     title = get_text(locale, "alert_title_ea_disconnect")
-                    body = get_text(locale, "alert_body_ea_disconnect", minutes=int(current_value))
+                    body = get_text(locale, "alert_body_ea_disconnect", minutes=int(current_value), workspace=workspace_name)
                     message = f"{title}\n\n{body}"
+                    skip_target_footer = True  # The workspace name is already in the message
                 else:
                     # Generic Threshold breached template
                     title = get_text(locale, "alert_title_risk", target_type_upper=target_type.upper())
@@ -144,7 +147,7 @@ class AlertEngine:
                     
                     message = f"{title}\n\n{metric_line}\n{value_line}"
                     
-                if target_id:
+                if target_id and not skip_target_footer:
                     try:
                         target_name = "Desconocido"
                         account_name = "N/A"

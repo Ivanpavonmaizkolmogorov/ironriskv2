@@ -198,7 +198,10 @@ async def ea_connectivity_watchdog():
                                         user_id=acc.user_id,
                                         target_type=cfg.target_type,
                                         target_id=cfg.target_id,
-                                        metrics={"ea_disconnect_minutes": elapsed_minutes}
+                                        metrics={
+                                            "ea_disconnect_minutes": elapsed_minutes,
+                                            "disconnected_workspace": acc.name or acc.id[:8]
+                                        }
                                     )
                             else:
                                 # Fallback: dispatch with account id (legacy behavior)
@@ -206,7 +209,10 @@ async def ea_connectivity_watchdog():
                                     user_id=acc.user_id,
                                     target_type="account",
                                     target_id=acc.id,
-                                    metrics={"ea_disconnect_minutes": elapsed_minutes}
+                                    metrics={
+                                        "ea_disconnect_minutes": elapsed_minutes,
+                                        "disconnected_workspace": acc.name or acc.id[:8]
+                                    }
                                 )
         except Exception as e:
             logger.error(f"Heartbeat Watchdog Error: {e}")
