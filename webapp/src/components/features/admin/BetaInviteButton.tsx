@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
 import { useSettingsStore } from "@/store/useSettingsStore";
+import { getTutorialUrl } from "@/config/tutorials";
 
 export default function BetaInviteButton() {
   const [copiedLang, setCopiedLang] = useState<string | null>(null);
@@ -12,6 +13,7 @@ export default function BetaInviteButton() {
   const getInvite = (lang: "en" | "es") => {
     const handle = adminTelegramHandle;
     const url = `https://t.me/${handle.replace('@', '')}`;
+    const tutorialUrl = getTutorialUrl(lang);
     
     if (lang === "en") {
       return `🛡️ IronRisk — Closed Beta
@@ -19,7 +21,7 @@ export default function BetaInviteButton() {
 🌐 https://www.ironrisk.pro/en/register
 
 📺 Tutorial:
-https://youtu.be/IgGUemRjnoc
+${tutorialUrl}
 
 💬 Direct support: ${handle}
 ${url}`;
@@ -29,7 +31,7 @@ ${url}`;
 🌐 https://www.ironrisk.pro/es/register
 
 📺 Tutorial:
-https://youtu.be/rW_rJLNmtTw
+${tutorialUrl}
 
 💬 Soporte directo: ${handle}
 ${url}`;

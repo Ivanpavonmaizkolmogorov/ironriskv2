@@ -5,6 +5,7 @@ import logging
 import os
 from dotenv import load_dotenv
 from models.database import get_settings
+from config.tutorials import get_tutorial_url
 
 # Forced loading to capture changes immediately
 load_dotenv(override=True)
@@ -291,7 +292,7 @@ class EmailService:
                 headline = "You're in."
                 body_p1 = "Your access to <strong style=\"color: #c9d1d9;\">IronRisk</strong> has been activated. You can now log in directly using the email and password you used when you registered."
                 btn_text = "Log in to IronRisk →"
-                yt_link = "https://youtu.be/IgGUemRjnoc"
+                yt_link = get_tutorial_url("en")
                 yt_text = "📺 Watch Step-by-Step Video Tutorial"
                 spam_note = "⚠️ If you didn't request access, you can ignore this email."
             else:
@@ -299,7 +300,7 @@ class EmailService:
                 headline = "Estás dentro."
                 body_p1 = "Tu acceso a <strong style=\"color: #c9d1d9;\">IronRisk</strong> ha sido activado. Ya puedes entrar directamente con el correo y la contraseña que usaste al registrarte."
                 btn_text = "Entrar a IronRisk →"
-                yt_link = "https://youtu.be/rW_rJLNmtTw"
+                yt_link = get_tutorial_url("es")
                 yt_text = "📺 Ver Video Tutorial Paso a Paso"
                 spam_note = "⚠️ Si no solicitaste acceso, puedes ignorar este correo."
 
