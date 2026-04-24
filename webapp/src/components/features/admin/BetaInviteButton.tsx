@@ -19,7 +19,7 @@ export default function BetaInviteButton() {
 🌐 https://www.ironrisk.pro/en/register
 
 📺 Tutorial:
-https://youtu.be/rW_rJLNmtTw
+https://youtu.be/IgGUemRjnoc
 
 💬 Direct support: ${handle}
 ${url}`;

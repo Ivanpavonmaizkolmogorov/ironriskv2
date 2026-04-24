@@ -1147,6 +1147,10 @@
       "add_ci_regression_tests": {
         "title": "CI/CD Regressions",
         "body": "Expanded test suite to prevent pathing and timezone variance errors in future continuous integrations."
+      },
+      "fix_invite_english_youtube_link": {
+        "title": "YouTube Link Correction",
+        "body": "Fixed the tutorial link in the English invite template which was incorrectly pointing to the Spanish video."
       }
     }
   }

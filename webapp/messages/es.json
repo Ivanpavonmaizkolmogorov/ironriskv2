@@ -1147,6 +1147,10 @@
       "add_ci_regression_tests": {
         "title": "Regresiones CI/CD",
         "body": "Se ha ampliado la suite de pruebas para evitar fallos de rutas y husos horarios en integraciones continuas futuras."
+      },
+      "fix_invite_english_youtube_link": {
+        "title": "Enlace de YouTube Corregido",
+        "body": "Se ha arreglado el enlace al tutorial en la invitación inglesa que redirigía por defecto al vídeo en español."
       }
     }
   }

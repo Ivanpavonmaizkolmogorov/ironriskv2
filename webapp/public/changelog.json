@@ -1,5 +1,11 @@
 [
   {
+    "id": "fix_invite_english_youtube_link",
+    "date": "2026-04-24",
+    "tag": "improvement",
+    "internal": false
+  },
+  {
     "id": "add_ci_regression_tests",
     "date": "2026-04-23",
     "tag": "improvement",
