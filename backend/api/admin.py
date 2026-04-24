@@ -472,3 +472,90 @@ def purge_alert_history(admin: User = Depends(get_admin_user), db: Session = Dep
         return {"status": "ok", "detail": f"Purgados {deleted} registros de historial de alertas para tu usuario."}
     
     return {"status": "ok", "detail": "No hay historial de alertas que purgar."}
+
+
+@router.get("/debug-watchdog")
+def debug_watchdog(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Diagnostic: simulates what the ea_connectivity_watchdog sees right now."""
+    if not user.is_admin:
+        raise HTTPException(403)
+    
+    from models.trading_account import TradingAccount
+    from models.user_alerts import UserAlertConfig, UserAlertHistory
+    from models.user_preferences import UserPreferences
+    from sqlalchemy import select
+    
+    now = datetime.now(timezone.utc)
+    accounts = db.query(TradingAccount).filter(TradingAccount.is_active == True).all()
+    
+    results = []
+    for acc in accounts:
+        entry = {
+            "account_name": acc.name,
+            "account_id": acc.id,
+            "user_id": acc.user_id,
+            "last_heartbeat_at": str(acc.last_heartbeat_at) if acc.last_heartbeat_at else None,
+            "elapsed_minutes": None,
+            "would_dispatch": False,
+            "alert_configs_found": 0,
+            "alert_configs": [],
+            "history_entries": [],
+            "telegram_chat_id": None,
+        }
+        
+        if acc.last_heartbeat_at:
+            last_hb = acc.last_heartbeat_at
+            if last_hb.tzinfo is None:
+                last_hb = last_hb.replace(tzinfo=timezone.utc)
+            elapsed = (now - last_hb).total_seconds() / 60.0
+            entry["elapsed_minutes"] = round(elapsed, 2)
+            entry["would_dispatch"] = elapsed >= 1
+        
+        # Check alert configs matching exactly what the watchdog queries
+        configs = db.scalars(select(UserAlertConfig).where(
+            UserAlertConfig.user_id == acc.user_id,
+            UserAlertConfig.target_type == "account",
+            UserAlertConfig.target_id == acc.id,
+            UserAlertConfig.is_active == True
+        )).all()
+        entry["alert_configs_found"] = len(configs)
+        
+        for c in configs:
+            hist = db.execute(select(UserAlertHistory).where(
+                UserAlertHistory.config_id == c.id
+            ).order_by(UserAlertHistory.triggered_at.desc()).limit(1)).scalar_one_or_none()
+            
+            entry["alert_configs"].append({
+                "id": c.id,
+                "metric_key": c.metric_key,
+                "operator": c.operator,
+                "threshold": c.threshold_value,
+                "cooldown_minutes": c.cooldown_minutes,
+                "channel": c.channel,
+            })
+            if hist:
+                entry["history_entries"].append({
+                    "config_id": c.id,
+                    "triggered_at": str(hist.triggered_at),
+                    "value_at_trigger": hist.value_at_trigger,
+                })
+        
+        # Also find ALL disconnect configs for the user (detect target_id mismatch)
+        all_dc = db.scalars(select(UserAlertConfig).where(
+            UserAlertConfig.user_id == acc.user_id,
+            UserAlertConfig.metric_key == "ea_disconnect_minutes"
+        )).all()
+        entry["all_disconnect_configs_for_user"] = [
+            {"id": c.id, "target_type": c.target_type, "target_id": c.target_id, "threshold": c.threshold_value}
+            for c in all_dc
+        ]
+        
+        # Check telegram
+        prefs = db.execute(select(UserPreferences).where(
+            UserPreferences.user_id == acc.user_id
+        )).scalar_one_or_none()
+        entry["telegram_chat_id"] = prefs.telegram_chat_id if prefs else None
+        
+        results.append(entry)
+    
+    return {"now_utc": str(now), "accounts": results}
