@@ -66,6 +66,11 @@ class EmailService:
                            Download MQL5 Engine
                         </a>
                     </div>
+
+                    <div style="text-align: center; margin-bottom: 35px;">
+                        <p style="font-size: 14px; color: #8b949e; line-height: 1.6; margin-bottom: 10px;">Not sure how to install it?</p>
+                        <a href="https://youtu.be/IgGUemRjnoc" style="color: #58a6ff; text-decoration: none; font-size: 14px; font-weight: 500;">📺 Watch Step-by-Step Video Tutorial</a>
+                    </div>
     
                     <div style="background-color: rgba(255, 235, 59, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #fbc02d; margin-bottom: 25px;">
                         <p style="margin: 0; font-size: 14px; color: #fbc02d;">
@@ -104,6 +109,11 @@ class EmailService:
                            style="display: inline-block; padding: 14px 28px; background-color: #00e676; color: #000000; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
                            Descargar MQL5 Engine
                         </a>
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 35px;">
+                        <p style="font-size: 14px; color: #8b949e; line-height: 1.6; margin-bottom: 10px;">¿No estás seguro de cómo instalarlo?</p>
+                        <a href="https://youtu.be/rW_rJLNmtTw" style="color: #58a6ff; text-decoration: none; font-size: 14px; font-weight: 500;">📺 Ver Video Tutorial Paso a Paso</a>
                     </div>
     
                     <div style="background-color: rgba(255, 235, 59, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #fbc02d; margin-bottom: 25px;">
