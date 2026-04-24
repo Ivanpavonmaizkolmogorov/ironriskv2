@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import LocaleSwitcher from "@/components/ui/LocaleSwitcher";
+import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import AuthForm from "@/components/features/auth/AuthForm";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -26,7 +26,7 @@ export default function LoginPage() {
         <span>←</span> {isEn ? "Back to Home" : "Volver al inicio"}
       </Link>
       <div className="absolute top-6 right-6 md:top-8 md:right-8">
-        <LocaleSwitcher />
+        <LanguageSwitcher />
       </div>
       
       <div className="w-full max-w-sm">
@@ -55,7 +55,7 @@ export default function LoginPage() {
 
             <p className="text-center text-sm text-iron-500 mt-6">
               {isEn ? "No account?" : "¿Sin cuenta?"}{" "}
-              <Link href="/register" className="text-risk-green hover:underline">
+              <Link href={`/${locale}/register`} className="text-risk-green hover:underline">
                 {isEn ? "Register" : "Regístrate"}
               </Link>
             </p>
