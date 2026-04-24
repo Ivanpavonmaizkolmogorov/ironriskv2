@@ -1,8 +1,9 @@
 """
-Single source of truth for onboarding tutorial URLs.
+SINGLE SOURCE OF TRUTH for onboarding tutorial URLs.
 Update ONLY these constants when uploading new tutorial videos.
 
-These must stay in sync with: webapp/src/config/tutorials.ts
+The frontend reads these values via the public Settings API at runtime.
+Backend services (email_service, waitlist_service) import directly from here.
 """
 
 TUTORIAL_URL_EN = "https://youtu.be/IgGUemRjnoc"

@@ -4,11 +4,10 @@ import React, { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
 import { useSettingsStore } from "@/store/useSettingsStore";
-import { getTutorialUrl } from "@/config/tutorials";
 
 export default function BetaInviteButton() {
   const [copiedLang, setCopiedLang] = useState<string | null>(null);
-  const { adminTelegramHandle } = useSettingsStore();
+  const { adminTelegramHandle, getTutorialUrl } = useSettingsStore();
 
   const getInvite = (lang: "en" | "es") => {
     const handle = adminTelegramHandle;
