@@ -121,8 +121,8 @@ class AlertEngine:
                         
                     elapsed = (now - triggered_at).total_seconds() / 60.0
                     
-                    # Enforce minimum 5-min cooldown even if user set 0
-                    effective_cooldown = max(config.cooldown_minutes, 5)
+                    # Enforce minimum 1-min cooldown to prevent spam (watchdog runs every 60s)
+                    effective_cooldown = max(config.cooldown_minutes, 1)
                     if elapsed < effective_cooldown:
                         continue # Still in cooldown period
                         
