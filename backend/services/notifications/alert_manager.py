@@ -121,10 +121,9 @@ class AlertEngine:
                         
                     elapsed = (now - triggered_at).total_seconds() / 60.0
                     
-                    if config.cooldown_minutes == 0:
-                        continue # Fire once per incident. If we are here, the incident hasn't been cleared yet.
-                        
-                    if elapsed < config.cooldown_minutes:
+                    # Enforce minimum 5-min cooldown even if user set 0
+                    effective_cooldown = max(config.cooldown_minutes, 5)
+                    if elapsed < effective_cooldown:
                         continue # Still in cooldown period
                         
                 # We can fire the alert!
@@ -178,6 +177,14 @@ class AlertEngine:
                     except Exception as e:
                         with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> EXCEPTION building message: {e}\n")
 
+                # Build inline mute button for Telegram
+                mute_label = "🔕 Silenciar" if locale == "es" else "🔕 Mute"
+                reply_markup = {
+                    "inline_keyboard": [[
+                        {"text": mute_label, "callback_data": f"mute:{config.id}"}
+                    ]]
+                }
+
                 # Send via selected channel
                 channel = self.channels.get(config.channel)
                 if not channel:
@@ -189,7 +196,6 @@ class AlertEngine:
                 if config.channel == "telegram" and prefs and prefs.telegram_chat_id:
                     recipient = prefs.telegram_chat_id
                 elif config.channel == "email":
-                    # Assume user email is tied to preferences via relationships or we'd fetch the user
                     recipient = getattr(prefs.user, "email", "unknown@email.com") if prefs else None
                 
                 if not recipient:
@@ -197,8 +203,11 @@ class AlertEngine:
                     continue
 
                 with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Sending message via {config.channel} to {recipient}\n")
-                # Fire and forget
-                success = await channel.send(recipient, message)
+                # Send with inline keyboard for Telegram
+                if config.channel == "telegram":
+                    success = await channel.send(recipient, message, reply_markup=reply_markup)
+                else:
+                    success = await channel.send(recipient, message)
                 with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Send success: {success}\n")
 
 

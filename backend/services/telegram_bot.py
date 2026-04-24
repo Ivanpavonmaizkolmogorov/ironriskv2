@@ -192,6 +192,42 @@ async def send_admin_notification(text: str):
         await _send_message(bot_token, cid, text)
 
 
+async def _handle_mute_callback(bot_token: str, callback_id: str, chat_id: str, config_id: str):
+    """Handle the '🔕 Silenciar' inline button press — deactivates the alert config."""
+    try:
+        with SessionLocal() as db:
+            from models.user_alerts import UserAlertConfig
+            config = db.query(UserAlertConfig).filter(UserAlertConfig.id == config_id).first()
+            
+            if config and config.is_active:
+                config.is_active = False
+                db.commit()
+                
+                # Determine locale
+                prefs = db.query(UserPreferences).filter(
+                    UserPreferences.user_id == config.user_id
+                ).first()
+                locale = getattr(prefs, "locale", "es") if prefs else "es"
+                
+                answer = "✅ Alerta silenciada. Puedes reactivarla desde el Centro de Alertas." if locale == "es" \
+                    else "✅ Alert muted. You can reactivate it from the Alerts Center."
+                confirm = f"🔕 <i>{answer}</i>"
+                await _send_message(bot_token, chat_id, confirm)
+            else:
+                answer = "ℹ️ Esta alerta ya estaba silenciada." if True else "ℹ️ This alert was already muted."
+    except Exception as e:
+        logger.error(f"Error handling mute callback: {e}")
+        answer = "❌ Error al silenciar la alerta."
+    
+    # Answer the callback query (removes the loading spinner on the button)
+    try:
+        url = f"https://api.telegram.org/bot{bot_token}/answerCallbackQuery"
+        async with httpx.AsyncClient() as client:
+            await client.post(url, json={"callback_query_id": callback_id, "text": answer}, timeout=5.0)
+    except Exception:
+        pass
+
+
 async def telegram_bot_poller():
     """Background task that polls Telegram getUpdates and responds to commands."""
     global _last_update_id
@@ -206,7 +242,7 @@ async def telegram_bot_poller():
     while True:
         try:
             url = f"https://api.telegram.org/bot{bot_token}/getUpdates"
-            params = {"timeout": 30, "allowed_updates": ["message"]}
+            params = {"timeout": 30, "allowed_updates": ["message", "callback_query"]}
             if _last_update_id > 0:
                 params["offset"] = _last_update_id + 1
 
@@ -224,6 +260,19 @@ async def telegram_bot_poller():
                     if update_id > _last_update_id:
                         _last_update_id = update_id
 
+                    # ── CALLBACK QUERY (inline button clicks) ──
+                    callback = update.get("callback_query")
+                    if callback:
+                        cb_data = callback.get("data", "")
+                        cb_id = callback.get("id")
+                        chat_id = str(callback.get("message", {}).get("chat", {}).get("id", ""))
+                        
+                        if cb_data.startswith("mute:"):
+                            config_id = cb_data[5:]
+                            await _handle_mute_callback(bot_token, cb_id, chat_id, config_id)
+                        continue
+
+                    # ── MESSAGE (commands) ──
                     msg = update.get("message", {})
                     text = msg.get("text", "").strip()
                     chat_id = str(msg.get("chat", {}).get("id", ""))

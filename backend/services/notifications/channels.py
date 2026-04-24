@@ -25,7 +25,7 @@ class TelegramChannel(NotificationChannel):
         self.bot_token = bot_token
         # Telegram API URL base: https://api.telegram.org/bot<TOKEN>/sendMessage
 
-    async def send(self, recipient_id: str, message: str) -> bool:
+    async def send(self, recipient_id: str, message: str, reply_markup: dict | None = None) -> bool:
         if not self.bot_token or not recipient_id:
             logger.error(f"Cannot send Telegram message: Missing token or recipient_id={recipient_id}")
             return False
@@ -36,6 +36,8 @@ class TelegramChannel(NotificationChannel):
             "text": message,
             "parse_mode": "HTML"
         }
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
 
         try:
             async with httpx.AsyncClient() as client:
