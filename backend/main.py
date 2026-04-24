@@ -161,31 +161,53 @@ def health():
     return {"status": "healthy", "version": _build_version}
 
 async def ea_connectivity_watchdog():
-    """Periodically checks if any MT5 EA has disconnected (heartbeat staled)."""
+    """Periodically checks if any MT5 EA has disconnected (heartbeat staled).
+    
+    FIX 2026-04-24: Dispatches using the user's configured target_id, not
+    the disconnected account's id. This ensures one ea_disconnect alert
+    covers ALL workspaces for a user, matching UX expectations.
+    """
+    from models.user_alerts import UserAlertConfig
+    
     while True:
         await asyncio.sleep(60.0) # Check every 60 seconds
         try:
             with SessionLocal() as db:
                 now = datetime.now(timezone.utc)
-                # Ensure we only track active accounts
                 accounts = db.query(TradingAccount).filter(TradingAccount.is_active == True).all()
                 for acc in accounts:
                     if acc.last_heartbeat_at:
-                        # SQLite might return a naive datetime depending on driver configurations
                         last_hb = acc.last_heartbeat_at
                         if last_hb.tzinfo is None:
                             last_hb = last_hb.replace(tzinfo=timezone.utc)
                             
                         elapsed_seconds = (now - last_hb).total_seconds()
                         elapsed_minutes = elapsed_seconds / 60.0
-                        if elapsed_minutes >= 1: # We dispatch it if it has been away for at least 1 min
-                            # The AlertEngine handles cooldowns, so this won't spam!
-                            dispatch_alerts_background(
-                                user_id=acc.user_id,
-                                target_type="account",
-                                target_id=acc.id,
-                                metrics={"ea_disconnect_minutes": elapsed_minutes}
-                            )
+                        if elapsed_minutes >= 1:
+                            # Find ALL ea_disconnect configs for this user
+                            # (may be configured on a different workspace)
+                            configs = db.query(UserAlertConfig).filter(
+                                UserAlertConfig.user_id == acc.user_id,
+                                UserAlertConfig.metric_key == "ea_disconnect_minutes",
+                                UserAlertConfig.is_active == True
+                            ).all()
+                            
+                            if configs:
+                                for cfg in configs:
+                                    dispatch_alerts_background(
+                                        user_id=acc.user_id,
+                                        target_type=cfg.target_type,
+                                        target_id=cfg.target_id,
+                                        metrics={"ea_disconnect_minutes": elapsed_minutes}
+                                    )
+                            else:
+                                # Fallback: dispatch with account id (legacy behavior)
+                                dispatch_alerts_background(
+                                    user_id=acc.user_id,
+                                    target_type="account",
+                                    target_id=acc.id,
+                                    metrics={"ea_disconnect_minutes": elapsed_minutes}
+                                )
         except Exception as e:
             logger.error(f"Heartbeat Watchdog Error: {e}")
 
