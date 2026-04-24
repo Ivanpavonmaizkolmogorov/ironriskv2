@@ -31,130 +31,7 @@ class EmailService:
         """Check if the SMTP credentials are fully provided."""
         return bool(self.sender_email and self.sender_password)
 
-    def send_welcome_email(self, recipient_email: str, locale: str = "es") -> bool:
-        """
-        Sends an HTML welcome email with the EA download links to the registered user.
-        Executes synchronously (should be called in a background task or threaded).
-        """
-        print(f"\n📧 [EMAIL SERVICE] Intentando enviar email de bienvenida a: {recipient_email}")
-        
-        if not self.is_configured():
-            print(f"❌ [EMAIL SERVICE ERROR] Faltan credenciales! Revisa tu .env y reinicia el servidor. Email: {self.sender_email}, Password: {'[Configurado]' if self.sender_password else '[NO CONFIGURADO]'}")
-            logger.warning(f"EmailService not configured. Skipping welcome email to {recipient_email}.")
-            return False
 
-        if locale == "en":
-            subject = "Welcome to IronRisk - Project Your Statistical Edge"
-            html_content = f"""
-            <html>
-              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; background-image: linear-gradient(#0d1117, #0d1117); color: #c9d1d9;">
-                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; background-image: linear-gradient(#161b22, #161b22); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
-                    <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
-                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hello,</p>
-                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
-                        Your lifetime account has been successfully provisioned for access with the email: <strong style="color: #c9d1d9;">{recipient_email}</strong>
-                    </p>
-                    
-                    <h3 style="font-size: 18px; color: #e6edf3; margin-top: 30px;">Next Step: Connect MetaTrader</h3>
-                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
-                        You are one step away from projecting your statistical probability. To start computing Bayesian data in real-time, install our MQL5 engine on your chosen MetaTrader chart.
-                    </p>
-                    
-                    <div style="text-align: center; margin: 35px 0;">
-                        <a href="{EA_DOWNLOAD_URL}" 
-                           style="display: inline-block; padding: 14px 28px; background-color: #00e676; color: #000000; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
-                           Download MQL5 Engine
-                        </a>
-                    </div>
-
-                    <div style="text-align: center; margin-bottom: 35px;">
-                        <p style="font-size: 14px; color: #8b949e; line-height: 1.6; margin-bottom: 10px;">Not sure how to install it?</p>
-                        <a href="https://youtu.be/IgGUemRjnoc" style="color: #58a6ff; text-decoration: none; font-size: 14px; font-weight: 500;">📺 Watch Step-by-Step Video Tutorial</a>
-                    </div>
-    
-                    <div style="background-color: rgba(255, 235, 59, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #fbc02d; margin-bottom: 25px;">
-                        <p style="margin: 0; font-size: 14px; color: #fbc02d;">
-                            <strong>Important:</strong> The Workspace is cryptographically bound. You must paste the <em>API Token</em> and ensure your <em>MT5 Account Number</em> matches exactly the one configured on the web, otherwise the connection will be rejected.
-                        </p>
-                    </div>
-    
-                    <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
-                        Any doubts? Reply directly to this email.<br>
-                        <strong style="color: #8b949e;">Iván P.</strong> <span style="color: #484f58;">— Founder & Lead Developer</span><br>
-                        <a href="https://www.ironrisk.pro" style="color: #00e676; text-decoration: none; font-size: 12px;">www.ironrisk.pro</a>
-                    </p>
-                </div>
-              </body>
-            </html>
-            """
-        else:
-            subject = "Bienvenido a IronRisk - Proyecta tu Edge Matemático"
-            html_content = f"""
-            <html>
-              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #0d1117; background-image: linear-gradient(#0d1117, #0d1117); color: #c9d1d9;">
-                <div style="max-w-lg: 600px; margin: 0 auto; background-color: #161b22; background-image: linear-gradient(#161b22, #161b22); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-top: 5px solid #00e676; border: 1px solid #30363d;">
-                    <a href="https://www.ironrisk.pro" style="display: inline-block; margin-bottom: 10px;"><img src="https://www.ironrisk.pro/email-logo.png" alt="IronRisk" style="height: 36px; width: auto;" /></a>
-                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">Hola,</p>
-                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
-                        Tu cuenta vitalicia ha sido provisionada exitosamente para el acceso con el correo: <strong style="color: #c9d1d9;">{recipient_email}</strong>
-                    </p>
-                    
-                    <h3 style="font-size: 18px; color: #e6edf3; margin-top: 30px;">Próximo Paso: Conecta tu MetaTrader</h3>
-                    <p style="font-size: 16px; color: #8b949e; line-height: 1.6;">
-                        Estás a un paso de proyectar tu probabilidad estadística. Para comenzar a ver datos Bayesianos en tiempo real, instala nuestro motor MQL5 en el gráfico de tu terminal MetaTrader que quieras vincular.
-                    </p>
-                    
-                    <div style="text-align: center; margin: 35px 0;">
-                        <a href="{EA_DOWNLOAD_URL}" 
-                           style="display: inline-block; padding: 14px 28px; background-color: #00e676; color: #000000; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
-                           Descargar MQL5 Engine
-                        </a>
-                    </div>
-
-                    <div style="text-align: center; margin-bottom: 35px;">
-                        <p style="font-size: 14px; color: #8b949e; line-height: 1.6; margin-bottom: 10px;">¿No estás seguro de cómo instalarlo?</p>
-                        <a href="https://youtu.be/rW_rJLNmtTw" style="color: #58a6ff; text-decoration: none; font-size: 14px; font-weight: 500;">📺 Ver Video Tutorial Paso a Paso</a>
-                    </div>
-    
-                    <div style="background-color: rgba(255, 235, 59, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #fbc02d; margin-bottom: 25px;">
-                        <p style="margin: 0; font-size: 14px; color: #fbc02d;">
-                            <strong>Importante:</strong> El Workspace está protegido gráficamente. Deberás pegar el <em>API Token</em> y asegurarte de que tu <em>Número de Cuenta de MT5</em> coincide exactamente con el que configuraste en la web, de lo contrario la conexión será rechazada.
-                        </p>
-                    </div>
-    
-                    <p style="font-size: 14px; color: #484f58; margin-top: 40px; border-top: 1px solid #30363d; padding-top: 20px;">
-                        ¿Tienes dudas? Responde directamente a este correo.<br>
-                        <strong style="color: #8b949e;">Iván P.</strong> <span style="color: #484f58;">— Founder & Lead Developer</span><br>
-                        <a href="https://www.ironrisk.pro" style="color: #00e676; text-decoration: none; font-size: 12px;">www.ironrisk.pro</a>
-                    </p>
-                </div>
-              </body>
-            </html>
-            """
-        
-        msg = EmailMessage()
-        msg['Subject'] = subject
-        sender_name = "Ivan from IronRisk" if locale == "en" else "Iván de IronRisk"
-        msg['From'] = formataddr((sender_name, self.sender_email))
-        msg['To'] = recipient_email
-        msg.set_content("Abre este correo en un cliente que soporte renderizado HTML para ver las instrucciones.")
-        msg.add_alternative(html_content, subtype='html')
-
-        try:
-            print("⏳ [EMAIL SERVICE] Conectando a smtp.gmail.com:587...")
-            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
-                server.set_debuglevel(1)
-                server.starttls()
-                server.login(self.sender_email, self.sender_password)
-                server.send_message(msg)
-            
-            print(f"✅ [EMAIL SERVICE SUCCESS] ¡Email inyectado en la bandeja de {recipient_email} exitosamente!")
-            logger.info(f"Welcome email successfully dispatched to {recipient_email}")
-            return True
-        except Exception as e:
-            print(f"🔥 [EMAIL SERVICE EXCEPTION] Error catastrófico enviando a {recipient_email}: {e}")
-            logger.error(f"Failed to transmit welcome email to {recipient_email}: {e}")
-            return False
 
     def send_verification_email(self, recipient_email: str, token: str, locale: str = "es") -> bool:
         """Sends an email with a verification link to confirm the user's email address."""
@@ -414,12 +291,16 @@ class EmailService:
                 headline = "You're in."
                 body_p1 = "Your access to <strong style=\"color: #c9d1d9;\">IronRisk</strong> has been activated. You can now log in directly using the email and password you used when you registered."
                 btn_text = "Log in to IronRisk →"
+                yt_link = "https://youtu.be/IgGUemRjnoc"
+                yt_text = "📺 Watch Step-by-Step Video Tutorial"
                 spam_note = "⚠️ If you didn't request access, you can ignore this email."
             else:
                 subject = "🛡️ Tu acceso a IronRisk está listo"
                 headline = "Estás dentro."
                 body_p1 = "Tu acceso a <strong style=\"color: #c9d1d9;\">IronRisk</strong> ha sido activado. Ya puedes entrar directamente con el correo y la contraseña que usaste al registrarte."
                 btn_text = "Entrar a IronRisk →"
+                yt_link = "https://youtu.be/rW_rJLNmtTw"
+                yt_text = "📺 Ver Video Tutorial Paso a Paso"
                 spam_note = "⚠️ Si no solicitaste acceso, puedes ignorar este correo."
 
             html_content = f"""
@@ -437,6 +318,10 @@ class EmailService:
                            style="display: inline-block; padding: 16px 32px; background-color: #00e676; color: #0d1117; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
                            {btn_text}
                         </a>
+                    </div>
+                    
+                    <div style="text-align: center; margin-bottom: 32px;">
+                        <a href="{yt_link}" style="color: #58a6ff; text-decoration: none; font-size: 14px; font-weight: 500;">{yt_text}</a>
                     </div>
 
                     <div style="background-color: #1c2128; border: 1px solid #f0883e33; border-radius: 8px; padding: 12px 16px; margin: 24px 0;">
