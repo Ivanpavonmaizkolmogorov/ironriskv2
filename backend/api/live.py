@@ -658,7 +658,13 @@ def heartbeat(req: HeartbeatRequest, background_tasks: BackgroundTasks, db: Sess
         else:
             logger.info(f"[DUP-CHECK] No previous heartbeat, skipping")
     elif req.hostname and account.hostname and req.hostname == account.hostname:
-        logger.debug(f"[DUP-CHECK] Same hostname, no collision")
+        # Same hostname = collision resolved, clear warning if it was set
+        if layout.get("duplicate_warning"):
+            layout["duplicate_warning"] = False
+            dirty = True
+            logger.info(f"[DUP-CHECK] Collision cleared for {account.name} (same hostname: {req.hostname})")
+        else:
+            logger.debug(f"[DUP-CHECK] Same hostname, no collision")
     elif not req.hostname:
         logger.debug(f"[DUP-CHECK] No hostname in request (legacy EA)")
 
