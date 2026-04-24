@@ -115,16 +115,19 @@ class AlertEngine:
                 with open("alert_debug.log", "a", encoding="utf-8") as f: f.write(f"-> Condition met! Checking cooldown lock...\n")
                 
                 if last_hist:
+                    # Disconnect alerts: fire ONCE per incident.
+                    # History auto-clears when workspace reconnects (is_breached=False above).
+                    if config.metric_key == "ea_disconnect_minutes":
+                        continue  # Already alerted — wait for reconnect to clear history
+                    
+                    # Other alerts: respect user-configured cooldown
                     triggered_at = last_hist.triggered_at
                     if triggered_at.tzinfo is None:
                         triggered_at = triggered_at.replace(tzinfo=timezone.utc)
-                        
                     elapsed = (now - triggered_at).total_seconds() / 60.0
-                    
-                    # Enforce minimum 1-min cooldown to prevent spam (watchdog runs every 60s)
                     effective_cooldown = max(config.cooldown_minutes, 1)
                     if elapsed < effective_cooldown:
-                        continue # Still in cooldown period
+                        continue  # Still in cooldown period
                         
                 # We can fire the alert!
                 
