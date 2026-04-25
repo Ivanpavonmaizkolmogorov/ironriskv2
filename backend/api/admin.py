@@ -36,6 +36,42 @@ def db_diagnostic(db: Session = Depends(get_db), user: User = Depends(get_admin_
     return {"alembic_version": alembic_ver, "user_preferences_columns": cols, "bt_discount_sample": sample}
 
 
+@router.post("/fix-schema")
+def fix_schema(db: Session = Depends(get_db), user: User = Depends(get_admin_user)):
+    """Run schema fix directly."""
+    from sqlalchemy import inspect as sa_inspect
+    results = []
+    try:
+        inspector = sa_inspect(db.bind)
+        existing = [c["name"] for c in inspector.get_columns("user_preferences")]
+        results.append(f"existing columns: {existing}")
+
+        if "briefing_hour_utc" not in existing:
+            db.execute(text("ALTER TABLE user_preferences ADD COLUMN briefing_hour_utc INTEGER NOT NULL DEFAULT 6"))
+            results.append("Added briefing_hour_utc")
+        if "last_briefing_date" not in existing:
+            db.execute(text("ALTER TABLE user_preferences ADD COLUMN last_briefing_date VARCHAR(10)"))
+            results.append("Added last_briefing_date")
+
+        db.execute(text(
+            "UPDATE strategies SET metrics_snapshot = metrics_snapshot - 'bayes_cache' "
+            "WHERE metrics_snapshot IS NOT NULL "
+            "AND metrics_snapshot::text LIKE '%bayes_cache%'"
+        ))
+        results.append("Cleared bayes caches")
+
+        db.execute(text("DELETE FROM alembic_version"))
+        db.execute(text("INSERT INTO alembic_version (version_num) VALUES ('f001_consolidated')"))
+        results.append("Stamped alembic")
+
+        db.commit()
+        results.append("COMMITTED")
+    except Exception as e:
+        results.append(f"ERROR: {e}")
+        db.rollback()
+    return {"results": results}
+
+
 class FeatureFlagUpdate(BaseModel):
     tier: str  # "free", "pro", "enterprise"
 
