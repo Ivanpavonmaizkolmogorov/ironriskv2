@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 MIN_TRADES_FOR_CI = 30
 
 # Default BT discount factor (each BT trade = 1/D live trades)
-DEFAULT_BT_DISCOUNT = 20.0
+DEFAULT_BT_DISCOUNT = 1.0
 
 
 @dataclass

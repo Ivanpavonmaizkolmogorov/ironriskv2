@@ -32,7 +32,7 @@ def compute_bayes_result(db: Session, strategy: Strategy, sim_pnl_list: list[flo
 
     dist_fit = getattr(strategy, "distribution_fit", None) or {}
     risk_config = getattr(strategy, "risk_config", None) or {}
-    bt_discount = strategy.bt_discount or 20.0
+    bt_discount = strategy.bt_discount or 1.0
     ci_confidence = 0.95
     min_trades_ci = 30
     max_bt_trades = 30
