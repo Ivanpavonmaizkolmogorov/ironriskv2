@@ -1,10 +1,10 @@
 {
-  "run_at": "2026-04-24T19:06:26.845803+00:00",
+  "run_at": "2026-04-25T07:23:15.755685+00:00",
   "total": 50,
   "passed": 50,
   "failed": 0,
   "success_rate": 100.0,
-  "duration_ms": 4675.8,
+  "duration_ms": 4818.8,
   "groups": {
     "csv_import": [
       {
@@ -13,7 +13,7 @@
         "passed": true,
         "expected": "File exists",
         "actual": "C:\\Users\\ivanp\\Desktop\\Symbols\\Porfolios\\ironriskv2\\backend\\tests\\fixtures\\demo_backtest.csv",
-        "duration_ms": 0.2,
+        "duration_ms": 0.1,
         "error": null
       },
       {
@@ -22,7 +22,7 @@
         "passed": true,
         "expected": "762",
         "actual": "762",
-        "duration_ms": 3883.1,
+        "duration_ms": 4050.6,
         "error": null
       },
       {
@@ -31,7 +31,7 @@
         "passed": true,
         "expected": "All trades have 'pnl'",
         "actual": "OK",
-        "duration_ms": 57.5,
+        "duration_ms": 61.3,
         "error": null
       },
       {
@@ -40,7 +40,7 @@
         "passed": true,
         "expected": "equity_curve non-empty",
         "actual": "762 points",
-        "duration_ms": 57.3,
+        "duration_ms": 59.8,
         "error": null
       },
       {
@@ -58,7 +58,7 @@
         "passed": true,
         "expected": "wins > 0 AND losses > 0",
         "actual": "347 wins, 415 losses",
-        "duration_ms": 59.4,
+        "duration_ms": 55.4,
         "error": null
       }
     ],
@@ -69,7 +69,7 @@
         "passed": true,
         "expected": "50% <= P(EV>0) <= 100%",
         "actual": "82.7%",
-        "duration_ms": 63.9,
+        "duration_ms": 67.2,
         "error": null
       },
       {
@@ -78,7 +78,7 @@
         "passed": true,
         "expected": "82.7% \u00b12.0%",
         "actual": "82.7%",
-        "duration_ms": 59.2,
+        "duration_ms": 57.7,
         "error": null
       },
       {
@@ -87,7 +87,7 @@
         "passed": true,
         "expected": "100.0%",
         "actual": "100.0%",
-        "duration_ms": 60.9,
+        "duration_ms": 58.2,
         "error": null
       },
       {
@@ -96,7 +96,7 @@
         "passed": true,
         "expected": "P(bt_discount=1) >= P(bt_discount=100) - 5%",
         "actual": "bt_discount=1 \u2192 100.0%, bt_discount=100 \u2192 67.19%",
-        "duration_ms": 59.7,
+        "duration_ms": 57.3,
         "error": null
       },
       {
@@ -105,7 +105,7 @@
         "passed": true,
         "expected": "None or p_positive=0.5 (degenerate prior)",
         "actual": "p_positive=0.5000 (degenerate prior)",
-        "duration_ms": 0.4,
+        "duration_ms": 0.3,
         "error": null
       },
       {
@@ -114,7 +114,7 @@
         "passed": true,
         "expected": "> 70%",
         "actual": "100.0%",
-        "duration_ms": 0.5,
+        "duration_ms": 0.4,
         "error": null
       }
     ],
@@ -125,7 +125,7 @@
         "passed": true,
         "expected": "P equal (diff < 1e-6)",
         "actual": "diff = 0.00000000",
-        "duration_ms": 60.6,
+        "duration_ms": 56.7,
         "error": null
       },
       {
@@ -134,7 +134,7 @@
         "passed": true,
         "expected": "P_live >= P_bt: 82.7%",
         "actual": "P_live=100.0% | P_bt=82.7%",
-        "duration_ms": 58.1,
+        "duration_ms": 53.7,
         "error": null
       },
       {
@@ -143,7 +143,7 @@
         "passed": true,
         "expected": "P_live <= P_bt: 82.7%",
         "actual": "P_live=0.0% | P_bt=82.7%",
-        "duration_ms": 56.5,
+        "duration_ms": 55.1,
         "error": null
       },
       {
@@ -152,7 +152,7 @@
         "passed": true,
         "expected": "live_win_rate \u2248 0.6667",
         "actual": "0.6667",
-        "duration_ms": 61.3,
+        "duration_ms": 55.5,
         "error": null
       },
       {
@@ -161,7 +161,7 @@
         "passed": true,
         "expected": "5",
         "actual": "5",
-        "duration_ms": 58.2,
+        "duration_ms": 54.6,
         "error": null
       },
       {
@@ -170,7 +170,7 @@
         "passed": true,
         "expected": "blind_risk > 30%",
         "actual": "blind_risk = 100.0%",
-        "duration_ms": 59.4,
+        "duration_ms": 56.0,
         "error": null
       }
     ],
@@ -228,7 +228,7 @@
         "passed": true,
         "expected": "status=green, percentile<50",
         "actual": "status=green, percentile=6.1",
-        "duration_ms": 4.2,
+        "duration_ms": 5.4,
         "error": null
       },
       {
@@ -237,7 +237,7 @@
         "passed": true,
         "expected": "status=amber (pct ~90, amber=85, red=95)",
         "actual": "status=amber, percentile=91.5",
-        "duration_ms": 0.5,
+        "duration_ms": 0.4,
         "error": null
       },
       {
@@ -255,7 +255,7 @@
         "passed": true,
         "expected": "status=fatal, limit_breached=True",
         "actual": "status=fatal, limit_breached=True",
-        "duration_ms": 0.4,
+        "duration_ms": 0.2,
         "error": null
       },
       {
@@ -273,7 +273,7 @@
         "passed": true,
         "expected": "status=green (15 trades stagnation is low)",
         "actual": "status=green, percentile=3.0",
-        "duration_ms": 0.2,
+        "duration_ms": 0.4,
         "error": null
       },
       {
@@ -282,7 +282,7 @@
         "passed": true,
         "expected": "status=red (beyond historical max)",
         "actual": "status=red, percentile=99.9",
-        "duration_ms": 0.2,
+        "duration_ms": 0.1,
         "error": null
       },
       {
@@ -291,7 +291,7 @@
         "passed": true,
         "expected": "status=fatal (90 >= limit 90)",
         "actual": "status=fatal, limit_breached=True",
-        "duration_ms": 0.6,
+        "duration_ms": 0.3,
         "error": null
       },
       {
@@ -300,7 +300,7 @@
         "passed": true,
         "expected": "status=green",
         "actual": "status=green, percentile=8.0",
-        "duration_ms": 0.1,
+        "duration_ms": 0.2,
         "error": null
       },
       {
@@ -309,7 +309,7 @@
         "passed": true,
         "expected": "status=red (25 > max hist 20)",
         "actual": "status=red, percentile=99.9",
-        "duration_ms": 0.1,
+        "duration_ms": 0.2,
         "error": null
       },
       {
@@ -327,7 +327,7 @@
         "passed": true,
         "expected": "Keys: ['current', 'limit', 'limit_breached', 'percentile', 'simulated', 'status']",
         "actual": "All present: ['current', 'limit', 'limit_breached', 'percentile', 'simulated', 'status']",
-        "duration_ms": 0.2,
+        "duration_ms": 0.4,
         "error": null
       },
       {
@@ -336,7 +336,7 @@
         "passed": true,
         "expected": "simulated=True",
         "actual": "simulated=True",
-        "duration_ms": 0.2,
+        "duration_ms": 0.4,
         "error": null
       },
       {
@@ -376,7 +376,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.5,
+        "duration_ms": 0.2,
         "error": null
       },
       {
@@ -385,7 +385,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.2,
+        "duration_ms": 0.1,
         "error": null
       }
     ],
@@ -396,7 +396,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.2,
+        "duration_ms": 0.1,
         "error": null
       },
       {
@@ -405,7 +405,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.3,
+        "duration_ms": 0.2,
         "error": null
       },
       {
@@ -414,7 +414,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.3,
+        "duration_ms": 0.1,
         "error": null
       },
       {
@@ -423,7 +423,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.3,
+        "duration_ms": 0.1,
         "error": null
       },
       {
@@ -432,7 +432,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.4,
+        "duration_ms": 0.2,
         "error": null
       },
       {
@@ -441,7 +441,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.2,
+        "duration_ms": 0.1,
         "error": null
       },
       {
@@ -450,7 +450,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.4,
+        "duration_ms": 0.3,
         "error": null
       },
       {
@@ -459,7 +459,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.6,
+        "duration_ms": 0.4,
         "error": null
       },
       {
@@ -468,7 +468,7 @@
         "passed": true,
         "expected": null,
         "actual": null,
-        "duration_ms": 0.2,
+        "duration_ms": 0.1,
         "error": null
       }
     ]

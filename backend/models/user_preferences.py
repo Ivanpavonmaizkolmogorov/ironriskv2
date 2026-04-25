@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, DateTime, Text, ForeignKey
+from sqlalchemy import String, DateTime, Text, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -29,6 +29,8 @@ class UserPreferences(Base):
     telegram_chat_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
     telegram_sync_token: Mapped[str | None] = mapped_column(String(36), nullable=True)
     locale: Mapped[str] = mapped_column(String(5), default="es", nullable=False)
+    briefing_hour_utc: Mapped[int] = mapped_column(Integer, default=6, nullable=False)  # 0-23, default 6 = 08:00 CET
+    last_briefing_date: Mapped[str | None] = mapped_column(String(10), nullable=True)  # "YYYY-MM-DD"
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

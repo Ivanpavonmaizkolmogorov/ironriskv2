@@ -355,70 +355,60 @@ async def telegram_bot_poller():
         await asyncio.sleep(1)
 
 
-async def _try_broadcast_once(bot_token: str):
-    """Attempt to send the daily broadcast, but only if not already sent today.
-    
-    Uses a DB marker to prevent duplicates. The marker is set BEFORE sending
-    to prevent the race condition where apt-daily-upgrade kills the process
-    between broadcast and marker save (causing a duplicate on restart).
-    """
-    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    try:
-        with SessionLocal() as db:
-            from models.system_settings import SystemSetting
-            marker = db.query(SystemSetting).filter(SystemSetting.key == "last_daily_broadcast").first()
-            if marker and marker.value == today_str:
-                logger.info(f"Broadcast already sent today ({today_str}), skipping.")
-                return
-            # Mark BEFORE sending to prevent race condition
-            if marker:
-                marker.value = today_str
-            else:
-                db.add(SystemSetting(key="last_daily_broadcast", value=today_str, description="Date of last daily Telegram broadcast"))
-            db.commit()
-    except Exception as e:
-        logger.error(f"Failed to check/set broadcast marker: {e}")
-        return  # Don't broadcast if we can't guarantee idempotency
-
-    logger.info(f"⏰ Executing Daily Telegram Broadcast for {today_str}")
-    await _execute_broadcast(bot_token)
-
-
 async def daily_status_broadcaster():
-    """Background task that broadcasts the EA Status to all registered users daily at 06:00 UTC (08:00 CET).
+    """Background task that broadcasts the EA Status to users at their configured hour.
     
-    Resilient to service restarts: if the service starts between 06:00-06:30 UTC
-    and the broadcast hasn't been sent yet today, it fires immediately.
-    Uses a DB marker column to prevent duplicate broadcasts.
+    Runs every hour. For each user whose briefing_hour_utc matches the current UTC hour,
+    sends the morning briefing (if not already sent today).
+    Each user can configure their preferred hour via UserPreferences.briefing_hour_utc.
+    Default is 6 (06:00 UTC = 08:00 CET).
     """
     bot_token = await _get_bot_token()
     if not bot_token:
         logger.warning("TELEGRAM_BOT_TOKEN not set — daily broadcaster disabled.")
         return
 
-    logger.info("🌅 Telegram Daily Broadcaster initialized.")
+    logger.info("🌅 Telegram Daily Broadcaster initialized (per-user hourly mode).")
 
     while True:
         try:
             now = datetime.now(timezone.utc)
-            target_hour = 6  # 06:00 UTC = 08:00 CET
+            current_hour = now.hour
+            today_str = now.strftime("%Y-%m-%d")
 
-            # Calculate next 06:00 UTC
-            target = now.replace(hour=target_hour, minute=0, second=0, microsecond=0)
-            if now >= target:
-                target += timedelta(days=1)
+            # Find users whose briefing hour matches NOW and haven't been sent today
+            with SessionLocal() as db:
+                from sqlalchemy import or_
+                candidates = db.query(UserPreferences).filter(
+                    UserPreferences.telegram_chat_id.isnot(None),
+                    UserPreferences.briefing_hour_utc == current_hour,
+                    or_(
+                        UserPreferences.last_briefing_date.is_(None),
+                        UserPreferences.last_briefing_date != today_str
+                    )
+                ).all()
 
-            # Check if we need a catch-up broadcast (service restarted during window)
-            in_catchup_window = now.hour == target_hour and now.minute < 30
-            if in_catchup_window:
-                await _try_broadcast_once(bot_token)
+                for pref in candidates:
+                    chat_id = pref.telegram_chat_id
+                    if chat_id:
+                        # Mark BEFORE sending to prevent race condition
+                        pref.last_briefing_date = today_str
+                        db.commit()
+                        
+                        status_msg = _build_status_response(chat_id)
+                        full_msg = f"🌅 <b>IRONRISK MORNING BRIEFING</b>\n\n{status_msg}"
+                        await _send_message(bot_token, chat_id, full_msg)
+                        await asyncio.sleep(0.5)
 
-            sleep_seconds = (target - now).total_seconds()
-            logger.info(f"Daily broadcaster sleeping for {sleep_seconds/3600:.2f} hours until {target.isoformat()}")
-            await asyncio.sleep(sleep_seconds)
+                sent_count = len(candidates)
+                if sent_count > 0:
+                    logger.info(f"🌅 Broadcast sent to {sent_count} users at UTC hour {current_hour}.")
 
-            # WAKING UP - It's 06:00 UTC!
-            await _try_broadcast_once(bot_token)
+            # Sleep until the next hour boundary
+            next_hour = (now + timedelta(hours=1)).replace(minute=0, second=5, microsecond=0)
+            sleep_seconds = (next_hour - datetime.now(timezone.utc)).total_seconds()
+            if sleep_seconds > 0:
+                await asyncio.sleep(sleep_seconds)
 
         except asyncio.CancelledError:
             break
