@@ -565,6 +565,7 @@
       "varianceDesc1": "The variance of the mean is calculated as:",
       "varianceWhere": "where:",
       "varianceDisp": "← dispersion of the {count} winning Backtest trades (ALL are used, not discounted)",
+      "varianceBessel": "Bessel-corrected sample variance (n−1). Each xᵢ is a trade, x̄ is the mean",
       "varianceEff": "← discounting applies here:",
       "varianceEffLive": " + {n} live",
       "varianceNote": "💡 s² measures how much the trades vary from each other (Backtest measures this well), but n_eff reflects how much we trust the Backtest mean ({n_eff} vs {n_bt} real).",

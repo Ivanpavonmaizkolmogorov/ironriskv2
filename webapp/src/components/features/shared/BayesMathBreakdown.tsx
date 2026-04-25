@@ -189,6 +189,9 @@ export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakd
                       s²<sub>wins</sub> = <span className="text-iron-300 font-semibold">{s2.toFixed(2)}</span>
                       <span className="text-iron-600"> {tMath("step2.varianceDisp", { count: d.n_bt_wins })}</span>
                     </div>
+                    <div className="text-iron-600 text-[10px] pl-2">
+                      s² = Σ(x<sub>i</sub> − x̄)² / (n − 1) — {tMath("step2.varianceBessel")}
+                    </div>
                     <div>
                       n<sub>eff</sub> = <span className="text-iron-300 font-semibold">{nEff}</span>
                       <span className="text-iron-600">{tMath("step2.varianceEff")} eff_bt_wins = {Math.round(d.eff_bt_wins)}{d.avg_win_n > 0 ? tMath("step2.varianceEffLive", { n: d.avg_win_n }) : ''}</span>
@@ -297,6 +300,9 @@ export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakd
                     <div>
                       s²<sub>losses</sub> = <span className="text-iron-300 font-semibold">{s2.toFixed(2)}</span>
                       <span className="text-iron-600"> {tMath("step3.varianceDisp", { count: d.n_bt_losses })}</span>
+                    </div>
+                    <div className="text-iron-600 text-[10px] pl-2">
+                      s² = Σ(x<sub>i</sub> − x̄)² / (n − 1) — {tMath("step2.varianceBessel")}
                     </div>
                     <div>
                       n<sub>eff</sub> = <span className="text-iron-300 font-semibold">{nEff}</span>

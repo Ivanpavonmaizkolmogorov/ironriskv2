@@ -565,6 +565,7 @@
       "varianceDesc1": "La varianza de la media se calcula como:",
       "varianceWhere": "donde:",
       "varianceDisp": "← dispersión de los {count} trades ganadores del Backtest (se usan TODOS, no se descuentan)",
+      "varianceBessel": "varianza muestral con corrección de Bessel (n−1). Cada xᵢ es un trade, x̄ es la media",
       "varianceEff": "← aquí SÍ se descuenta:",
       "varianceEffLive": " + {n} live",
       "varianceNote": "💡 s² mide cuánto varían los trades entre sí (eso el Backtest lo mide bien), pero n_eff refleja cuánto confiamos en la media del Backtest ({n_eff} vs {n_bt} reales).",
