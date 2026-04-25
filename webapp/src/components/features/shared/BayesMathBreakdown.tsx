@@ -211,18 +211,20 @@ export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakd
                   </div>
                   {(() => {
                     const df = Math.max(nEff, 4);
-                    const alpha_tail = 0.025;
+                    const sigma = Math.sqrt(d.avg_win_var);
+                    const t_crit = sigma > 0 ? (d.avg_win_mean - d.avg_win_lower) / sigma : 0;
                     return (
                       <div className="text-iron-400 pl-2 space-y-0.5 mt-1 border-l-2 border-iron-700 ml-1">
                         <div className="text-iron-600 font-sans text-[10px] font-semibold">GRADOS DE LIBERTAD</div>
                         <div>df = max(n<sub>eff</sub>, 4) = max({nEff}, 4) = <span className="text-iron-300 font-semibold">{df}</span></div>
                         <div className="text-iron-600 text-[10px]">{tMath("step2.dfOrigin")}</div>
-                        <div className="text-iron-600 text-[10px]">{tMath("step2.dfUsage", { df })}</div>
+                        <div className="mt-1">t<sub>crit</sub> = t.ppf(0.975, df={df}) = <span className="text-iron-300 font-semibold">{t_crit.toFixed(2)}</span></div>
+                        <div className="text-iron-600 text-[10px]">{tMath("step2.dfTcrit", { df })}</div>
                       </div>
                     );
                   })()}
                   <div className="text-iron-600 font-sans mt-1">
-                    {tMath("step2.verify")} IC = W ± t × σ ≈ {usd(d.avg_win_mean)} ± {usd(d.avg_win_mean - d.avg_win_lower)} = [{usd(d.avg_win_lower)}, {usd(d.avg_win_upper)}] ✅
+                    {tMath("step2.verify")} IC = W ± t<sub>crit</sub> × σ = {usd(d.avg_win_mean)} ± {usd(d.avg_win_mean - d.avg_win_lower)} = [{usd(d.avg_win_lower)}, {usd(d.avg_win_upper)}] ✅
                   </div>
                 </div>
               );
@@ -335,17 +337,20 @@ export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakd
                   </div>
                   {(() => {
                     const df = Math.max(nEff, 4);
+                    const sigma = Math.sqrt(d.avg_loss_var);
+                    const t_crit = sigma > 0 ? (d.avg_loss_mean - d.avg_loss_lower) / sigma : 0;
                     return (
                       <div className="text-iron-400 pl-2 space-y-0.5 mt-1 border-l-2 border-iron-700 ml-1">
                         <div className="text-iron-600 font-sans text-[10px] font-semibold">GRADOS DE LIBERTAD</div>
                         <div>df = max(n<sub>eff</sub>, 4) = max({nEff}, 4) = <span className="text-iron-300 font-semibold">{df}</span></div>
                         <div className="text-iron-600 text-[10px]">{tMath("step2.dfOrigin")}</div>
-                        <div className="text-iron-600 text-[10px]">{tMath("step2.dfUsage", { df })}</div>
+                        <div className="mt-1">t<sub>crit</sub> = t.ppf(0.975, df={df}) = <span className="text-iron-300 font-semibold">{t_crit.toFixed(2)}</span></div>
+                        <div className="text-iron-600 text-[10px]">{tMath("step2.dfTcrit", { df })}</div>
                       </div>
                     );
                   })()}
                   <div className="text-iron-600 font-sans mt-1">
-                    {tMath("step2.verify")} IC = L ± t × σ ≈ {usd(d.avg_loss_mean)} ± {usd(d.avg_loss_mean - d.avg_loss_lower)} = [{usd(d.avg_loss_lower)}, {usd(d.avg_loss_upper)}] ✅
+                    {tMath("step2.verify")} IC = L ± t<sub>crit</sub> × σ = {usd(d.avg_loss_mean)} ± {usd(d.avg_loss_mean - d.avg_loss_lower)} = [{usd(d.avg_loss_lower)}, {usd(d.avg_loss_upper)}] ✅
                   </div>
                 </div>
               );
