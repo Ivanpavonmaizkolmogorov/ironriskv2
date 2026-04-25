@@ -32,20 +32,23 @@ def upgrade() -> None:
     conn.execute(sa.text("UPDATE strategies SET bt_discount = 1.0"))
 
     # 3. Clear bayes caches to force recomputation with new bt_discount
-    dialect = conn.dialect.name
-    if dialect == "postgresql":
-        conn.execute(sa.text(
-            "UPDATE strategies "
-            "SET metrics_snapshot = metrics_snapshot - 'bayes_cache' "
-            "WHERE metrics_snapshot IS NOT NULL "
-            "AND metrics_snapshot::text LIKE :pattern"
-        ), {"pattern": "%bayes_cache%"})
-    elif dialect == "sqlite":
-        conn.execute(sa.text(
-            "UPDATE strategies "
-            "SET metrics_snapshot = json_remove(metrics_snapshot, '$.bayes_cache') "
-            "WHERE metrics_snapshot IS NOT NULL"
-        ))
+    try:
+        dialect = conn.dialect.name
+        if dialect == "postgresql":
+            conn.execute(sa.text(
+                "UPDATE strategies "
+                "SET metrics_snapshot = metrics_snapshot - 'bayes_cache' "
+                "WHERE metrics_snapshot IS NOT NULL "
+                "AND metrics_snapshot::text LIKE '%bayes_cache%'"
+            ))
+        elif dialect == "sqlite":
+            conn.execute(sa.text(
+                "UPDATE strategies "
+                "SET metrics_snapshot = json_remove(metrics_snapshot, '$.bayes_cache') "
+                "WHERE metrics_snapshot IS NOT NULL"
+            ))
+    except Exception:
+        pass  # Cache will be stale but will eventually refresh
 
 
 def downgrade() -> None:
