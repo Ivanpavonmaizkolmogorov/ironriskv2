@@ -81,7 +81,7 @@ interface EVDecomposition {
   ev_lower: number; ev_upper: number;
   blind_risk: number;
   ev_includes_zero: boolean; p_positive: number;
-  confidence: number; bt_discount: number;
+  confidence: number;
   n_live: number; n_bt: number; method: string;
   // Raw counts for transparency
   n_bt_wins: number; n_bt_losses: number;

@@ -181,7 +181,6 @@ def create_strategy_from_simulation(
     extracted_stats: dict | None = None,
     equity_curve: list | None = None,
     start_date: str | None = None,
-    bt_discount: float = 10.0,
 ) -> Strategy:
     """Create a strategy from simulator data with full backtest context.
     
@@ -315,7 +314,6 @@ def create_strategy_from_simulation(
         distribution_fit=distribution_fit,
         total_trades=total_trades,
         net_profit=net_profit,
-        bt_discount=bt_discount,
     )
     db.add(strategy)
     db.commit()
@@ -418,7 +416,7 @@ def update_strategy(
         flag_modified(strategy, "magic_aliases")
 
     # Invalidate Bayesian cache if fields that affect computation changed
-    BAYES_FIELDS = {"risk_config", "bt_discount", "equity_curve", "magic_aliases", "start_date"}
+    BAYES_FIELDS = {"risk_config", "equity_curve", "magic_aliases", "start_date"}
     if BAYES_FIELDS & set(update_dict.keys()):
         from services.bayes_cache_service import invalidate_bayes_cache
         invalidate_bayes_cache(db, strategy)
@@ -428,14 +426,7 @@ def update_strategy(
     return strategy
 
 
-def compute_portfolio_bt_discount(strategies: list) -> float:
-    """Weighted average bt_discount for portfolio-level Bayesian analysis.
-    
-    Weight = number of backtest trades per strategy.
-    Future-ready: use when running Bayes at portfolio level.
-    """
-    total_trades = sum(s.total_trades for s in strategies) or 1
-    return sum(s.total_trades * (s.bt_discount or 10.0) for s in strategies) / total_trades
+
 
 
 def apply_risk_multiplier(

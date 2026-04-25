@@ -27,7 +27,6 @@ class SimulationService:
             std_win=std_win,
             std_loss=std_loss,
             n_trades=req.n_trades or 0,
-            bt_discount=20.0,
             max_bt_trades=30,
         )
         return decomp, cls._format_stats(req.win_rate, req.avg_win, req.avg_loss, std_win, std_loss, req.n_trades)
@@ -61,7 +60,6 @@ class SimulationService:
             std_win=std_win,
             std_loss=std_loss,
             n_trades=n_trades,
-            bt_discount=20.0,
             max_bt_trades=30,
             method_name="beta_nig_delta_from_csv"
         )

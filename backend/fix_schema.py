@@ -35,9 +35,17 @@ with engine.begin() as conn:
     except Exception as e:
         print(f"Cache clear skipped: {e}")
 
-    # Stamp alembic
+    # Drop bt_discount column if it exists
+    strat_cols = [c["name"] for c in inspector.get_columns("strategies")]
+    if "bt_discount" in strat_cols:
+        conn.execute(text("ALTER TABLE strategies DROP COLUMN bt_discount"))
+        print("Dropped bt_discount column")
+    else:
+        print("bt_discount already dropped")
+
+    # Stamp alembic to latest
     conn.execute(text("DELETE FROM alembic_version"))
-    conn.execute(text("INSERT INTO alembic_version (version_num) VALUES ('f001_consolidated')"))
-    print("Stamped alembic to f001_consolidated")
+    conn.execute(text("INSERT INTO alembic_version (version_num) VALUES ('g002_drop_bt_discount')"))
+    print("Stamped alembic to g002_drop_bt_discount")
 
 print("Done!")

@@ -76,7 +76,7 @@ export default function SimulatorWizard() {
   const urlMode = searchParams.get('mode'); // 'manual' | 'csv' | null
   const [forkDone] = useState(true); // Always skip fork on public simulator
 
-  // bt_discount: real account (1) vs backtest (20)
+
 
 
   React.useEffect(() => {

@@ -35,7 +35,6 @@ class StrategyUpdate(BaseModel):
     metrics_snapshot: Optional[dict] = None
     net_profit: Optional[float] = None
     total_trades: Optional[int] = None
-    bt_discount: Optional[float] = None
     risk_multiplier: Optional[float] = None
 
 class CreateStrategyRequest(BaseModel):
@@ -62,7 +61,6 @@ class CreateFromSimulationRequest(BaseModel):
     extracted_stats: Optional[dict] = None
     equity_curve: Optional[list] = None
     start_date: Optional[str] = None
-    bt_discount: Optional[float] = None
 
 # --- SQX Integration Schemas ---
 
@@ -129,7 +127,6 @@ class StrategyResponse(BaseModel):
     daily_loss_limit: float
     total_trades: int
     net_profit: float
-    bt_discount: float = 10.0
     risk_multiplier: float = 1.0
     equity_curve: Optional[list] = None
     gauss_params: Optional[dict] = None

@@ -4,7 +4,7 @@ into strategy.metrics_snapshot["bayes_cache"].
 
 Triggered by:
   - sync-trades (new live trades arrive)
-  - Strategy creation/update (equity_curve, risk_config, bt_discount changes)
+  - Strategy creation/update (equity_curve, risk_config changes)
   - First dashboard load (fallback if cache is missing)
 """
 
@@ -32,7 +32,6 @@ def compute_bayes_result(db: Session, strategy: Strategy, sim_pnl_list: list[flo
 
     dist_fit = getattr(strategy, "distribution_fit", None) or {}
     risk_config = getattr(strategy, "risk_config", None) or {}
-    bt_discount = strategy.bt_discount or 1.0
     ci_confidence = 0.95
     min_trades_ci = 30
     max_bt_trades = 30
@@ -88,7 +87,6 @@ def compute_bayes_result(db: Session, strategy: Strategy, sim_pnl_list: list[flo
                 tmp_decomp = engine.decompose_ev(
                     bt_pnl=trades_pnl if trades_pnl else None,
                     live_pnl=combined_live[:i],
-                    bt_discount=bt_discount,
                     confidence=ci_confidence,
                     min_trades=0,
                     max_bt_trades=max_bt_trades,
@@ -156,7 +154,6 @@ def compute_bayes_result(db: Session, strategy: Strategy, sim_pnl_list: list[flo
     decomposition = engine.decompose_ev(
         bt_pnl=trades_pnl if trades_pnl else None,
         live_pnl=combined_live if combined_live else None,
-        bt_discount=bt_discount,
         confidence=ci_confidence,
         min_trades=min_trades_ci,
         prior_stats_override=prior_override,
@@ -363,7 +360,7 @@ def refresh_bayes_cache(strategy_id: str):
 def invalidate_bayes_cache(db: Session, strategy: Strategy):
     """
     Clear the cached Bayesian result so it gets recomputed on next /bayes request.
-    Call this when risk_config, equity_curve, or bt_discount changes.
+    Call this when risk_config or equity_curve changes.
     """
     if strategy.metrics_snapshot and "bayes_cache" in strategy.metrics_snapshot:
         del strategy.metrics_snapshot["bayes_cache"]

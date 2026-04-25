@@ -548,7 +548,6 @@
       "model": "Model:",
       "modelDesc": "Conjugate Beta-Bernoulli. Each trade is a win or loss. The Beta is the natural prior — no goodness-of-fit test required.",
       "inputs": "INPUT DATA",
-      "confBt": "Backtest Confidence: {conf}% → each Backtest trade equals {eff} live trades",
       "confBtEff": "Backtest eff: {nEff} trades (cap {cap})",
       "prior": "PRIOR (discounted Backtest only)",
       "posterior": "POSTERIOR (Backtest + Live)",

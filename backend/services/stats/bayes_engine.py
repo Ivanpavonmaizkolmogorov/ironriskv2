@@ -38,9 +38,6 @@ logger = logging.getLogger(__name__)
 # Minimum trades required to compute a meaningful credibility interval
 MIN_TRADES_FOR_CI = 30
 
-# Default BT discount factor (each BT trade = 1/D live trades)
-DEFAULT_BT_DISCOUNT = 1.0
-
 
 @dataclass
 class EVDecomposition:
@@ -85,7 +82,6 @@ class EVDecomposition:
 
     # Metadata
     confidence: float
-    bt_discount: float
     n_live: int
     n_bt: int
     method: str
@@ -95,8 +91,8 @@ class EVDecomposition:
     n_bt_losses: int
     n_live_wins: int
     n_live_losses: int
-    eff_bt_wins: float      # n_bt_wins / bt_discount
-    eff_bt_losses: float    # n_bt_losses / bt_discount
+    eff_bt_wins: float      # effective wins after cap
+    eff_bt_losses: float    # effective losses after cap
     def to_dict(self) -> dict:
         """Serialize to dict, sanitizing numpy types."""
         def _clean(v):
@@ -169,7 +165,6 @@ class BayesEngine:
         self,
         live_data: np.ndarray,
         bt_data: np.ndarray | None,
-        bt_discount: float,
         confidence: float,
         prior_stats: dict | None = None,
     ) -> dict:
@@ -191,7 +186,7 @@ class BayesEngine:
             bt_mean = prior_stats["mean"]
             bt_var = prior_stats["var"]
 
-            effective_n = bt_n / max(bt_discount, 1.0)
+            effective_n = float(bt_n)
             mu_0 = bt_mean
             kappa_0 = effective_n
             alpha_0 = max(effective_n / 2.0, 2.0)
@@ -201,7 +196,7 @@ class BayesEngine:
             bt_mean = float(np.mean(bt_data))
             bt_var = float(np.var(bt_data, ddof=1))
 
-            effective_n = bt_n / max(bt_discount, 1.0)
+            effective_n = float(bt_n)
             mu_0 = bt_mean
             kappa_0 = effective_n
             alpha_0 = max(effective_n / 2.0, 2.0)
@@ -253,7 +248,6 @@ class BayesEngine:
         std_win: float,
         std_loss: float,
         n_trades: int,
-        bt_discount: float = DEFAULT_BT_DISCOUNT,
         confidence: float = 0.95,
         max_bt_trades: int | None = 30,
         method_name: str = "beta_nig_delta_from_stats"
@@ -266,9 +260,9 @@ class BayesEngine:
         if n_trades <= 0:
             return None
 
-        # Effective trades discounted by skepticism factor D
-        eff_bt_wins = (n_trades * win_rate) / max(bt_discount, 1.0)
-        eff_bt_losses = (n_trades * (1 - win_rate)) / max(bt_discount, 1.0)
+        # Effective trades (1:1 with BT)
+        eff_bt_wins = float(n_trades * win_rate)
+        eff_bt_losses = float(n_trades * (1 - win_rate))
 
         # Apply max_bt_trades cap (universal default: 30)
         total_eff = eff_bt_wins + eff_bt_losses
@@ -364,7 +358,6 @@ class BayesEngine:
             bt_p_positive=round(p_positive, 6),  # Without live, posterior == prior
             
             confidence=confidence,
-            bt_discount=bt_discount,
             n_live=0,
             n_bt=n_trades,
             method=method_name,
@@ -381,7 +374,6 @@ class BayesEngine:
         self,
         bt_pnl: list[float] | None = None,
         live_pnl: list[float] | None = None,
-        bt_discount: float = DEFAULT_BT_DISCOUNT,
         confidence: float = 0.95,
         min_trades: int = MIN_TRADES_FOR_CI,
         prior_stats_override: dict | None = None,
@@ -389,7 +381,7 @@ class BayesEngine:
     ) -> EVDecomposition | None:
         """Full Bayesian EV decomposition: Beta(WinRate) + NIG(AvgWin) + NIG(AvgLoss) + Delta.
 
-        BT trades define the PRIOR (discounted by D).
+        BT trades define the PRIOR.
         Live trades are the evidence.
         max_bt_trades puts a hard cap on the total effective trades of the BT prior.
 
@@ -410,7 +402,6 @@ class BayesEngine:
             bt_only = self.decompose_ev(
                 bt_pnl=bt_pnl,
                 live_pnl=[],
-                bt_discount=bt_discount,
                 confidence=confidence,
                 min_trades=min_trades,
                 prior_stats_override=prior_stats_override,
@@ -444,7 +435,7 @@ class BayesEngine:
         # ============================================================
         # 1. WIN RATE: Beta posterior
         # ============================================================
-        total_eff = n_bt / max(bt_discount, 1.0)
+        total_eff = float(n_bt)
         if max_bt_trades is not None and max_bt_trades > 0 and total_eff > max_bt_trades:
             total_eff = max_bt_trades
             
@@ -477,7 +468,7 @@ class BayesEngine:
         if prior_stats_override:
             ps = prior_stats_override
             
-            win_prior_n = total_eff * bt_wr * max(bt_discount, 1.0) if (max_bt_trades and max_bt_trades > 0 and (n_bt / max(bt_discount, 1.0)) > max_bt_trades) else n_bt_wins
+            win_prior_n = total_eff * bt_wr * n_bt / total_eff if (max_bt_trades and max_bt_trades > 0 and n_bt > max_bt_trades) else n_bt_wins
             
             win_prior = {"n": win_prior_n, "mean": ps["avg_win"], "var": ps.get("std_win", 0)**2}
             bt_avg_win = ps["avg_win"]
@@ -485,12 +476,13 @@ class BayesEngine:
             win_prior = None
             bt_avg_win = float(np.mean(bt_wins)) if n_bt_wins > 0 else 0.0
 
-        win_discount = bt_discount
-        if max_bt_trades is not None and max_bt_trades > 0 and (n_bt / max(bt_discount, 1.0)) > max_bt_trades:
-             win_discount = n_bt / max_bt_trades if n_bt > 0 else bt_discount
+        win_discount_n = float(n_bt)
+        if max_bt_trades is not None and max_bt_trades > 0 and n_bt > max_bt_trades:
+             win_discount_n = float(max_bt_trades)
 
+        # For NIG, pass bt_data scaled to effective count via prior_stats
         win_post = self._nig_posterior(
-            live_wins, bt_wins if n_bt_wins > 0 and not prior_stats_override else None, win_discount, confidence,
+            live_wins, bt_wins if n_bt_wins > 0 and not prior_stats_override else None, confidence,
             prior_stats=win_prior
         )
 
@@ -504,7 +496,7 @@ class BayesEngine:
         if prior_stats_override:
             ps = prior_stats_override
             
-            loss_prior_n = total_eff * (1.0 - bt_wr) * max(bt_discount, 1.0) if (max_bt_trades and max_bt_trades > 0 and (n_bt / max(bt_discount, 1.0)) > max_bt_trades) else n_bt_losses
+            loss_prior_n = total_eff * (1.0 - bt_wr) * n_bt / total_eff if (max_bt_trades and max_bt_trades > 0 and n_bt > max_bt_trades) else n_bt_losses
             
             loss_prior = {"n": loss_prior_n, "mean": abs(ps["avg_loss"]), "var": ps.get("std_loss", 0)**2}
             bt_avg_loss = abs(ps["avg_loss"])
@@ -512,12 +504,12 @@ class BayesEngine:
             loss_prior = None
             bt_avg_loss = float(np.mean(bt_losses)) if n_bt_losses > 0 else 0.0
 
-        loss_discount = bt_discount
-        if max_bt_trades is not None and max_bt_trades > 0 and (n_bt / max(bt_discount, 1.0)) > max_bt_trades:
-             loss_discount = n_bt / max_bt_trades if n_bt > 0 else bt_discount
+        loss_discount_n = float(n_bt)
+        if max_bt_trades is not None and max_bt_trades > 0 and n_bt > max_bt_trades:
+             loss_discount_n = float(max_bt_trades)
 
         loss_post = self._nig_posterior(
-            live_losses, bt_losses if n_bt_losses > 0 and not prior_stats_override else None, loss_discount, confidence,
+            live_losses, bt_losses if n_bt_losses > 0 and not prior_stats_override else None, confidence,
             prior_stats=loss_prior
         )
 
@@ -596,7 +588,6 @@ class BayesEngine:
             bt_p_positive=round(bt_p_positive, 6) if bt_p_positive is not None else round(p_positive, 6),
             # Metadata
             confidence=confidence,
-            bt_discount=bt_discount,
             n_live=n_live,
             n_bt=n_bt,
             method="beta_nig_delta",

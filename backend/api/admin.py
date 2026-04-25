@@ -27,13 +27,15 @@ def get_admin_user(user: User = Depends(get_current_user)) -> User:
 
 @router.get("/db-diag")
 def db_diagnostic(db: Session = Depends(get_db), user: User = Depends(get_admin_user)):
-    """Quick diagnostic: alembic version, user_preferences columns, strategy bt_discount sample."""
+    """Quick diagnostic: alembic version, table columns."""
     alembic_ver = db.execute(text("SELECT version_num FROM alembic_version")).scalars().all()
-    cols = db.execute(text(
+    up_cols = db.execute(text(
         "SELECT column_name FROM information_schema.columns WHERE table_name = 'user_preferences' ORDER BY ordinal_position"
     )).scalars().all()
-    sample = db.execute(text("SELECT bt_discount FROM strategies LIMIT 3")).scalars().all()
-    return {"alembic_version": alembic_ver, "user_preferences_columns": cols, "bt_discount_sample": sample}
+    strat_cols = db.execute(text(
+        "SELECT column_name FROM information_schema.columns WHERE table_name = 'strategies' ORDER BY ordinal_position"
+    )).scalars().all()
+    return {"alembic_version": alembic_ver, "user_preferences_columns": up_cols, "strategies_columns": strat_cols}
 
 
 @router.post("/fix-schema")

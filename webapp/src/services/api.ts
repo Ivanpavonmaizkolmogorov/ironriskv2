@@ -127,7 +127,7 @@ export const strategyAPI = {
     extracted_stats?: Record<string, any>;
     equity_curve?: Record<string, any>[];
     start_date?: string;
-    bt_discount?: number;
+
   }) => api.post("/api/strategies/create-from-simulation", data),
   applyMultiplier: (id: string, risk_multiplier: number) =>
     api.post(`/api/strategies/${id}/apply-multiplier`, { risk_multiplier }),

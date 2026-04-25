@@ -8,7 +8,6 @@ interface EVDecomposition {
   n_bt_losses: number;
   n_live_wins: number;
   n_live_losses: number;
-  bt_discount: number;
   eff_bt_wins: number;
   eff_bt_losses: number;
   theta_alpha: number;
@@ -81,28 +80,22 @@ export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakd
             <div className="text-iron-600 text-xs font-sans font-semibold mb-1">{tMath("step1.inputs")}</div>
             <div className="text-iron-500">Backtest: <span className="text-iron-300">{d.n_bt_wins}</span> wins + <span className="text-iron-300">{d.n_bt_losses}</span> losses = {d.n_bt_wins + d.n_bt_losses} trades</div>
             <div className="text-iron-500">Live: <span className="text-iron-300">{d.n_live_wins}</span> wins + <span className="text-iron-300">{d.n_live_losses}</span> losses = {d.n_live_wins + d.n_live_losses} trades</div>
-            <div className="text-iron-500">
-              {tMath("step1.confBt", { conf: Math.round(100/d.bt_discount), eff: (1/d.bt_discount).toFixed(2) })}
-            </div>
             {(() => {
               const totalBt = d.n_bt_wins + d.n_bt_losses;
-              const rawEff = totalBt / d.bt_discount;
-              const cappedEff = Math.min(rawEff, 30);
-              const isCapped = rawEff > 30;
-              const btWR = d.n_bt_wins / totalBt;
+              const isCapped = totalBt > 30;
               return (
                 <>
                   <div className="text-iron-600 text-xs font-sans font-semibold mt-2 mb-1">{tMath("step1.prior")}</div>
                   {isCapped ? (
                     <>
-                      <div className="text-iron-500">n_eff = min({totalBt} / {d.bt_discount}, 30) = <span className="text-iron-300">30</span> <span className="text-iron-600">(cap)</span></div>
+                      <div className="text-iron-500">n_eff = min({totalBt}, 30) = <span className="text-iron-300">30</span> <span className="text-iron-600">(cap)</span></div>
                       <div className="text-iron-500">α₀ = 30 × ({d.n_bt_wins}/{totalBt}) = <span className="text-iron-300">{d.eff_bt_wins}</span></div>
                       <div className="text-iron-500">β₀ = 30 × ({d.n_bt_losses}/{totalBt}) = <span className="text-iron-300">{d.eff_bt_losses}</span></div>
                     </>
                   ) : (
                     <>
-                      <div className="text-iron-500">α₀ = {d.n_bt_wins} / {d.bt_discount} = <span className="text-iron-300">{d.eff_bt_wins}</span></div>
-                      <div className="text-iron-500">β₀ = {d.n_bt_losses} / {d.bt_discount} = <span className="text-iron-300">{d.eff_bt_losses}</span></div>
+                      <div className="text-iron-500">α₀ = <span className="text-iron-300">{d.eff_bt_wins}</span> <span className="text-iron-600">({d.n_bt_wins} wins)</span></div>
+                      <div className="text-iron-500">β₀ = <span className="text-iron-300">{d.eff_bt_losses}</span> <span className="text-iron-600">({d.n_bt_losses} losses)</span></div>
                     </>
                   )}
                   <div className="text-iron-400">
