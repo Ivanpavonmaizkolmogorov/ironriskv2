@@ -54,7 +54,7 @@ def fix_schema(db: Session = Depends(get_db), user: User = Depends(get_admin_use
             results.append("Added last_briefing_date")
 
         db.execute(text(
-            "UPDATE strategies SET metrics_snapshot = metrics_snapshot - 'bayes_cache' "
+            "UPDATE strategies SET metrics_snapshot = (metrics_snapshot::jsonb - 'bayes_cache')::json "
             "WHERE metrics_snapshot IS NOT NULL "
             "AND metrics_snapshot::text LIKE '%bayes_cache%'"
         ))

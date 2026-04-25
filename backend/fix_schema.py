@@ -27,7 +27,7 @@ with engine.begin() as conn:
     # Clear bayes caches
     try:
         conn.execute(text(
-            "UPDATE strategies SET metrics_snapshot = metrics_snapshot - 'bayes_cache' "
+            "UPDATE strategies SET metrics_snapshot = (metrics_snapshot::jsonb - 'bayes_cache')::json "
             "WHERE metrics_snapshot IS NOT NULL "
             "AND metrics_snapshot::text LIKE '%bayes_cache%'"
         ))
