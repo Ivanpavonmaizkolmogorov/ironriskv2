@@ -12,7 +12,7 @@ from alembic import op
 import sqlalchemy as sa
 
 revision = 'f001_consolidated'
-down_revision = '8b58e34200b4'
+down_revision = ('8b58e34200b4', 'a1b2c3d4e5f6')
 branch_labels = None
 depends_on = None
 

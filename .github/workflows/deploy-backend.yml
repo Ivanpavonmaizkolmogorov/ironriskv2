@@ -40,12 +40,17 @@ jobs:
             from models.database import engine
             from sqlalchemy import text
             with engine.begin() as conn:
-                ver = conn.execute(text('SELECT version_num FROM alembic_version')).scalar()
-                if ver and ver not in ['8b58e34200b4', 'f001_consolidated']:
-                    conn.execute(text(\"UPDATE alembic_version SET version_num = '8b58e34200b4'\"))
-                    print(f'Fixed alembic: {ver} -> 8b58e34200b4')
+                vers = conn.execute(text('SELECT version_num FROM alembic_version')).scalars().all()
+                print(f'Current alembic versions: {vers}')
+                needed = {'8b58e34200b4', 'a1b2c3d4e5f6'}
+                current = set(vers)
+                if 'f001_consolidated' in current:
+                    print('Already at target')
                 else:
-                    print(f'Alembic OK at {ver}')
+                    conn.execute(text('DELETE FROM alembic_version'))
+                    for v in needed:
+                        conn.execute(text('INSERT INTO alembic_version (version_num) VALUES (:v)'), {'v': v})
+                    print(f'Set alembic to merge base: {needed}')
             " 2>&1
             alembic upgrade head 2>&1 || echo "ALEMBIC MIGRATION FAILED"
             systemctl restart ironrisk
