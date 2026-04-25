@@ -355,6 +355,35 @@ async def telegram_bot_poller():
         await asyncio.sleep(1)
 
 
+async def _try_broadcast_once(bot_token: str):
+    """Attempt to send the daily broadcast, but only if not already sent today.
+    
+    Uses a DB marker to prevent duplicates. The marker is set BEFORE sending
+    to prevent the race condition where apt-daily-upgrade kills the process
+    between broadcast and marker save (causing a duplicate on restart).
+    """
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    try:
+        with SessionLocal() as db:
+            from models.system_settings import SystemSetting
+            marker = db.query(SystemSetting).filter(SystemSetting.key == "last_daily_broadcast").first()
+            if marker and marker.value == today_str:
+                logger.info(f"Broadcast already sent today ({today_str}), skipping.")
+                return
+            # Mark BEFORE sending to prevent race condition
+            if marker:
+                marker.value = today_str
+            else:
+                db.add(SystemSetting(key="last_daily_broadcast", value=today_str, description="Date of last daily Telegram broadcast"))
+            db.commit()
+    except Exception as e:
+        logger.error(f"Failed to check/set broadcast marker: {e}")
+        return  # Don't broadcast if we can't guarantee idempotency
+
+    logger.info(f"⏰ Executing Daily Telegram Broadcast for {today_str}")
+    await _execute_broadcast(bot_token)
+
+
 async def daily_status_broadcaster():
     """Background task that broadcasts the EA Status to all registered users daily at 06:00 UTC (08:00 CET).
     
@@ -374,69 +403,22 @@ async def daily_status_broadcaster():
             now = datetime.now(timezone.utc)
             target_hour = 6  # 06:00 UTC = 08:00 CET
 
-            # Check if we're in the "catch-up" window (06:00 - 06:30 UTC)
-            # This handles the case where apt-daily-upgrade restarts the service
-            # right at 06:00, killing the sleeping broadcaster.
-            in_catchup_window = now.hour == target_hour and now.minute < 30
-            
-            if in_catchup_window:
-                # Check if we already sent today's broadcast
-                today_str = now.strftime("%Y-%m-%d")
-                already_sent = False
-                try:
-                    with SessionLocal() as db:
-                        from models.system_settings import SystemSetting
-                        marker = db.query(SystemSetting).filter(SystemSetting.key == "last_daily_broadcast").first()
-                        if marker and marker.value == today_str:
-                            already_sent = True
-                except Exception:
-                    pass  # If the check fails, proceed with broadcast (better duplicate than missing)
-
-                if not already_sent:
-                    logger.info(f"🌅 Catch-up broadcast! Service restarted during broadcast window. Firing now.")
-                    await _execute_broadcast(bot_token)
-                    # Mark as sent
-                    try:
-                        with SessionLocal() as db:
-                            from models.system_settings import SystemSetting
-                            marker = db.query(SystemSetting).filter(SystemSetting.key == "last_daily_broadcast").first()
-                            if marker:
-                                marker.value = today_str
-                            else:
-                                db.add(SystemSetting(key="last_daily_broadcast", value=today_str, description="Date of last daily Telegram broadcast"))
-                            db.commit()
-                    except Exception as e:
-                        logger.error(f"Failed to save broadcast marker: {e}")
-                else:
-                    logger.info(f"Broadcast already sent today ({today_str}), skipping catch-up.")
-
             # Calculate next 06:00 UTC
             target = now.replace(hour=target_hour, minute=0, second=0, microsecond=0)
             if now >= target:
                 target += timedelta(days=1)
 
+            # Check if we need a catch-up broadcast (service restarted during window)
+            in_catchup_window = now.hour == target_hour and now.minute < 30
+            if in_catchup_window:
+                await _try_broadcast_once(bot_token)
+
             sleep_seconds = (target - now).total_seconds()
             logger.info(f"Daily broadcaster sleeping for {sleep_seconds/3600:.2f} hours until {target.isoformat()}")
-
             await asyncio.sleep(sleep_seconds)
 
             # WAKING UP - It's 06:00 UTC!
-            logger.info("⏰ Executing scheduled Daily Telegram Broadcast!")
-            await _execute_broadcast(bot_token)
-
-            # Mark as sent
-            try:
-                today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-                with SessionLocal() as db:
-                    from models.system_settings import SystemSetting
-                    marker = db.query(SystemSetting).filter(SystemSetting.key == "last_daily_broadcast").first()
-                    if marker:
-                        marker.value = today_str
-                    else:
-                        db.add(SystemSetting(key="last_daily_broadcast", value=today_str, description="Date of last daily Telegram broadcast"))
-                    db.commit()
-            except Exception as e:
-                logger.error(f"Failed to save broadcast marker: {e}")
+            await _try_broadcast_once(bot_token)
 
         except asyncio.CancelledError:
             break
