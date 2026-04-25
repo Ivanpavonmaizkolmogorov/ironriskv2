@@ -35,38 +35,12 @@ jobs:
             source /var/www/ironrisk/backend/venv/bin/activate || true
             pip install -q -r requirements.txt 2>/dev/null
             find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-            # Remove stale migration files
             rm -f alembic/versions/e74db5cda078_*.py 2>/dev/null || true
             rm -f alembic/versions/a5c3f3c810ae_*.py 2>/dev/null || true
             rm -f alembic/versions/51390179ad16_*.py 2>/dev/null || true
             rm -f alembic/versions/ec5182343cb4_*.py 2>/dev/null || true
-            # Direct DB operations (bypass alembic for this one-time fix)
-            python -c "
-            from models.database import engine
-            from sqlalchemy import text, inspect as sa_inspect
-            with engine.begin() as conn:
-                # Add missing columns
-                inspector = sa_inspect(engine)
-                existing = [c['name'] for c in inspector.get_columns('user_preferences')]
-                if 'briefing_hour_utc' not in existing:
-                    conn.execute(text('ALTER TABLE user_preferences ADD COLUMN briefing_hour_utc INTEGER NOT NULL DEFAULT 6'))
-                    print('Added briefing_hour_utc')
-                if 'last_briefing_date' not in existing:
-                    conn.execute(text('ALTER TABLE user_preferences ADD COLUMN last_briefing_date VARCHAR(10)'))
-                    print('Added last_briefing_date')
-                # Clear bayes caches
-                try:
-                    conn.execute(text(\"\"\"UPDATE strategies SET metrics_snapshot = metrics_snapshot - 'bayes_cache' WHERE metrics_snapshot IS NOT NULL AND metrics_snapshot::text LIKE '%bayes_cache%'\"\"\"))
-                    print('Cleared bayes caches')
-                except Exception as e:
-                    print(f'Cache clear skipped: {e}')
-                # Stamp alembic to consolidated
-                conn.execute(text('DELETE FROM alembic_version'))
-                conn.execute(text(\"INSERT INTO alembic_version (version_num) VALUES ('f001_consolidated')\"))
-                print('Stamped alembic to f001_consolidated')
-            " 2>&1
-            # Future migrations via alembic
-            alembic upgrade head 2>&1 || echo "ALEMBIC OK (already at head)"
+            python fix_schema.py 2>&1
+            alembic upgrade head 2>&1 || echo "ALEMBIC OK"
             systemctl restart ironrisk
             echo ""
             echo "--- Service Status ---"
