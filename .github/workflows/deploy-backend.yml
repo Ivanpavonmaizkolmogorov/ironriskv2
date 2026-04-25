@@ -35,6 +35,11 @@ jobs:
             source /var/www/ironrisk/backend/venv/bin/activate || true
             pip install -q -r requirements.txt 2>/dev/null
             find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+            # Remove stale migration files that were deleted from repo but persist on server
+            rm -f alembic/versions/e74db5cda078_*.py 2>/dev/null || true
+            rm -f alembic/versions/a5c3f3c810ae_*.py 2>/dev/null || true
+            rm -f alembic/versions/51390179ad16_*.py 2>/dev/null || true
+            rm -f alembic/versions/ec5182343cb4_*.py 2>/dev/null || true
             # Fix stuck alembic version from broken migration chain
             python -c "
             from models.database import engine
