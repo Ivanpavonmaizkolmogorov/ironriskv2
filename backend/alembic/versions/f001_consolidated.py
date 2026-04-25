@@ -1,19 +1,18 @@
-"""fix add briefing columns to user_preferences for PG
+"""consolidated: briefing columns + bt_discount=1 + clear bayes caches
 
-The original e74db5cda078 migration had 'pass' when it was first deployed,
-so Alembic marked it as done without actually creating the columns.
-This migration fixes that by adding them if missing.
+This single migration replaces the broken chain:
+  e74db5cda078 (pass) → a5c3f3c810ae (bt_discount) → 51390179ad16 (broken ??) → ec5182343cb4 (catch-all)
 
-Also re-runs the bt_discount=1 update and bayes cache invalidation
-in case those also failed in the chain.
+Production DB is stuck at a5c3f3c810ae. This migration continues from there
+and performs all pending operations.
 
-Revision ID: ec5182343cb4
+Revision ID: f001_consolidated
 """
 from alembic import op
 import sqlalchemy as sa
 
-revision = 'ec5182343cb4'
-down_revision = '51390179ad16'
+revision = 'f001_consolidated'
+down_revision = '8b58e34200b4'
 branch_labels = None
 depends_on = None
 
@@ -21,18 +20,18 @@ depends_on = None
 def upgrade() -> None:
     conn = op.get_bind()
     inspector = sa.inspect(conn)
+
+    # 1. Add briefing columns to user_preferences (if missing)
     existing = [c["name"] for c in inspector.get_columns("user_preferences")]
-    
-    # 1. Add missing columns
     if "briefing_hour_utc" not in existing:
         op.add_column("user_preferences", sa.Column("briefing_hour_utc", sa.Integer(), nullable=False, server_default="6"))
     if "last_briefing_date" not in existing:
         op.add_column("user_preferences", sa.Column("last_briefing_date", sa.String(10), nullable=True))
 
-    # 2. Set all strategies bt_discount to 1
+    # 2. Ensure all strategies have bt_discount = 1 (may already be done by a5c3f3c810ae)
     conn.execute(sa.text("UPDATE strategies SET bt_discount = 1.0"))
 
-    # 3. Invalidate bayes caches
+    # 3. Clear bayes caches to force recomputation with new bt_discount
     dialect = conn.dialect.name
     if dialect == "postgresql":
         conn.execute(sa.text(
@@ -50,4 +49,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    pass
+    op.drop_column("user_preferences", "last_briefing_date")
+    op.drop_column("user_preferences", "briefing_hour_utc")

@@ -35,6 +35,18 @@ jobs:
             source /var/www/ironrisk/backend/venv/bin/activate || true
             pip install -q -r requirements.txt 2>/dev/null
             find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+            # Fix stuck alembic version from broken migration chain
+            python -c "
+            from models.database import engine
+            from sqlalchemy import text
+            with engine.begin() as conn:
+                ver = conn.execute(text('SELECT version_num FROM alembic_version')).scalar()
+                if ver and ver not in ['8b58e34200b4', 'f001_consolidated']:
+                    conn.execute(text(\"UPDATE alembic_version SET version_num = '8b58e34200b4'\"))
+                    print(f'Fixed alembic: {ver} -> 8b58e34200b4')
+                else:
+                    print(f'Alembic OK at {ver}')
+            " 2>&1
             alembic upgrade head 2>&1 || echo "ALEMBIC MIGRATION FAILED"
             systemctl restart ironrisk
             echo ""
