@@ -63,7 +63,7 @@ class Strategy(Base):
 
     # Bayesian backtest discount factor
     # 1.0 = real account (no discount), 20.0 = backtest/optimization tool
-    bt_discount: Mapped[float] = mapped_column(Float, nullable=False, default=10.0)
+    bt_discount: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
 
     # Risk Multiplier (Factor de Escalado)
     # Scales all backtest PnL by this factor before any calculation.
