@@ -549,6 +549,7 @@
       "modelDesc": "Beta-Bernoulli conjugado. Cada trade es win o loss. La Beta es el prior natural — no requiere test de bondad de ajuste.",
       "inputs": "DATOS DE ENTRADA",
       "confBt": "Confianza Backtest: {conf}% → cada trade Backtest vale {eff} trades live",
+      "confBtEff": "Backtest eff: {nEff} trades (cap {cap})",
       "prior": "PRIOR (solo Backtest descontado)",
       "posterior": "POSTERIOR (Backtest + Live)",
       "variance": "VARIANZA (se usará en Paso 4)"

@@ -152,7 +152,7 @@ export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakd
             <div className="text-iron-500">Backtest: <span className="text-iron-300">{d.n_bt_wins}</span> wins → media = <span className="text-iron-300">{usd(d.avg_win_bt)}</span></div>
             <div className="text-iron-500">Live: <span className="text-iron-300">{d.avg_win_n > 0 ? `${d.avg_win_n} wins → media = ${usd(d.avg_win_live!)}` : "sin datos live todavía"}</span></div>
             <div className="text-iron-500">
-              {tMath("step1.confBt", { conf: Math.round(100/d.bt_discount), eff: d.eff_bt_wins })}
+              {tMath("step1.confBtEff", { nEff: Math.round(d.eff_bt_wins), cap: 30 })}
             </div>
 
             <div className="text-iron-600 text-xs font-sans font-semibold mt-2 mb-1">{tMath("step2.calcMean")}</div>
@@ -258,7 +258,7 @@ export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakd
             <div className="text-iron-500">Backtest: <span className="text-iron-300">{d.n_bt_losses}</span> losses → media = <span className="text-iron-300">{usd(d.avg_loss_bt)}</span></div>
             <div className="text-iron-500">Live: <span className="text-iron-300">{d.avg_loss_n > 0 ? `${d.avg_loss_n} losses → media = ${usd(d.avg_loss_live!)}` : "sin datos live todavía"}</span></div>
             <div className="text-iron-500">
-              {tMath("step1.confBt", { conf: Math.round(100/d.bt_discount), eff: d.eff_bt_losses })}
+              {tMath("step1.confBtEff", { nEff: Math.round(d.eff_bt_losses), cap: 30 })}
             </div>
 
             <div className="text-iron-600 text-xs font-sans font-semibold mt-2 mb-1">{tMath("step2.calcMean")}</div>
