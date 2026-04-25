@@ -167,6 +167,7 @@ class BayesEngine:
         bt_data: np.ndarray | None,
         confidence: float,
         prior_stats: dict | None = None,
+        max_eff_n: float | None = None,
     ) -> dict:
         """Compute NIG posterior for the mean of a data subset (wins or losses).
 
@@ -187,6 +188,8 @@ class BayesEngine:
             bt_var = prior_stats["var"]
 
             effective_n = float(bt_n)
+            if max_eff_n is not None and effective_n > max_eff_n:
+                effective_n = max_eff_n
             mu_0 = bt_mean
             kappa_0 = effective_n
             alpha_0 = max(effective_n / 2.0, 2.0)
@@ -197,6 +200,8 @@ class BayesEngine:
             bt_var = float(np.var(bt_data, ddof=1))
 
             effective_n = float(bt_n)
+            if max_eff_n is not None and effective_n > max_eff_n:
+                effective_n = max_eff_n
             mu_0 = bt_mean
             kappa_0 = effective_n
             alpha_0 = max(effective_n / 2.0, 2.0)
@@ -483,7 +488,8 @@ class BayesEngine:
         # For NIG, pass bt_data scaled to effective count via prior_stats
         win_post = self._nig_posterior(
             live_wins, bt_wins if n_bt_wins > 0 and not prior_stats_override else None, confidence,
-            prior_stats=win_prior
+            prior_stats=win_prior,
+            max_eff_n=eff_bt_wins,
         )
 
         live_avg_win = float(np.mean(live_wins)) if n_live_wins > 0 else None
@@ -510,7 +516,8 @@ class BayesEngine:
 
         loss_post = self._nig_posterior(
             live_losses, bt_losses if n_bt_losses > 0 and not prior_stats_override else None, confidence,
-            prior_stats=loss_prior
+            prior_stats=loss_prior,
+            max_eff_n=eff_bt_losses,
         )
 
 
