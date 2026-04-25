@@ -570,6 +570,8 @@
       "varianceEffLive": " + {n} live",
       "varianceNote": "💡 s² measures how much the trades vary from each other (Backtest measures this well), but n_eff reflects how much we trust the Backtest mean ({n_eff} vs {n_bt} real).",
       "varianceTheory": "📐 Theoretical origin: in the NIG (Normal-Inverse-Gamma) model, the prior on the mean μ given σ² is Normal(μ₀, σ²/κ₀), where κ₀ = n_eff. Dividing s² by n_eff yields Var[μ], the uncertainty of the marginal t-Student posterior with df ≈ n_eff degrees of freedom. Standard result from conjugate Bayesian statistics.",
+      "dfOrigin": "Origin: α₀ = n_eff / 2 → df = 2 × α₀ ≈ n_eff. Minimum 4 to avoid degenerate distributions.",
+      "dfUsage": "Used in: t-Student({df} df) to compute t_crit for the 95% CI. More df → thinner tails → narrower CI → more confidence in the mean.",
       "verify": "Verification:",
       "actuarialTitle": "💡 Statistical Justification (NIG Modeling)",
       "actuarialP1": "Assuming a t-Student for a strictly positive metric like PnL is conceptually imperfect, given its (-∞, +∞) support. However, we maintain this parametric model for two fundamental reasons:",
