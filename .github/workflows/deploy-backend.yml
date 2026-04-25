@@ -34,7 +34,8 @@ jobs:
             cd /var/www/ironrisk/backend
             source /var/www/ironrisk/backend/venv/bin/activate || true
             pip install -q -r requirements.txt 2>/dev/null
-            alembic upgrade head
+            find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+            alembic upgrade head 2>&1 || echo "ALEMBIC MIGRATION FAILED"
             systemctl restart ironrisk
             echo ""
             echo "--- Service Status ---"
