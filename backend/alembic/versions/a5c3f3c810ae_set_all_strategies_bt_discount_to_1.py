@@ -12,8 +12,9 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute("UPDATE strategies SET bt_discount = 1.0")
+    # Handled by ec5182343cb4 catch-all migration
+    pass
 
 
 def downgrade() -> None:
-    op.execute("UPDATE strategies SET bt_discount = 10.0")
+    pass
