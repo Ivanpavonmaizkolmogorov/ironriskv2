@@ -197,6 +197,9 @@ export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakd
                   <div className="text-iron-600 font-sans bg-iron-800/30 rounded p-1.5 mt-1">
                     {tMath("step2.varianceNote", { n_eff: nEff, n_bt: d.n_bt_wins })}
                   </div>
+                  <div className="text-iron-600 font-sans bg-iron-800/30 rounded p-1.5 mt-1 text-[10px]">
+                    {tMath("step2.varianceTheory")}
+                  </div>
                   <div className="text-iron-400 font-mono mt-1">
                     Var[W] = {s2.toFixed(2)} / {nEff} = <span className="text-risk-green font-semibold">{d.avg_win_var.toFixed(4)}</span>
                   </div>
@@ -302,6 +305,9 @@ export default function BayesMathBreakdown({ decomposition: d }: BayesMathBreakd
                   </div>
                   <div className="text-iron-600 font-sans bg-iron-800/30 rounded p-1.5 mt-1">
                     {tMath("step2.varianceNote", { n_eff: nEff, n_bt: d.n_bt_losses })}
+                  </div>
+                  <div className="text-iron-600 font-sans bg-iron-800/30 rounded p-1.5 mt-1 text-[10px]">
+                    {tMath("step2.varianceTheory")}
                   </div>
                   <div className="text-iron-400 font-mono mt-1">
                     Var[L] = {s2.toFixed(2)} / {nEff} = <span className="text-risk-red font-semibold">{d.avg_loss_var.toFixed(4)}</span>
