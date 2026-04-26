@@ -1159,6 +1159,18 @@
       "telegram_admin_invite_template": {
         "title": "Telegram Invite Assistant",
         "body": "When approving a new lead, the Telegram bot will now automatically send you the pre-formatted invite template in the trader's native language for one-tap forwarding."
+      },
+      "admin_impersonate": {
+        "title": "View as User",
+        "body": "Admins can now view any user's dashboard with a single click from the admin panel. A red banner indicates when impersonation is active."
+      },
+      "bayes_math_tcrit_df": {
+        "title": "t_crit Formula & Degrees of Freedom",
+        "body": "The mathematical derivation now shows the explicit t_crit = t.ppf(0.975, df) calculation, degrees of freedom, and Bessel-corrected variance."
+      },
+      "nig_cap_fix": {
+        "title": "NIG Model Cap Fix",
+        "body": "The NIG model now correctly respects the 30 effective trades cap, preventing over-confidence from raw backtest data."
       }
     }
   }

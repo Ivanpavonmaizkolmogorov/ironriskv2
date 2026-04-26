@@ -1,5 +1,24 @@
 [
   {
+    "id": "admin_impersonate",
+    "date": "2026-04-26",
+    "tag": "feature",
+    "internal": true
+  },
+  {
+    "id": "bayes_math_tcrit_df",
+    "date": "2026-04-25",
+    "tag": "improvement",
+    "internal": false
+  },
+  {
+    "id": "nig_cap_fix",
+    "date": "2026-04-25",
+    "tag": "fix",
+    "internal": false,
+    "has_regression_test": true
+  },
+  {
     "id": "telegram_admin_invite_template",
     "date": "2026-04-24",
     "tag": "feature",
