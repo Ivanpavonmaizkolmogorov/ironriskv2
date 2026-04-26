@@ -179,8 +179,10 @@ export const MonitorView = ({ context }: { context: DashboardContext }) => {
   const humanizer = new Humanizer(tH, tV);
   const d = data?.decomposition;
 
-  // ── Verdict computation
-  let hasFatal = false, hasRed = false, hasAmber = false;
+  // ── Verdict computation (seeded from info_report signals, then augmented by gauges)
+  let hasFatal = false;
+  let hasRed = data?.info_report?.signals?.some((s: any) => s.severity === 'warning') || false;
+  let hasAmber = data?.info_report?.signals?.some((s: any) => s.severity === 'notable') || false;
   const gaugeEntries: Array<{ key: string; gauge: RiskGauge }> = [];
   if (data?.risk_gauges) {
     Object.entries(data.risk_gauges).forEach(([key, g]: [string, any]) => {
