@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { adminAPI } from "@/services/api";
-import { Trash2, Shield, User, Clock, Briefcase, Activity, Key } from "lucide-react";
+import { Trash2, Shield, User, Clock, Briefcase, Activity, Key, Eye } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -197,6 +197,17 @@ export default function UsersTable() {
                         </div>
                       ) : (
                         <div className="flex items-center justify-end gap-1">
+                          <button 
+                            onClick={() => {
+                              const impersonate = useAuthStore.getState().impersonate;
+                              impersonate(u.id);
+                            }}
+                            disabled={isMe}
+                            className={`p-2 rounded-lg text-iron-500 border border-transparent ${!isMe ? 'hover:bg-[#00aaff]/10 hover:text-[#00aaff] hover:border-[#00aaff]/30' : 'opacity-30 cursor-not-allowed'} transition-all`}
+                            title={isMe ? "Cannot impersonate yourself" : `View as ${u.email}`}
+                          >
+                            <Eye className="w-5 h-5" />
+                          </button>
                           <button 
                             onClick={() => handleResetPassword(u.id)}
                             className="p-2 rounded-lg text-iron-500 border border-transparent hover:bg-risk-yellow/10 hover:text-risk-yellow hover:border-risk-yellow/30 transition-all"

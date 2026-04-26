@@ -214,6 +214,7 @@ export const adminAPI = {
   deleteUser: (userId: string) => api.delete(`/api/admin/users/${userId}`),
   updateUser: (userId: string, data: { is_admin?: boolean, password?: string }) =>
     api.patch(`/api/admin/users/${userId}`, data),
+  impersonate: (userId: string) => api.post(`/api/admin/impersonate/${userId}`),
 };
 
 // --- Waitlist (lead capture) ---

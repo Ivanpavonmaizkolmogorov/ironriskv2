@@ -8,6 +8,7 @@ import { routing } from "@/i18n/routing";
 import ThemeProvider from "@/components/ui/ThemeProvider";
 import { MetricsProvider } from "@/contexts/MetricsContext";
 import AdminToolbar from "@/components/ui/AdminToolbar";
+import ImpersonateBanner from "@/components/ui/ImpersonateBanner";
 import BugReportButton from "@/components/ui/BugReportButton";
 import LocaleSync from "@/components/LocaleSync";
 import "../globals.css";
@@ -119,6 +120,7 @@ export default async function RootLayout({
           <ThemeProvider>
             <MetricsProvider>
               {children}
+              <ImpersonateBanner />
               <AdminToolbar />
               <BugReportButton />
               <LocaleSync />

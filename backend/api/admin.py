@@ -38,6 +38,29 @@ def db_diagnostic(db: Session = Depends(get_db), user: User = Depends(get_admin_
     return {"alembic_version": alembic_ver, "user_preferences_columns": up_cols, "strategies_columns": strat_cols}
 
 
+@router.post("/impersonate/{user_id}")
+def impersonate_user(user_id: str, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
+    """Generate a JWT for the target user so the admin can view their dashboard.
+    
+    The returned token is a normal user token — the frontend stores the admin's
+    original token so they can switch back without re-logging in.
+    """
+    from services.auth_service import create_jwt
+
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    logger.info(f"🔑 Admin '{admin.email}' impersonating user '{target.email}' (id={user_id})")
+
+    token = create_jwt(target.id, target.email)
+    return {
+        "access_token": token,
+        "target_email": target.email,
+        "target_id": target.id,
+    }
+
+
 @router.post("/fix-schema")
 def fix_schema(db: Session = Depends(get_db), user: User = Depends(get_admin_user)):
     """Run schema fix directly."""
