@@ -165,15 +165,21 @@ export const MonitorView = ({ context }: { context: DashboardContext }) => {
 
   const [data, setData]       = useState<BayesData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedId) return;
     setLoading(true);
     setData(null);
+    setError(null);
     const req = isPortfolio
       ? portfolioAPI.getBayes(selectedId, {})
       : strategyAPI.getBayes(selectedId, {});
-    req.then(r => setData(r.data)).catch(() => {}).finally(() => setLoading(false));
+    req.then(r => setData(r.data)).catch((err) => {
+      const msg = err?.response?.data?.detail || err?.message || "Unknown error";
+      console.error("[MonitorView] Bayes fetch failed:", isPortfolio ? "portfolio" : "strategy", selectedId, err?.response?.status, msg);
+      setError(`${err?.response?.status || "?"}: ${msg}`);
+    }).finally(() => setLoading(false));
   }, [selectedId, liveEquityVersion]);
 
   const humanizer = new Humanizer(tH, tV);
@@ -349,6 +355,11 @@ export const MonitorView = ({ context }: { context: DashboardContext }) => {
             </div>
           ) : loading ? (
             <div className="flex items-center justify-center h-32 text-iron-500 text-xs animate-pulse">{tWorkspace("calculating")}</div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center h-32 gap-2">
+              <span className="text-red-400 text-xs font-mono">⚠️ Bayes error: {error}</span>
+              <span className="text-iron-600 text-[10px]">{isPortfolio ? "portfolio" : "strategy"} · {selectedId?.slice(0,8)}</span>
+            </div>
           ) : (
             <div className="flex items-center justify-center h-32 text-iron-600 text-xs">{tWorkspace("selectStrategy")}</div>
           )}
