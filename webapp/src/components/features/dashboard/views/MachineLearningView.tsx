@@ -338,8 +338,8 @@ export const MachineLearningView = ({ context }: { context: DashboardContext }) 
                  const humanizer = new Humanizer(tH, tV);
 
                  let hasFatal = false;
-                 let hasRed = data.info_report?.signals.some((s: any) => s.severity === 'warning') || false;
-                 let hasAmber = data.info_report?.signals.some((s: any) => s.severity === 'notable') || false;
+                 let hasRed = false;
+                 let hasAmber = false;
 
                  // Collect gauge data for humanizer
                  const gaugeEntries: Array<{ key: string; gauge: any; gv: any }> = [];
