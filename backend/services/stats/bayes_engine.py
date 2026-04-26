@@ -123,7 +123,6 @@ class BayesEngine:
         result = engine.decompose_ev(
             bt_pnl=[10, -5, 20, -3, ...],
             live_pnl=[15, -8, 12, ...],
-            bt_discount=10,
             confidence=0.95,
         )
     """

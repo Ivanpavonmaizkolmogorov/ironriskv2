@@ -284,7 +284,7 @@ def get_portfolio_bayes(
     db: Session = Depends(get_db),
     min_trades_ci: int = 30,
     ci_confidence: float = 0.95,
-    bt_discount: float = 20.0,  # Internal constant — no longer user-configurable
+
     max_bt_trades: int = 30, # Max effective backtest trades cap (universal default)
     sim_pnl: Optional[str] = None,
     
@@ -379,7 +379,6 @@ def get_portfolio_bayes(
                 tmp_decomp = engine.decompose_ev(
                     bt_pnl=trades_pnl if trades_pnl else None,
                     live_pnl=combined_live[:i],
-                    bt_discount=bt_discount,
                     confidence=ci_confidence,
                     min_trades=0,
                     max_bt_trades=max_bt_trades if max_bt_trades > 0 else 30,
@@ -428,7 +427,6 @@ def get_portfolio_bayes(
     decomposition = engine.decompose_ev(
         bt_pnl=trades_pnl if trades_pnl else None,
         live_pnl=combined_live if combined_live else None,
-        bt_discount=bt_discount,
         confidence=ci_confidence,
         min_trades=min_trades_ci,
         max_bt_trades=max_bt_trades if max_bt_trades > 0 else 30,
