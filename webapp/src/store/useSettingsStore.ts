@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { settingsAPI } from '@/services/api';
 
+/**
+ * SINGLE SOURCE OF TRUTH: config/onboarding.json (repo root).
+ * Both this frontend store and the Python backend read from the same JSON.
+ * The import below is resolved at build time by Next.js.
+ */
+import onboarding from '@/config/onboarding.json';
+
 interface SettingsState {
   adminTelegramHandle: string;
   tutorialUrlEn: string;
@@ -11,9 +18,9 @@ interface SettingsState {
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
-  adminTelegramHandle: '@IronRisk_Ivan', // Default fallback
-  tutorialUrlEn: 'https://youtu.be/IgGUemRjnoc',
-  tutorialUrlEs: 'https://www.youtube.com/playlist?list=PL2-Vp4inhJRLXEbMuJ2m--H3F72x9V7Pw',
+  adminTelegramHandle: onboarding.admin_telegram_handle,
+  tutorialUrlEn: onboarding.tutorial_url_en,
+  tutorialUrlEs: onboarding.tutorial_url_es,
   isLoaded: false,
   getTutorialUrl: (locale: string) => {
     return locale === 'en' ? get().tutorialUrlEn : get().tutorialUrlEs;
@@ -29,9 +36,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       const ytEs = settings.find((s: any) => s.key === 'tutorial_url_es');
       
       set({ 
-        adminTelegramHandle: adminAlias ? adminAlias.value : '@IronRisk_Ivan',
-        tutorialUrlEn: ytEn ? ytEn.value : 'https://youtu.be/IgGUemRjnoc',
-        tutorialUrlEs: ytEs ? ytEs.value : 'https://www.youtube.com/playlist?list=PL2-Vp4inhJRLXEbMuJ2m--H3F72x9V7Pw',
+        adminTelegramHandle: adminAlias ? adminAlias.value : onboarding.admin_telegram_handle,
+        tutorialUrlEn: ytEn ? ytEn.value : onboarding.tutorial_url_en,
+        tutorialUrlEs: ytEs ? ytEs.value : onboarding.tutorial_url_es,
         isLoaded: true 
       });
     } catch (e) {
