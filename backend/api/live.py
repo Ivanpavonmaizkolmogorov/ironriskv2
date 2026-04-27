@@ -504,18 +504,13 @@ def refresh_all_strategy_currents(db: Session, account_id: str, skip_magic: int 
 
 
 def refresh_affected_portfolios_currents(db: Session, account_id: str, trigger_magic: int | None = None, floating_by_magic: dict[str, float] | None = None):
-    """Batch-refresh current metrics for Custom Portfolios."""
+    """Batch-refresh current metrics for ALL Portfolios (including default Global)."""
     from services.portfolio_service import get_portfolios_for_account
     from sqlalchemy.orm.attributes import flag_modified
 
     portfolios = get_portfolios_for_account(db, account_id)
     
-    # We need to know which strategy_ids correspond to the trigger_magic to optimize,
-    # but for now we just refresh all portfolios. It's fast unless there are hundreds.
-    
     for p in portfolios:
-        if p.is_default:
-            continue # Global portfolio is already handled by heartbeat magic=0
         if not p.risk_config or not isinstance(p.risk_config, dict):
             continue
 
