@@ -7,7 +7,7 @@ Backend services (email_service, waitlist_service) import directly from here.
 """
 
 TUTORIAL_URL_EN = "https://youtu.be/IgGUemRjnoc"
-TUTORIAL_URL_ES = "https://youtu.be/rW_rJLNmtTw"
+TUTORIAL_URL_ES = "https://www.youtube.com/playlist?list=PL2-Vp4inhJRLXEbMuJ2m--H3F72x9V7Pw"
 
 
 def get_tutorial_url(locale: str) -> str:
