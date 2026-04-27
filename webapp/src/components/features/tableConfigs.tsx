@@ -849,10 +849,22 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
       const { pct, style } = resolveBlindRisk(p);
       const isRed = style.textColor.includes("red");
       
+      // Prior blind risk (BT-only, before any live trades)
+      const btP = d?.bt_p_positive;
+      const hasPrior = btP !== undefined && s.bayesian_breakdown?.live_trades_total > 0;
+      const prior = hasPrior ? resolveBlindRisk(btP) : null;
+      
       return (
-        <div className="flex items-center justify-end gap-1.5">
-          <span className="text-[10px]">{style.icon}</span>
-          <span className={`font-mono text-xs ${style.textColor} ${isRed ? 'font-bold' : ''}`}>{pct.toFixed(1)}%</span>
+        <div className="flex flex-col items-end gap-0.5">
+          <div className="flex items-center justify-end gap-1.5">
+            <span className="text-[10px]">{style.icon}</span>
+            <span className={`font-mono text-xs ${style.textColor} ${isRed ? 'font-bold' : ''}`}>{pct.toFixed(1)}%</span>
+          </div>
+          {prior && (
+            <span className={`text-[9px] font-mono tracking-tighter uppercase opacity-80 ${prior.style.textColor}`}>
+              Prior: {prior.pct.toFixed(1)}%
+            </span>
+          )}
         </div>
       );
     },
