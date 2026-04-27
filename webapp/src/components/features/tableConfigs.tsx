@@ -388,6 +388,56 @@ export const LiveView: TableViewDef = {
   ]
 };
 
+/* ─── Shared Blind Risk column (used in both HybridView & BayesianView) ─── */
+const BLIND_RISK_COLUMN: ColumnDef = {
+  id: "bayes_blind_risk",
+  label: "Riesgo Ciego",
+  metricKey: "bayes_blind_risk",
+  align: "right",
+  sortValue: (s) => calcBlindRisk(s.bayesian_breakdown?.decomposition?.p_positive ?? 1),
+  renderCell: (s) => {
+    if (s.bayesian_breakdown === undefined) return <div className="flex items-center justify-end gap-1.5"><div className="h-3 w-12 bg-iron-700/60 rounded animate-pulse" /></div>;
+    
+    const d = s.bayesian_breakdown?.decomposition;
+    const p = d?.p_positive;
+    if (p === undefined) return <span className="text-iron-600 font-mono" title="Insuficientes trades evaluables (<30)">—</span>;
+    
+    const { pct, style } = resolveBlindRisk(p);
+    const isRed = style.textColor.includes("red");
+    
+    // Prior blind risk (BT-only, before any live trades)
+    const btP = d?.bt_p_positive;
+    const hasPrior = btP !== undefined && s.bayesian_breakdown?.live_trades_total > 0;
+    const prior = hasPrior ? resolveBlindRisk(btP) : null;
+    
+    return (
+      <div className="flex flex-col items-end gap-0.5">
+        <div className="flex items-center justify-end gap-1.5">
+          <span className="text-[10px]">{style.icon}</span>
+          <span className={`font-mono text-xs ${style.textColor} ${isRed ? 'font-bold' : ''}`}>{pct.toFixed(1)}%</span>
+        </div>
+        {prior && (
+          <span className={`text-[9px] font-mono tracking-tighter uppercase opacity-80 ${prior.style.textColor}`}>
+            Prior: {prior.pct.toFixed(1)}%
+          </span>
+        )}
+      </div>
+    );
+  },
+  renderFooter: (assets) => {
+    const withData = assets.filter(s => s.bayesian_breakdown?.decomposition?.p_positive !== undefined);
+    if (withData.length === 0) return <span className="text-iron-600 font-mono block text-right">—</span>;
+    const avgP = withData.reduce((sum, s) => sum + s.bayesian_breakdown!.decomposition!.p_positive, 0) / withData.length;
+    const { pct, style } = resolveBlindRisk(avgP);
+    return (
+      <div className="flex items-center justify-end gap-1.5">
+        <span className="text-[10px]">{style.icon}</span>
+        <span className={`font-mono font-semibold text-xs ${style.textColor}`}>{pct.toFixed(1)}%</span>
+      </div>
+    );
+  }
+};
+
 export const HybridView: TableViewDef = {
   id: "hybrid",
   name: "⚖️ Live vs BT",
@@ -451,6 +501,7 @@ export const HybridView: TableViewDef = {
         );
       }
     },
+    BLIND_RISK_COLUMN,
     {
       id: "hybrid_dd",
       label: "Drawdown",
@@ -833,54 +884,7 @@ const BAYESIAN_COLUMNS: Record<string, ColumnDef> = {
       );
     }
   },
-  blind_risk: {
-    id: "bayes_blind_risk",
-    label: "Riesgo Ciego",
-    metricKey: "bayes_blind_risk",
-    align: "right",
-    sortValue: (s) => calcBlindRisk(s.bayesian_breakdown?.decomposition?.p_positive ?? 1),
-    renderCell: (s) => {
-      if (s.bayesian_breakdown === undefined) return <div className="flex items-center justify-end gap-1.5"><div className="h-3 w-12 bg-iron-700/60 rounded animate-pulse" /></div>;
-      
-      const d = s.bayesian_breakdown?.decomposition;
-      const p = d?.p_positive;
-      if (p === undefined) return <span className="text-iron-600 font-mono" title="Insuficientes trades evaluables (<30)">—</span>;
-      
-      const { pct, style } = resolveBlindRisk(p);
-      const isRed = style.textColor.includes("red");
-      
-      // Prior blind risk (BT-only, before any live trades)
-      const btP = d?.bt_p_positive;
-      const hasPrior = btP !== undefined && s.bayesian_breakdown?.live_trades_total > 0;
-      const prior = hasPrior ? resolveBlindRisk(btP) : null;
-      
-      return (
-        <div className="flex flex-col items-end gap-0.5">
-          <div className="flex items-center justify-end gap-1.5">
-            <span className="text-[10px]">{style.icon}</span>
-            <span className={`font-mono text-xs ${style.textColor} ${isRed ? 'font-bold' : ''}`}>{pct.toFixed(1)}%</span>
-          </div>
-          {prior && (
-            <span className={`text-[9px] font-mono tracking-tighter uppercase opacity-80 ${prior.style.textColor}`}>
-              Prior: {prior.pct.toFixed(1)}%
-            </span>
-          )}
-        </div>
-      );
-    },
-    renderFooter: (assets) => {
-      const withData = assets.filter(s => s.bayesian_breakdown?.decomposition?.p_positive !== undefined);
-      if (withData.length === 0) return <span className="text-iron-600 font-mono block text-right">—</span>;
-      const avgP = withData.reduce((sum, s) => sum + s.bayesian_breakdown!.decomposition!.p_positive, 0) / withData.length;
-      const { pct, style } = resolveBlindRisk(avgP);
-      return (
-        <div className="flex items-center justify-end gap-1.5">
-          <span className="text-[10px]">{style.icon}</span>
-          <span className={`font-mono font-semibold text-xs ${style.textColor}`}>{pct.toFixed(1)}%</span>
-        </div>
-      );
-    }
-  }
+  blind_risk: BLIND_RISK_COLUMN
 };
 
 export const BayesianView: TableViewDef = {
