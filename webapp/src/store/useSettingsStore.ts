@@ -2,9 +2,9 @@ import { create } from 'zustand';
 import { settingsAPI } from '@/services/api';
 
 /**
- * SINGLE SOURCE OF TRUTH: config/onboarding.json (repo root).
- * Both this frontend store and the Python backend read from the same JSON.
- * The import below is resolved at build time by Next.js.
+ * SINGLE SOURCE OF TRUTH: webapp/src/config/onboarding.json
+ * Tutorial URLs are imported directly from the JSON — no API, no DB.
+ * Only admin_telegram_handle is fetched from the API (it could change at runtime).
  */
 import onboarding from '@/config/onboarding.json';
 
@@ -32,18 +32,15 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       const settings = res.data.settings;
       
       const adminAlias = settings.find((s: any) => s.key === 'admin_telegram_handle');
-      const ytEn = settings.find((s: any) => s.key === 'tutorial_url_en');
-      const ytEs = settings.find((s: any) => s.key === 'tutorial_url_es');
       
       set({ 
         adminTelegramHandle: adminAlias ? adminAlias.value : onboarding.admin_telegram_handle,
-        tutorialUrlEn: ytEn ? ytEn.value : onboarding.tutorial_url_en,
-        tutorialUrlEs: ytEs ? ytEs.value : onboarding.tutorial_url_es,
+        // Tutorial URLs ALWAYS come from onboarding.json — never from API
         isLoaded: true 
       });
     } catch (e) {
       console.error('Failed to fetch public settings', e);
-      set({ isLoaded: true }); // Prevent infinite retries
+      set({ isLoaded: true });
     }
   }
 }));

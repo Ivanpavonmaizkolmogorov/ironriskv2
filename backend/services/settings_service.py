@@ -19,7 +19,7 @@ class SettingsService:
     @staticmethod
     def get_public_settings(db: Session) -> list[SystemSetting]:
         # Defined set of keys that are safe to expose to the frontend without auth
-        PUBLIC_KEYS = ["admin_telegram_handle", "tutorial_url_en", "tutorial_url_es"]
+        PUBLIC_KEYS = ["admin_telegram_handle"]
         return db.query(SystemSetting).filter(SystemSetting.key.in_(PUBLIC_KEYS)).all()
 
     @staticmethod
@@ -37,12 +37,11 @@ class SettingsService:
         return setting
 
 def init_default_settings(db: Session):
-    """Seed default settings if they don't exist."""
-    from config.tutorials import TUTORIAL_URL_EN, TUTORIAL_URL_ES
+    """Seed default settings if they don't exist.
+    NOTE: Tutorial URLs are NOT stored in DB — they live in config/onboarding.json.
+    """
     defaults = {
         "admin_telegram_handle": ("@IronRisk_Ivan", "Soporte Telegram alias shown to users"),
-        "tutorial_url_en": (TUTORIAL_URL_EN, "YouTube tutorial URL for English users"),
-        "tutorial_url_es": (TUTORIAL_URL_ES, "YouTube tutorial URL for Spanish users"),
     }
     for key, (val, desc) in defaults.items():
         if not SettingsService.get_setting(db, key):
