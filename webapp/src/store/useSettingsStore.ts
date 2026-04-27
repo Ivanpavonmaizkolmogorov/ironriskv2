@@ -13,7 +13,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   adminTelegramHandle: '@IronRisk_Ivan', // Default fallback
   tutorialUrlEn: 'https://youtu.be/IgGUemRjnoc',
-  tutorialUrlEs: 'https://youtu.be/rW_rJLNmtTw',
+  tutorialUrlEs: 'https://www.youtube.com/playlist?list=PL2-Vp4inhJRLXEbMuJ2m--H3F72x9V7Pw',
   isLoaded: false,
   getTutorialUrl: (locale: string) => {
     return locale === 'en' ? get().tutorialUrlEn : get().tutorialUrlEs;
@@ -31,7 +31,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       set({ 
         adminTelegramHandle: adminAlias ? adminAlias.value : '@IronRisk_Ivan',
         tutorialUrlEn: ytEn ? ytEn.value : 'https://youtu.be/IgGUemRjnoc',
-        tutorialUrlEs: ytEs ? ytEs.value : 'https://youtu.be/rW_rJLNmtTw',
+        tutorialUrlEs: ytEs ? ytEs.value : 'https://www.youtube.com/playlist?list=PL2-Vp4inhJRLXEbMuJ2m--H3F72x9V7Pw',
         isLoaded: true 
       });
     } catch (e) {
