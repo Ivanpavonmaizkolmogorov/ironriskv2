@@ -15,6 +15,9 @@ param(
     [switch]$SkipDashboard
 )
 
+# --- Force TLS 1.2 (Windows Server defaults to TLS 1.0 which breaks HTTPS) ---
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 $ServiceFileName   = "IronRisk_Service.ex5"
 $DashboardFileName = "IronRisk_Dashboard.ex5"
 $TerminalBasePath  = Join-Path $env:APPDATA "MetaQuotes\Terminal"
@@ -143,7 +146,24 @@ $base = $selected.DataPath
 $svcDir = Join-Path $base "MQL5\Services"
 if (-not (Test-Path $svcDir)) { New-Item -ItemType Directory -Path $svcDir -Force | Out-Null }
 $svcDest = Join-Path $svcDir $ServiceFileName
-Invoke-WebRequest -Uri "$Server/$ServiceFileName" -OutFile $svcDest -Headers @{"Cache-Control"="no-cache, no-store"} -UseBasicParsing
+try {
+    Write-Host "  [*] Downloading $ServiceFileName from $Server..." -ForegroundColor Cyan
+    Invoke-WebRequest -Uri "$Server/$ServiceFileName" -OutFile $svcDest -Headers @{"Cache-Control"="no-cache, no-store"} -UseBasicParsing -ErrorAction Stop
+} catch {
+    Write-Host "  [X] DOWNLOAD FAILED: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "  [!] Your VPS may be blocking HTTPS connections to ironrisk.pro" -ForegroundColor Yellow
+    Write-Host "  [!] Try running this installer as Administrator." -ForegroundColor Yellow
+    Read-Host "Press Enter to exit"
+    exit 1
+}
+# Validate downloaded file (must be > 1KB, not an HTML error page)
+if (-not (Test-Path $svcDest) -or (Get-Item $svcDest).Length -lt 1024) {
+    Write-Host "  [X] Downloaded file is missing or too small (corrupted)." -ForegroundColor Red
+    Write-Host "  [!] Try downloading manually: $Server/$ServiceFileName" -ForegroundColor Yellow
+    Read-Host "Press Enter to exit"
+    exit 1
+}
+Write-Host "  [OK] Service downloaded ($([math]::Round((Get-Item $svcDest).Length / 1024))KB)" -ForegroundColor Green
 
 # Download Dashboard (optional)
 if (-not $SkipDashboard) {
@@ -151,7 +171,8 @@ if (-not $SkipDashboard) {
     if (-not (Test-Path $expDir)) { New-Item -ItemType Directory -Path $expDir -Force | Out-Null }
     $expDest = Join-Path $expDir $DashboardFileName
     try {
-        Invoke-WebRequest -Uri "$Server/$DashboardFileName" -OutFile $expDest -Headers @{"Cache-Control"="no-cache, no-store"} -UseBasicParsing
+        Invoke-WebRequest -Uri "$Server/$DashboardFileName" -OutFile $expDest -Headers @{"Cache-Control"="no-cache, no-store"} -UseBasicParsing -ErrorAction Stop
+        Write-Host "  [OK] Dashboard downloaded ($([math]::Round((Get-Item $expDest).Length / 1024))KB)" -ForegroundColor Green
     } catch {
         Write-Host "  [!] Dashboard not found on server, continuing without it." -ForegroundColor DarkGray
     }
