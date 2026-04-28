@@ -1171,6 +1171,14 @@
       "nig_cap_fix": {
         "title": "Corrección del Modelo NIG",
         "body": "El modelo NIG ahora respeta correctamente el límite de 30 trades efectivos, evitando sobre-confianza en los datos de backtest."
+      },
+      "beta_invite_video_update": {
+        "title": "Actualización Vídeo Invitación Beta",
+        "body": "Actualizado el vídeo tutorial enlazado en las invitaciones beta."
+      },
+      "monitor_i18n_fix": {
+        "title": "Fix Traducciones Monitor",
+        "body": "Corregidas traducciones faltantes en la vista Monitor."
       }
     }
   }

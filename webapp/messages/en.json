@@ -1171,6 +1171,14 @@
       "nig_cap_fix": {
         "title": "NIG Model Cap Fix",
         "body": "The NIG model now correctly respects the 30 effective trades cap, preventing over-confidence from raw backtest data."
+      },
+      "beta_invite_video_update": {
+        "title": "Beta Invite Video Update",
+        "body": "Updated the tutorial video linked in beta invitations."
+      },
+      "monitor_i18n_fix": {
+        "title": "Monitor Translations Fix",
+        "body": "Fixed missing translations in the Monitor view."
       }
     }
   }
