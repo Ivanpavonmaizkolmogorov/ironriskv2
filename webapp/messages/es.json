@@ -936,6 +936,10 @@
       "refactor": "Refactorización"
     },
     "entries": {
+      "installer_tls_fix": {
+        "title": "Fix Instalador VPS",
+        "body": "El instalador ahora fuerza TLS 1.2 en Windows Server, resolviendo la descarga silenciosa fallida del servicio en VPS. Añadidos mensajes de error visibles si la descarga falla."
+      },
       "equity_curve_nan_fix": {
         "title": "Corrección Gráficos de Equity",
         "body": "Corregido un bug que causaba errores NaN en SVG en el gráfico de equity al usar el separador de miles con espacio no separable. Solucionado fijando el ancho del eje Y."

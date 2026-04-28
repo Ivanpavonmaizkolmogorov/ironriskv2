@@ -1,5 +1,11 @@
 [
   {
+    "id": "installer_tls_fix",
+    "date": "2026-04-28",
+    "tag": "improvement",
+    "internal": false
+  },
+  {
     "id": "admin_impersonate",
     "date": "2026-04-26",
     "tag": "feature",

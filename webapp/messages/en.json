@@ -936,6 +936,10 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "installer_tls_fix": {
+        "title": "VPS Installer Fix",
+        "body": "The installer now forces TLS 1.2 on Windows Server, fixing a silent download failure of the service on VPS environments. Visible error messages added if the download fails."
+      },
       "equity_curve_nan_fix": {
         "title": "Equity Chart NaN Fix",
         "body": "Fixed a bug causing NaN SVG rendering errors in the equity chart when using the non-breaking space thousand separator. Fixed by explicitly setting Y-axis width."
