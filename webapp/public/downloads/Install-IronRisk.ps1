@@ -227,7 +227,10 @@ if ($ans -match "^[yY]") {
     Start-Sleep -Seconds 3
     
     # Inject Auto-start Service & DLL Permissions AFTER MT5 is closed
-    $termIni = Join-Path $base "config\terminal.ini"
+    $cfgFolder = Join-Path $base "config"
+    if (-not (Test-Path $cfgFolder)) { New-Item -ItemType Directory -Path $cfgFolder -Force | Out-Null }
+
+    $termIni = Join-Path $cfgFolder "terminal.ini"
     if (Test-Path $termIni) {
         $iniLines = Get-Content $termIni
         $newLines = @()
@@ -259,9 +262,14 @@ if ($ans -match "^[yY]") {
         }
         
         $newLines | Set-Content $termIni -Encoding ASCII
+        Write-Host "  [OK] Service auto-start injected into terminal.ini" -ForegroundColor Green
+    } else {
+        # terminal.ini doesn't exist yet (fresh MT5) — create it with the Service entry
+        @('[Services]', 'IronRisk_Service=3') | Set-Content $termIni -Encoding ASCII
+        Write-Host "  [OK] Created terminal.ini with Service auto-start" -ForegroundColor Green
     }
 
-    $iniFile = Join-Path $base "config\common.ini"
+    $iniFile = Join-Path $cfgFolder "common.ini"
     if (Test-Path $iniFile) {
         $cLines = Get-Content $iniFile
         $cNewLines = @()
@@ -293,6 +301,9 @@ if ($ans -match "^[yY]") {
         }
         
         $cNewLines | Set-Content $iniFile -Encoding ASCII
+    } else {
+        # common.ini doesn't exist yet — create it with DLL permissions
+        @('[Experts]', 'AllowDllImport=1') | Set-Content $iniFile -Encoding ASCII
     }
     
     $exePath = Join-Path $selected.BrokerPath "terminal64.exe"
