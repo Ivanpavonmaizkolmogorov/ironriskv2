@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { DashboardContext } from "../dashboardViewConfigs";
 import { strategyAPI } from "@/services/api";
-import { useStrategyStore } from "@/store/useStrategyStore";
 import type { Strategy } from "@/types/strategy";
 
 // ── Note type ──────────────────────────────────────────────────────────────────
@@ -187,21 +186,10 @@ export const DiaryView = ({ context }: { context: DashboardContext }) => {
       .catch(() => setBayesData(null));
   }, [strategyId]);
 
-  // ── No strategy selected ──
-  if (!activeAsset || "strategy_ids" in activeAsset) {
-    return (
-      <div className="flex items-center justify-center h-48 text-iron-500 text-sm bg-surface-secondary/50 rounded-xl border border-iron-800/50">
-        <div className="text-center space-y-1">
-          <span className="text-2xl">📋</span>
-          <p>Selecciona una estrategia abajo para ver su diario</p>
-        </div>
-      </div>
-    );
-  }
-
-  const strategy = activeAsset as Strategy;
-  const isActive = strategy.is_active !== false;
-  const notes: DiaryNote[] = (strategy.notes as DiaryNote[]) || [];
+  const isStrategy = activeAsset && !("strategy_ids" in activeAsset);
+  const strategy = isStrategy ? (activeAsset as Strategy) : null;
+  const isActive = strategy ? strategy.is_active !== false : true;
+  const notes: DiaryNote[] = (strategy?.notes as DiaryNote[]) || [];
 
   // Generate context-aware suggestions
   const suggestions = useMemo(
@@ -209,7 +197,7 @@ export const DiaryView = ({ context }: { context: DashboardContext }) => {
     [bayesData, isActive]
   );
 
-  // Suggestions for notes (always available, not dependent on pause/activate direction)
+  // Suggestions for notes
   const noteSuggestions = useMemo(() => {
     const chips: string[] = [];
     if (bayesData?.decomposition) {
@@ -225,6 +213,18 @@ export const DiaryView = ({ context }: { context: DashboardContext }) => {
     }
     return chips;
   }, [bayesData]);
+
+  // ── No strategy selected ──
+  if (!isStrategy || !strategy) {
+    return (
+      <div className="flex items-center justify-center h-48 text-iron-500 text-sm bg-surface-secondary/50 rounded-xl border border-iron-800/50">
+        <div className="text-center space-y-1">
+          <span className="text-2xl">📋</span>
+          <p>Selecciona una estrategia abajo para ver su diario</p>
+        </div>
+      </div>
+    );
+  }
 
   // ── API calls ──
 
