@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, DateTime, Integer, Float, Text, ForeignKey, JSON
+from sqlalchemy import String, DateTime, Integer, Float, Text, ForeignKey, JSON, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -68,6 +68,10 @@ class Strategy(Base):
 
     # Original (un-scaled) equity curve — preserved so multiplier changes can re-derive
     original_equity_curve: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
+
+    # Operational status and diary notes
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    notes: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

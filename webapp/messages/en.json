@@ -215,6 +215,7 @@
     "tabMacro": "🌍 Macro Risk",
     "tabVs": "⚔️ VS Mode",
     "tabMonitor": "📡 Monitor",
+    "tabDiary": "📋 Diary",
     "viewFullAnalysis": "View full analysis",
     "phaseWaiting": "WAITING",
     "phaseCalibrating": "CALIBRATING",
@@ -936,6 +937,10 @@
       "refactor": "Refactor"
     },
     "entries": {
+      "strategy_diary": {
+        "title": "📋 Strategy Diary",
+        "body": "New Diary tab in the dashboard. Toggle strategies active/paused with one click, add free-text notes, and browse the chronological history. Pause/activate reasons are auto-suggested from the Bayesian Engine (Blind Risk, risk gauges, Guardian tests)."
+      },
       "installer_tls_fix": {
         "title": "VPS Installer Fix",
         "body": "The installer now forces TLS 1.2 on Windows Server, fixing a silent download failure of the service on VPS environments. Visible error messages added if the download fails."

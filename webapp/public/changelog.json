@@ -1,5 +1,11 @@
 [
   {
+    "id": "strategy_diary",
+    "date": "2026-05-20",
+    "tag": "feature",
+    "internal": false
+  },
+  {
     "id": "installer_tls_fix",
     "date": "2026-04-28",
     "tag": "improvement",

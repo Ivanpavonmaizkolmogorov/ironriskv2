@@ -4,6 +4,7 @@ import { InspectorView } from "./views/InspectorView";
 import { MachineLearningView } from "./views/MachineLearningView";
 import { VsView } from "./views/VsView";
 import { MonitorView } from "./views/MonitorView";
+import { DiaryView } from "./views/DiaryView";
 
 export interface DashboardContext {
   activeAsset: RiskAsset | null;
@@ -55,9 +56,16 @@ export const MonitorViewDef: DashboardViewDef = {
   renderComponent: (context) => <MonitorView context={context} />,
 };
 
+export const DiaryViewDef: DashboardViewDef = {
+  id: "diary",
+  name: "📋 Diario",
+  renderComponent: (context) => <DiaryView context={context} />,
+};
+
 export const DASHBOARD_VIEWS: DashboardViewDef[] = [
   ObjectInspectorViewDef,
   MonitorViewDef,
   MachineLearningViewDef,
-  VsModeViewDef
+  VsModeViewDef,
+  DiaryViewDef,
 ];

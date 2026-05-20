@@ -29,6 +29,9 @@ export interface Strategy {
     broker: string;
     match_window_seconds: number;
   }> | null;
+  // Diary — operational status and notes
+  is_active?: boolean;
+  notes?: Array<{ date: string; type: "activated" | "paused" | "note"; text: string }> | null;
 }
 
 export interface Portfolio {

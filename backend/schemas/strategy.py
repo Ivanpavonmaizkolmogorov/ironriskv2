@@ -134,6 +134,8 @@ class StrategyResponse(BaseModel):
     risk_config: Optional[dict] = None
     dashboard_layout: Optional[dict] = None
     distribution_fit: Optional[dict] = None
+    is_active: bool = True
+    notes: Optional[list] = None
 
     class Config:
         from_attributes = True
@@ -141,3 +143,14 @@ class StrategyResponse(BaseModel):
 
 class StrategyListResponse(BaseModel):
     strategies: List[StrategyResponse]
+
+
+class StrategyStatusUpdate(BaseModel):
+    """Toggle strategy active/paused status."""
+    is_active: bool
+    comment: Optional[str] = None
+
+
+class StrategyNoteCreate(BaseModel):
+    """Add a free-text note to a strategy."""
+    text: str

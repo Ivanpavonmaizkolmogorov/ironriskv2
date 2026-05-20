@@ -602,7 +602,7 @@ export default function DashboardPage() {
               <div className="flex bg-surface-tertiary p-1 rounded-lg border border-iron-800 w-fit max-w-full overflow-x-auto scrollbar-hide">
                 {DASHBOARD_VIEWS.map((dv) => {
                   const isActive = activeDashboardView === dv.id;
-                  const dvName = dv.id === "ml-bayes" ? tWorkspace("tabBayes") : dv.id === "inspector" ? tWorkspace("tabInspector") : dv.id === "macro" ? tWorkspace("tabMacro") : dv.id === "vs-mode" ? tWorkspace("tabVs") : dv.id === "monitor" ? tWorkspace("tabMonitor") : dv.name;
+                  const dvName = dv.id === "ml-bayes" ? tWorkspace("tabBayes") : dv.id === "inspector" ? tWorkspace("tabInspector") : dv.id === "macro" ? tWorkspace("tabMacro") : dv.id === "vs-mode" ? tWorkspace("tabVs") : dv.id === "monitor" ? tWorkspace("tabMonitor") : dv.id === "diary" ? tWorkspace("tabDiary") : dv.name;
                   return (
                     <button
                       key={dv.id}

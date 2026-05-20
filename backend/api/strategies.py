@@ -10,7 +10,8 @@ from models.database import get_db
 from models.user import User
 from schemas.strategy import (
     StrategyResponse, StrategyListResponse, StrategyUpdate, 
-    CreateFromSimulationRequest, LiveTradeResponse, SQXImportRequest
+    CreateFromSimulationRequest, LiveTradeResponse, SQXImportRequest,
+    StrategyStatusUpdate, StrategyNoteCreate
 )
 from services.auth_service import get_current_user
 from services.strategy_service import (
@@ -242,6 +243,91 @@ def modify_strategy(
 ):
     """Update strategy parameters like name, description, magic number."""
     return update_strategy(db, strategy_id, user.id, update_data)
+
+
+@router.patch("/{strategy_id}/status", response_model=StrategyResponse)
+def toggle_strategy_status(
+    strategy_id: str,
+    update: StrategyStatusUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Toggle strategy active/paused status and auto-log to diary."""
+    from models.strategy import Strategy
+    from sqlalchemy.orm.attributes import flag_modified
+    from datetime import datetime, timezone
+    
+    strategy = get_strategy_by_id(db, strategy_id, user.id)
+    strategy.is_active = update.is_active
+    
+    # Auto-log to diary
+    notes = list(strategy.notes or [])
+    note_entry = {
+        "date": datetime.now(timezone.utc).isoformat(),
+        "type": "activated" if update.is_active else "paused",
+        "text": update.comment or ""
+    }
+    notes.insert(0, note_entry)  # Most recent first
+    strategy.notes = notes
+    flag_modified(strategy, "notes")
+    
+    db.commit()
+    db.refresh(strategy)
+    logger.info(f"Strategy {strategy.name} {'activated' if update.is_active else 'paused'} by user {user.id}")
+    return strategy
+
+
+@router.post("/{strategy_id}/notes", response_model=StrategyResponse)
+def add_strategy_note(
+    strategy_id: str,
+    note: StrategyNoteCreate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Add a free-text note to a strategy's diary."""
+    from sqlalchemy.orm.attributes import flag_modified
+    from datetime import datetime, timezone
+    
+    strategy = get_strategy_by_id(db, strategy_id, user.id)
+    
+    notes = list(strategy.notes or [])
+    note_entry = {
+        "date": datetime.now(timezone.utc).isoformat(),
+        "type": "note",
+        "text": note.text
+    }
+    notes.insert(0, note_entry)
+    strategy.notes = notes
+    flag_modified(strategy, "notes")
+    
+    db.commit()
+    db.refresh(strategy)
+    return strategy
+
+
+@router.delete("/{strategy_id}/notes/{note_index}", response_model=StrategyResponse)
+def delete_strategy_note(
+    strategy_id: str,
+    note_index: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete a specific note from a strategy's diary by index."""
+    from sqlalchemy.orm.attributes import flag_modified
+    
+    strategy = get_strategy_by_id(db, strategy_id, user.id)
+    
+    notes = list(strategy.notes or [])
+    if note_index < 0 or note_index >= len(notes):
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    notes.pop(note_index)
+    strategy.notes = notes
+    flag_modified(strategy, "notes")
+    
+    db.commit()
+    db.refresh(strategy)
+    return strategy
 
 
 @router.get("/{strategy_id}/trades", response_model=List[LiveTradeResponse])

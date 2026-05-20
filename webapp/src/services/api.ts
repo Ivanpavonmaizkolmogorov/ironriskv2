@@ -145,6 +145,13 @@ export const strategyAPI = {
     api.patch(`/api/vs/${id}/link/${linkedId}/window`, { match_window_seconds: windowSeconds }),
   listCrossWorkspace: (excludeAccountId?: string) =>
     api.get(`/api/vs/strategies/cross-workspace${excludeAccountId ? `?exclude_account_id=${excludeAccountId}` : ''}`),
+  // Diary: status toggle + notes
+  toggleStatus: (id: string, data: { is_active: boolean; comment?: string }) =>
+    api.patch(`/api/strategies/${id}/status`, data),
+  addNote: (id: string, data: { text: string }) =>
+    api.post(`/api/strategies/${id}/notes`, data),
+  deleteNote: (id: string, index: number) =>
+    api.delete(`/api/strategies/${id}/notes/${index}`),
 };
 
 // --- Sandbox: Orphan Magics endpoints ---
