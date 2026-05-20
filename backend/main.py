@@ -71,8 +71,9 @@ for _col, _ddl_sqlite, _ddl_pg in [
 # ── Strategy diary migrations ──
 _strategy_cols = [c["name"] for c in _inspector.get_columns("strategies")]
 if "is_active" not in _strategy_cols:
+    _sql = "ALTER TABLE strategies ADD COLUMN is_active BOOLEAN DEFAULT 1 NOT NULL" if engine.dialect.name == "sqlite" else "ALTER TABLE strategies ADD COLUMN is_active BOOLEAN DEFAULT TRUE NOT NULL"
     with engine.connect() as _conn:
-        _conn.execute(sa_text("ALTER TABLE strategies ADD COLUMN is_active BOOLEAN DEFAULT 1 NOT NULL"))
+        _conn.execute(sa_text(_sql))
         _conn.commit()
     logger.info("Migration: added is_active column to strategies")
 if "notes" not in _strategy_cols:

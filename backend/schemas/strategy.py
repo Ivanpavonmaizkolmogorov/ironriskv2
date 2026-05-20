@@ -1,6 +1,6 @@
 """Pydantic schemas for strategy requests/responses."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional, List
 from datetime import datetime
 
@@ -136,6 +136,17 @@ class StrategyResponse(BaseModel):
     distribution_fit: Optional[dict] = None
     is_active: bool = True
     notes: Optional[list] = None
+
+    @field_validator("notes", mode="before")
+    @classmethod
+    def parse_notes(cls, v):
+        if isinstance(v, str):
+            import json
+            try:
+                return json.loads(v)
+            except (json.JSONDecodeError, TypeError):
+                return []
+        return v
 
     class Config:
         from_attributes = True
